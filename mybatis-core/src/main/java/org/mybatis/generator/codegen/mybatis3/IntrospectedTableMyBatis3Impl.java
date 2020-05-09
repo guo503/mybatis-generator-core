@@ -135,12 +135,10 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
                     progressCallback);
             javaModelGenerators.add(javaGenerator);
         }
-        boolean enablePo = false;// 生成查询po
+
+        // 生成查询po
         String generatorPo = context.getProp(ExtendModelPlugin.class.getName(), "generatorPo");
-        if (StringUtility.stringHasValue(generatorPo) || StringUtility.isTrue(generatorPo)) {
-            enablePo = true;
-        }
-        if (enablePo) {
+        if (StringUtility.stringHasValue(generatorPo) && StringUtility.isTrue(generatorPo)) {
             if (getRules().generateBaseRecordClass()) {
                 AbstractJavaGenerator javaGenerator = new BaseRecordGenerator();
                 initializeAbstractGenerator(javaGenerator, warnings,
@@ -156,7 +154,7 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
             javaModelGenerators.add(javaGenerator);
         }
 
-       //生成ao
+        //生成ao
         if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "aoProject")) {
             BaseRecordAOGenerator aoGenerator = new BaseRecordAOGenerator(context);
             initializeAbstractGenerator(aoGenerator, warnings,

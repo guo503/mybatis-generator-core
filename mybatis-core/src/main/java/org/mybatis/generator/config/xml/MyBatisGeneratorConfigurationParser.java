@@ -326,7 +326,7 @@ public class MyBatisGeneratorConfigurationParser {
         String enableManage = attributes
                 .getProperty("enableManage"); //是否生成service
         if (stringHasValue(enableManage)) {
-            tc.setEnableBusiness(isTrue(enableManage));
+            tc.setEnableManage(isTrue(enableManage));
         }
 
 
