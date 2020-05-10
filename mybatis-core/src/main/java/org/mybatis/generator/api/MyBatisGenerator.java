@@ -26,6 +26,7 @@ import org.mybatis.generator.internal.DefaultShellCallback;
 import org.mybatis.generator.internal.NullProgressCallback;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.XmlFileMergerJaxp;
+import org.mybatis.generator.utils.OsUtil;
 
 import java.io.*;
 import java.sql.SQLException;
