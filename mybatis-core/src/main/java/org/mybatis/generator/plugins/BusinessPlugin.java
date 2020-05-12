@@ -140,11 +140,6 @@ public class BusinessPlugin extends PluginAdapter {
     private String modelConvertUtils;
 
     /**
-     * 表配置列表
-     */
-    private List<TableConfiguration> tableConfigurationList;
-
-    /**
      * 是否生成logger日志
      */
     private boolean enableLogger;
@@ -207,22 +202,12 @@ public class BusinessPlugin extends PluginAdapter {
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
 
-        tableConfigurationList = context.getTableConfigurations();
-
         //是否生成logger
         enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
 
         page = context.getProperty("page");
 
         this.exceptionPack = this.getCustomValue(className, "exceptionPack");
-
-        if (StringUtility.stringHasValue(enableAnnotation)) {
-            this.enableAnnotation = StringUtility.isTrue(enableAnnotation);
-        }
-
-        if (this.enableAnnotation) {
-            FullyQualifiedJavaType classAnnotation = new FullyQualifiedJavaType("org.springframework.web.bind.annotation.*");
-        }
 
         return true;
     }
@@ -231,7 +216,7 @@ public class BusinessPlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
 
         //是否生成business
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
+        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
             if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
                 this.generatorBusiness = tableConfiguration.isEnableBusiness();
                 this.versions = tableConfiguration.getVersionCol();

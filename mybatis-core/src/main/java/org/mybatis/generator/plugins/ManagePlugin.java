@@ -131,11 +131,6 @@ public class ManagePlugin extends PluginAdapter {
      */
     private String page;
 
-    /**
-     * 表配置列表
-     */
-    private List<TableConfiguration> tableConfigurationList;
-
 
     private String manageSuffix;
 
@@ -148,7 +143,7 @@ public class ManagePlugin extends PluginAdapter {
         // default is slf4j
         slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
         slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
-        methods = new ArrayList<Method>();
+        methods = new ArrayList<>();
         className = this.getClass().getName();
     }
 
@@ -166,8 +161,6 @@ public class ManagePlugin extends PluginAdapter {
         enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
 
         page = context.getProperty("page");
-
-        tableConfigurationList = context.getTableConfigurations();
 
 
         if (StringUtility.stringHasValue(enableAnnotation)) {
@@ -216,12 +209,11 @@ public class ManagePlugin extends PluginAdapter {
      */
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
-
-
         //是否生成business
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
+        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
             if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
                 this.generatorManage = tableConfiguration.isEnableManage();
+                this.versions = tableConfiguration.getVersionCol();
                 break;
             }
         }
@@ -785,14 +777,6 @@ public class ManagePlugin extends PluginAdapter {
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, params);
-        }
-
-        //是否生成乐观锁
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                this.versions = tableConfiguration.getVersionCol();
-                break;
-            }
         }
 
         if (MethodEnum.SAVE.getValue().equals(methodName) || MethodEnum.UPDATE.getValue().equals(methodName)) {

@@ -5,7 +5,6 @@ import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
@@ -44,10 +43,6 @@ public class ServicePlugin extends PluginAdapter {
     private String serviceImplProject;
     private String pojoUrl;
     /**
-     * 所有的方法
-     */
-    private List<Method> methods;
-    /**
      * 是否添加注解
      */
     private boolean enableAnnotation = true;
@@ -71,70 +66,11 @@ public class ServicePlugin extends PluginAdapter {
 
     private String saveAndGet;
 
-    /**
-     * 获取用户名方法
-     **/
-    private String userNameMethod = null;
-
-    /**
-     * 日期格式方法
-     **/
-    private String dateMethod = null;
-
-    /**
-     * remote注解所在包
-     **/
-    private String remote = null;
-
-    /**
-     * applicationName类所在包
-     **/
-    private String applicationName = null;
-
-    /**
-     * 创建时间
-     **/
-    private String createTime;
-
-    /**
-     * 修改时间
-     **/
-    private String updateTime;
-
-    /**
-     * 自定义异常类全路径
-     **/
-    private String exceptionPack;
-
-    /**
-     * 乐观锁
-     **/
-    private String versions;
-
-    /**
-     * 表的列list
-     **/
-    private List<IntrospectedColumn> columns;
-
-    /**
-     * extentModel插件类
-     **/
-    private PluginConfiguration extentModelPlugin;
 
     /**
      * 是否生成logger日志
      */
     private boolean enableLogger;
-
-    /**
-     * 分页类路径
-     */
-    private String page;
-
-    /**
-     * 表配置列表
-     */
-    private List<TableConfiguration> tableConfigurationList;
 
 
     private String serviceSuffix;
@@ -148,7 +84,6 @@ public class ServicePlugin extends PluginAdapter {
         // default is slf4j
         slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
         slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
-        methods = new ArrayList<Method>();
         className = this.getClass().getName();
     }
 
@@ -158,16 +93,10 @@ public class ServicePlugin extends PluginAdapter {
     @Override
     public boolean validate(List<String> warnings) {
 
-        extentModelPlugin = ContextUtils.getPlugin(context, CommonConstant.EXTEND_MODEL_PLUGIN);
-
         String enableAnnotation = properties.getProperty("enableAnnotation");
 
         //是否生成logger
         enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
-
-        page = context.getProperty("page");
-
-        tableConfigurationList = context.getTableConfigurations();
 
 
         if (StringUtility.stringHasValue(enableAnnotation)) {
@@ -213,7 +142,7 @@ public class ServicePlugin extends PluginAdapter {
 
 
         //是否生成business
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
+        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
             if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
                 this.generatorService = tableConfiguration.isEnableService();
                 break;
@@ -938,60 +867,5 @@ public class ServicePlugin extends PluginAdapter {
     public boolean clientInsertMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
         returnType = method.getReturnType();
         return true;
-    }
-
-
-    private String getMethodName(String fullMethodName, String str, String defaultValue) {
-        String setValue = null;
-        if (!hasColumn(str)) {
-            return null;
-        }
-        if (StringUtility.stringHasValue(fullMethodName)) {
-            setValue = MethodUtils.getFullMethod(fullMethodName, ".");
-        }
-        if (!StringUtility.stringHasValue(setValue)) {//没有配置默认方法，则使用默认值
-            setValue = defaultValue;
-        }
-        return setValue;
-    }
-
-
-    private boolean hasColumn(String str) {
-        if (!StringUtility.stringHasValue(str)) {
-            return false;
-        }
-        for (IntrospectedColumn column : columns) {
-            if (str.equals(column.getActualColumnName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //设置方法值
-    private void setMethodValue(Method method, String params, String column, String val) {
-        if (!hasColumn(column)) {
-            return;
-        }
-        method.addBodyLine("if (StringUtils.isEmpty(" + MethodUtils.generateGet(params, column) + ")) {");
-        if (CommonConstant.DEFAULT_USER.equals(val)) {
-            method.addBodyLine(MethodUtils.generateSet(params, column, "\"" + val + "\"") + ";");
-        } else {
-            method.addBodyLine(MethodUtils.generateSet(params, column, val) + ";");
-        }
-        method.addBodyLine("}");
-    }
-
-    private boolean hasDateColumn(String dateMethod, String... actualColumns) {
-        if (!StringUtility.stringHasValue(dateMethod)) {
-            if (actualColumns != null && actualColumns.length > 0) {
-                for (String column : actualColumns) {
-                    if (hasColumn(column)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 }

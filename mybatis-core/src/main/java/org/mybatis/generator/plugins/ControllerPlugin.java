@@ -4,7 +4,6 @@ import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.MethodEnum;
@@ -75,11 +74,6 @@ public class ControllerPlugin extends PluginAdapter {
     private String baseController;
 
     /**
-     * 所有的方法
-     */
-    private List<Method> methods;
-
-    /**
      * 新增方法
      **/
     private String insertMethod = null;
@@ -131,15 +125,6 @@ public class ControllerPlugin extends PluginAdapter {
      **/
     private boolean generatorController = false;
 
-    /**
-     * businessPlugin插件
-     **/
-    private PluginConfiguration businessPlugin;
-
-    /**
-     * 表配置列表
-     */
-    private List<TableConfiguration> tableConfigurationList;
 
     private final String className;
 
@@ -153,7 +138,6 @@ public class ControllerPlugin extends PluginAdapter {
         // default is slf4j
         slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
         slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
-        methods = new ArrayList<>();
         className = this.getClass().getName();
     }
 
@@ -191,8 +175,6 @@ public class ControllerPlugin extends PluginAdapter {
         enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
 
 
-        tableConfigurationList = context.getTableConfigurations();
-
         if (StringUtility.stringHasValue(enableAnnotation)) {
             this.enableAnnotation = StringUtility.isTrue(enableAnnotation);
         }
@@ -210,7 +192,7 @@ public class ControllerPlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
 
         //是否生成controller
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
+        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
             if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
                 this.generatorController = tableConfiguration.isEnableController();
                 break;
