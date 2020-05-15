@@ -30,6 +30,7 @@ package org.mybatis.generator.config.xml;
 
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.exception.XMLParserException;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.utils.CustomKeyUtil;
@@ -171,6 +172,8 @@ public class MyBatisGeneratorConfigurationParser {
 
             if ("property".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parseProperty(context, childNode);
+            } else if ("prop".equals(childNode.getNodeName())) { //$NON-NLS-1$
+                parseCustomProp(context, childNode, ConstEnum.CONTEXT_FIELD.getValue());
             } else if ("plugin".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parsePlugin(context, childNode);
             } else if ("commentGenerator".equals(childNode.getNodeName())) { //$NON-NLS-1$
@@ -697,7 +700,6 @@ public class MyBatisGeneratorConfigurationParser {
         customConfiguration.setValue(value);
         customConfiguration.setEnable(enable);
         context.setCustomConfigurationMap(key, customConfiguration);
-
     }
 
 
@@ -858,7 +860,7 @@ public class MyBatisGeneratorConfigurationParser {
      * This method resolve a property from one of the three sources: system properties,
      * properties loaded from the &lt;properties&gt; configuration element, and
      * "extra" properties that may be supplied by the Maven or Ant environments.
-     *
+     * <p>
      * <p>If there is a name collision, system properties take precedence, followed by
      * configuration properties, followed by extra properties.
      *

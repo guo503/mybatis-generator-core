@@ -18,17 +18,21 @@ package org.mybatis.generator.config;
 import org.mybatis.generator.api.*;
 import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.XmlElement;
+import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.internal.JDBCConnectionFactory;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.PluginAggregator;
 import org.mybatis.generator.internal.db.DatabaseIntrospector;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.CustomKeyUtil;
+import org.mybatis.generator.utils.OsUtil;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mybatis.generator.internal.util.StringUtility.*;
 import static org.mybatis.generator.internal.util.messages.Messages.getString;
@@ -93,7 +97,7 @@ public class Context extends PropertyHolder {
 
         tableConfigurations = new ArrayList<TableConfiguration>();
         pluginConfigurations = new ArrayList<PluginConfiguration>();
-        this.customConfigurationMap = new HashMap();
+        this.customConfigurationMap = new ConcurrentHashMap<>();
     }
 
     public void addTableConfiguration(TableConfiguration tc) {
@@ -580,5 +584,50 @@ public class Context extends PropertyHolder {
             return false;
         }
         return StringUtility.stringHasValue(customConfiguration.getValue()) && StringUtility.isTrue(customConfiguration.getEnable());
+    }
+
+    public String getCoreProjectPrefix() {
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.CORE_PROJECT_PREFIX));
+        if (Objects.isNull(customConfiguration)) {
+            return null;
+        }
+        return this.getBasePath(customConfiguration.getValue());
+    }
+
+    public String getApiProjectPrefix() {
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.API_PROJECT_PREFIX));
+        if (Objects.isNull(customConfiguration)) {
+            return null;
+        }
+        return this.getBasePath(customConfiguration.getValue());
+    }
+
+    public String getCorePackagePrefix() {
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.CORE_PACKAGE_PREFIX));
+        if (Objects.isNull(customConfiguration)) {
+            return null;
+        }
+        return this.getBasePack(customConfiguration.getValue());
+    }
+
+    public String getApiPackagePrefix() {
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.API_PACKAGE_PREFIX));
+        if (Objects.isNull(customConfiguration)) {
+            return null;
+        }
+        return this.getBasePack(customConfiguration.getValue());
+    }
+
+
+
+    private String getBasePath(String path) {
+        if (OsUtil.isWindows()) {
+            return path + OsUtil.WINDOWS_FILE_SEP;
+        }
+        return path + OsUtil.LINUX_FILE_SEP;
+    }
+
+    private String getBasePack(String pack) {
+        return pack + ".";
     }
 }
