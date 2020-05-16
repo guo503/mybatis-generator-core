@@ -186,17 +186,15 @@ public class BusinessPlugin extends PluginAdapter {
 
         this.businessSuffix = this.getCustomValue(className, "businessSuffix");
 
-        this.businessSuffix = this.getCustomValue(className, "businessSuffix");
-
         this.responseMethod = this.getCustomValue(ControllerPlugin.class.getName(), "responseMethod");
 
         this.modelConvertUtils = this.getCustomValue(className, "modelConvertUtils");
-        this.businessProject = this.getCustomValue(className, "businessProject");
-        this.businessPack = this.getCustomValue(className, "businessPack");
+        this.businessProject = context.getPath(className, "businessProject");
+        this.businessPack = context.getPack(className, "businessPack");
         this.businessSuffix = this.getCustomValue(className, "businessSuffix");
 
-        this.businessImplProject = this.getCustomValue(className, "businessImplProject");
-        this.businessImplPack = this.getCustomValue(className, "businessImplPack");
+        this.businessImplProject = context.getPath(className, "businessImplProject");
+        this.businessImplPack = context.getPack(className, "businessImplPack");
 
         this.remoteResource = this.getCustomValue(className, "remoteResource");
 
@@ -243,7 +241,7 @@ public class BusinessPlugin extends PluginAdapter {
 
         String domainObjectName = introspectedTable.getDomainObjectName();
         //service全路径
-        String servicePack = this.getCustomValue(ServicePlugin.class.getName(), "servicePack");
+        String servicePack = context.getPack(ServicePlugin.class.getName(), "servicePack");
         String serviceName = domainObjectName + this.getCustomValue(ServicePlugin.class.getName(), "serviceSuffix");
         serviceType = new FullyQualifiedJavaType(servicePack + "." + serviceName);
         String businessName = domainObjectName + this.businessSuffix;
@@ -308,7 +306,7 @@ public class BusinessPlugin extends PluginAdapter {
 
     protected void addBusiness(Interface interface1, IntrospectedTable introspectedTable, List<GeneratedJavaFile> files) {
         interface1.setVisibility(JavaVisibility.PUBLIC);
-        BusinessGen businessGen = new BusinessGen(context,this.responseMethod, this.modelConvertUtils, this.enableLogger);
+        BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
         if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
             method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);
@@ -369,7 +367,7 @@ public class BusinessPlugin extends PluginAdapter {
         }
 
         ClassUtils.addField(topLevelClass, this.serviceType, this.remoteResource);
-        BusinessGen businessGen = new BusinessGen(context,this.responseMethod, this.modelConvertUtils, this.enableLogger);
+        BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
         if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
             method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);

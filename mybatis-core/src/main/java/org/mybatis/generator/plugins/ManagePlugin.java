@@ -9,6 +9,7 @@ import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.*;
@@ -228,8 +229,8 @@ public class ManagePlugin extends PluginAdapter {
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
-        String managePath = managePack + "." + tableName + manageSuffix;
-        String manageImplPath = manageImplPack + "." + tableName + manageSuffix + "Impl";
+        String managePath = context.getPack(this.getClass().getName(), managePack) + "." + tableName + manageSuffix;
+        String manageImplPath = context.getPack(this.getClass().getName(), manageImplPack) + "." + tableName + manageSuffix + "Impl";
 
         interfaceType = new FullyQualifiedJavaType(managePath);
 
@@ -251,8 +252,8 @@ public class ManagePlugin extends PluginAdapter {
         String limitConditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
-        String manageFilePath = manageProject + LocalFileUtils.getPath(managePath) + suffix;
-        String manageImplFilePath = manageImplProject + LocalFileUtils.getPath(manageImplPath) + suffix;
+        String manageFilePath = context.getPath(this.getClass().getName(), manageProject) + LocalFileUtils.getPath(managePath) + suffix;
+        String manageImplFilePath = context.getPath(this.getClass().getName(), manageImplProject) + LocalFileUtils.getPath(manageImplPath) + suffix;
 
         List<GeneratedJavaFile> manageFiles = new ArrayList<>();
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();
@@ -315,15 +316,15 @@ public class ManagePlugin extends PluginAdapter {
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = getOtherInteger(BaseMethodPlugin.class.getName(),insertSelective, introspectedTable, tableName, 1);
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = getOtherInteger(this.getClass().getName(),saveAndGet, introspectedTable, tableName, 1);
+        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = getOtherInteger(BaseMethodPlugin.class.getName(),updateByPrimaryKeySelective, introspectedTable, tableName, 1);
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
@@ -333,11 +334,11 @@ public class ManagePlugin extends PluginAdapter {
             interface1.addMethod(method);
         }
 
-        method = listByIds(BaseMethodPlugin.class.getName(),introspectedTable, listByIds, 1);
+        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = listByCondition(BaseMethodPlugin.class.getName(),introspectedTable, list, 1);
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
@@ -347,7 +348,7 @@ public class ManagePlugin extends PluginAdapter {
         interface1.addMethod(method);
 
 
-        method = listByCondition(BaseMethodPlugin.class.getName(),introspectedTable, listByCondition, 4);
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
@@ -357,15 +358,15 @@ public class ManagePlugin extends PluginAdapter {
         interface1.addMethod(method);
 
 
-        method = listByCondition(this.getClass().getName(),introspectedTable, listId, 2);
+        method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = listByIds(this.getClass().getName(),introspectedTable, mapByIds, 2);
+        method = listByIds(this.getClass().getName(), introspectedTable, mapByIds, 2);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = listByCondition(this.getClass().getName(),introspectedTable, map, 3);
+        method = listByCondition(this.getClass().getName(), introspectedTable, map, 3);
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
@@ -396,7 +397,8 @@ public class ManagePlugin extends PluginAdapter {
             topLevelClass.addAnnotation("@Service");
             topLevelClass.addImportedType(service);
         }
-        topLevelClass.addImportedType(manageType);;
+        topLevelClass.addImportedType(manageType);
+        ;
         topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.*"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
@@ -418,27 +420,27 @@ public class ManagePlugin extends PluginAdapter {
 
         topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
 
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(),insertSelective, introspectedTable, tableName, 1));
+        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
 
         if (StringUtility.stringHasValue(deleteByCondition)) {
             topLevelClass.addMethod(delete(introspectedTable, deleteByCondition, tableName, 1));
         }
 
-        topLevelClass.addMethod(getOtherInteger(this.getClass().getName(),saveAndGet, introspectedTable, tableName, 1));
+        topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
 
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(),updateByPrimaryKeySelective, introspectedTable, tableName, 1));
+        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(),listByIds, introspectedTable, tableName, 6));
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(),list, introspectedTable, tableName, 5));
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
 
         topLevelClass.addMethod(countByCondition(introspectedTable, count));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(),listByCondition, introspectedTable, tableName, 8));
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
 
         topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
 
-        topLevelClass.addMethod(getOtherList(this.getClass().getName(),listId, introspectedTable, tableName, 7));
+        topLevelClass.addMethod(getOtherList(this.getClass().getName(), listId, introspectedTable, tableName, 7));
 
         topLevelClass.addMethod(getOtherMap(map, introspectedTable, tableName, 7));
 
@@ -649,7 +651,7 @@ public class ManagePlugin extends PluginAdapter {
      * param type              :返回类型：1,po集合 2 id列表集合
      * return
      */
-    protected Method listByCondition(String pluginType,IntrospectedTable introspectedTable, String methodName, int type) {
+    protected Method listByCondition(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
         if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
@@ -729,7 +731,7 @@ public class ManagePlugin extends PluginAdapter {
     /**
      * add method
      */
-    protected Method listByIds(String pluginType,IntrospectedTable introspectedTable, String methodName, int type) {
+    protected Method listByIds(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
         if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
@@ -753,7 +755,7 @@ public class ManagePlugin extends PluginAdapter {
     /**
      * add method
      */
-    protected Method getOtherInteger(String pluginType,String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
+    protected Method getOtherInteger(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
         if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
@@ -784,14 +786,14 @@ public class ManagePlugin extends PluginAdapter {
             String getDate;
             method.addBodyLine("Assert.notNull(" + domainName + "," + "\"" + domainName + "不能为空\");");
             if (MethodEnum.SAVE.getValue().equals(methodName)) {
-                String creator =  this.getCustomValue(pluginType,"creator");
+                String creator = this.getCustomValue(pluginType, "creator");
                 getUserName = this.getMethodName(userNameMethod, creator, CommonConstant.DEFAULT_USER);
                 getDate = this.getMethodName(dateMethod, createTime, CommonConstant.DEFAULT_TIME);
 
                 this.setMethodValue(method, params, creator, getUserName);//设置用户名
                 this.setMethodValue(method, params, createTime, getDate);//设置时间
             } else {
-                String updater = this.getCustomValue(pluginType,"updater");
+                String updater = this.getCustomValue(pluginType, "updater");
                 getUserName = this.getMethodName(userNameMethod, updater, CommonConstant.DEFAULT_USER);
                 getDate = this.getMethodName(dateMethod, updateTime, CommonConstant.DEFAULT_TIME);
                 this.setMethodValue(method, params, updater, getUserName);//设置用户名
@@ -821,8 +823,8 @@ public class ManagePlugin extends PluginAdapter {
     /**
      * add method
      */
-    protected Method getOtherList(String pluginType,String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!this.isCustomEnable(pluginType,MethodEnum.getNameByValue(methodName))) {
+    protected Method getOtherList(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
+        if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         Method method = new Method();
@@ -1052,7 +1054,7 @@ public class ManagePlugin extends PluginAdapter {
 
 
     private boolean hasColumn(String str) {
-        if(!StringUtility.stringHasValue(str)){
+        if (!StringUtility.stringHasValue(str)) {
             return false;
         }
         for (IntrospectedColumn column : columns) {

@@ -50,7 +50,7 @@
   The context element is used to describe a context for generating files, and the source
   tables.
 -->
-<!ELEMENT context (property*, plugin*, commentGenerator?, (connectionFactory | jdbcConnection), javaTypeResolver?,
+<!ELEMENT context ((property | prop)*, plugin*, commentGenerator?, (connectionFactory | jdbcConnection), javaTypeResolver?,
                          javaModelGenerator, sqlMapGenerator?, javaClientGenerator?, table+)>
 <!ATTLIST context id ID #REQUIRED
   defaultModelType CDATA #IMPLIED
@@ -103,10 +103,22 @@
    value CDATA #REQUIRED
    enable CDATA #REQUIRED>
 
+ <!ELEMENT path EMPTY>
+ <!ATTLIST path
+  name CDATA #REQUIRED
+  value CDATA #REQUIRED
+  type CDATA #REQUIRED>
+
+  <!ELEMENT pack EMPTY>
+  <!ATTLIST pack
+   name CDATA #REQUIRED
+   value CDATA #REQUIRED
+   type CDATA #REQUIRED>
+
 <!--
   The plugin element is used to define a plugin.
 -->
-<!ELEMENT plugin ((property | prop)*)>
+<!ELEMENT plugin ((property | prop | path | pack)*)>
 <!ATTLIST plugin
   type CDATA #REQUIRED>
 

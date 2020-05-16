@@ -5,14 +5,13 @@ package org.mybatis.generator.config;
  * @description
  * @date 2020/4/27 18:18
  **/
-public class CustomConfiguration {
-
+public class PathOrPackConfiguration {
 
     private String name;
 
     private String value;
 
-    private String enable;
+    private String type;
 
 
     public String getName() {
@@ -31,12 +30,11 @@ public class CustomConfiguration {
         this.value = value;
     }
 
-    public String getEnable() {
-        return enable;
+    public String getType() {
+        return type;
     }
 
-    public void setEnable(String enable) {
-        this.enable = enable;
+    public void setType(String type) {
+        this.type = type;
     }
-
 }

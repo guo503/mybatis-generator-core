@@ -156,13 +156,13 @@ public class ServicePlugin extends PluginAdapter {
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
-        String servicePath = servicePack + "." + tableName + serviceSuffix;
-        String serviceImplPath = serviceImplPack + "." + tableName + serviceSuffix + "Impl";
+        String servicePath = context.getPack(this.getClass().getName(), servicePack) + "." + tableName + serviceSuffix;
+        String serviceImplPath = context.getPack(this.getClass().getName(), serviceImplPack) + "." + tableName + serviceSuffix + "Impl";
 
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
         // 【com.coolead.mapper.UserMapper】
-        daoType = new FullyQualifiedJavaType(this.getCustomValue(ManagePlugin.class.getName(), "managePack") + "." + tableName + this.getCustomValue(ManagePlugin.class.getName(), "manageSuffix"));
+        daoType = new FullyQualifiedJavaType(context.getPack(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getPack(ManagePlugin.class.getName(), "manageSuffix"));
 
         // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         serviceType = new FullyQualifiedJavaType(serviceImplPath);
@@ -179,8 +179,8 @@ public class ServicePlugin extends PluginAdapter {
         String limitConditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
-        String serviceFilePath = serviceProject + LocalFileUtils.getPath(servicePath) + suffix;
-        String serviceImplFilePath = serviceImplProject + LocalFileUtils.getPath(serviceImplPath) + suffix;
+        String serviceFilePath = context.getPath(this.getClass().getName(), serviceProject) + LocalFileUtils.getPath(servicePath) + suffix;
+        String serviceImplFilePath = context.getPath(this.getClass().getName(), serviceImplProject) + LocalFileUtils.getPath(serviceImplPath) + suffix;
 
         List<GeneratedJavaFile> manageFiles = new ArrayList<>();
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();

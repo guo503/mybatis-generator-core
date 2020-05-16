@@ -1,4 +1,4 @@
-package org.mybatis.generator.constant;
+package org.mybatis.generator.exception;
 
 import com.google.common.collect.Lists;
 

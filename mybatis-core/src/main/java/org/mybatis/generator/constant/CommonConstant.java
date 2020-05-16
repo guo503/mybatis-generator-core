@@ -120,21 +120,4 @@ public class CommonConstant {
 
     public static final String LIMIT_CONDITION = "limitCondition";
 
-    /**
-     *基础服务项目路径前缀
-     */
-    public static final String CORE_PROJECT_PREFIX = "core_project_prefix";
-    /**
-     *基础服务包路径前缀
-     */
-    public static final String CORE_PACKAGE_PREFIX = "core_package_prefix";
-    /**
-     *api项目路径前缀
-     */
-    public static final String API_PROJECT_PREFIX = "api_project_prefix";
-    /**
-     *api包路径前缀
-     */
-    public static final String API_PACKAGE_PREFIX = "api_package_prefix";
-
 }

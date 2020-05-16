@@ -147,14 +147,14 @@ public class ControllerPlugin extends PluginAdapter {
     @Override
     public boolean validate(List<String> warnings) {
         String enableAnnotation = properties.getProperty("enableAnnotation");
-        this.controllerProject = this.getCustomValue(className, "controllerProject");
-        this.controllerPack = this.getCustomValue(className, "controllerPack");
+        this.controllerProject = context.getPath(className, "controllerProject");
+        this.controllerPack = context.getPack(className, "controllerPack");
         this.controllerSuffix = this.getCustomValue(className, "controllerSuffix");
 
-        this.businessPack = this.getCustomValue(BusinessPlugin.class.getName(), "businessPack");
+        this.businessPack = context.getPack(BusinessPlugin.class.getName(), "businessPack");
         this.businessSuffix = this.getCustomValue(BusinessPlugin.class.getName(), "businessSuffix");
 
-        this.aoPack = this.getCustomValue(ExtendModelPlugin.class.getName(), "aoPack");
+        this.aoPack = context.getPack(ExtendModelPlugin.class.getName(), "aoPack");
         this.aoSuffix = this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix");
 
 

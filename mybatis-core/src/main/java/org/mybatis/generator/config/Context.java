@@ -20,6 +20,7 @@ import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.XmlElement;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.ConstEnum;
+import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.internal.JDBCConnectionFactory;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.PluginAggregator;
@@ -75,6 +76,8 @@ public class Context extends PropertyHolder {
     private List<PluginConfiguration> pluginConfigurations;
 
     private Map<String, CustomConfiguration> customConfigurationMap;
+
+    private Map<String, PathOrPackConfiguration> pathOrPackConfigurationMap;
 
     private String targetRuntime;
 
@@ -567,6 +570,15 @@ public class Context extends PropertyHolder {
         this.customConfigurationMap.put(name, customConfiguration);
     }
 
+
+    public PathOrPackConfiguration getPathOrPackConfigurationMap(String type, String name) {
+        return this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
+    }
+
+    public void setPathOrPackConfigurationMap(String name, PathOrPackConfiguration pathOrPackConfiguration) {
+        this.pathOrPackConfigurationMap.put(name, pathOrPackConfiguration);
+    }
+
     public String getProp(String type, String name) {
         CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
         if (Objects.isNull(customConfiguration)) {
@@ -574,6 +586,46 @@ public class Context extends PropertyHolder {
         }
         return customConfiguration.getValue();
     }
+
+    public String getPath(String type, String name) {
+        PathOrPackConfiguration pathOrPackConfiguration = this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(pathOrPackConfiguration)) {
+            return null;
+        }
+        String prefix;
+        //core
+        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
+            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX);
+            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+        }
+        //api
+        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
+            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PROJECT_PREFIX);
+            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+        }
+        throw new RuntimeException("not exist this type");
+    }
+
+
+    public String getPack(String type, String name) {
+        PathOrPackConfiguration pathOrPackConfiguration = this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(pathOrPackConfiguration)) {
+            return null;
+        }
+        String prefix;
+        //core
+        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
+            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX);
+            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+        }
+        //api
+        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
+            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PACKAGE_PREFIX);
+            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+        }
+        throw new RuntimeException("not exist this type");
+    }
+
 
     public boolean isCustomEnable(String type, String name) {
         if (!StringUtility.stringHasValue(name)) {
@@ -587,7 +639,7 @@ public class Context extends PropertyHolder {
     }
 
     public String getCoreProjectPrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.CORE_PROJECT_PREFIX));
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PROJECT_PREFIX));
         if (Objects.isNull(customConfiguration)) {
             return null;
         }
@@ -595,7 +647,7 @@ public class Context extends PropertyHolder {
     }
 
     public String getApiProjectPrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.API_PROJECT_PREFIX));
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PROJECT_PREFIX));
         if (Objects.isNull(customConfiguration)) {
             return null;
         }
@@ -603,7 +655,7 @@ public class Context extends PropertyHolder {
     }
 
     public String getCorePackagePrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.CORE_PACKAGE_PREFIX));
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX));
         if (Objects.isNull(customConfiguration)) {
             return null;
         }
@@ -611,13 +663,12 @@ public class Context extends PropertyHolder {
     }
 
     public String getApiPackagePrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), CommonConstant.API_PACKAGE_PREFIX));
+        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PACKAGE_PREFIX));
         if (Objects.isNull(customConfiguration)) {
             return null;
         }
         return this.getBasePack(customConfiguration.getValue());
     }
-
 
 
     private String getBasePath(String path) {
