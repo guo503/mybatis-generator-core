@@ -121,10 +121,10 @@ public class ServicePlugin extends PluginAdapter {
         this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-        this.servicePack = this.getCustomValue(className, "servicePack");
-        this.serviceImplPack = this.getCustomValue(className, "serviceImplPack");
-        this.serviceProject = this.getCustomValue(className, "serviceProject");
-        this.serviceImplProject = this.getCustomValue(className, "serviceImplProject");
+        this.servicePack = context.getPack(className, "servicePack");
+        this.serviceImplPack = context.getPack(className, "serviceImplPack");
+        this.serviceProject = context.getPath(className, "serviceProject");
+        this.serviceImplProject = context.getPath(className, "serviceImplProject");
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
         if (this.enableAnnotation) {
@@ -156,13 +156,13 @@ public class ServicePlugin extends PluginAdapter {
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
-        String servicePath = context.getPack(this.getClass().getName(), servicePack) + "." + tableName + serviceSuffix;
-        String serviceImplPath = context.getPack(this.getClass().getName(), serviceImplPack) + "." + tableName + serviceSuffix + "Impl";
+        String servicePath = servicePack + "." + tableName + serviceSuffix;
+        String serviceImplPath = serviceImplPack + "." + tableName + serviceSuffix + "Impl";
 
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
         // 【com.coolead.mapper.UserMapper】
-        daoType = new FullyQualifiedJavaType(context.getPack(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getPack(ManagePlugin.class.getName(), "manageSuffix"));
+        daoType = new FullyQualifiedJavaType(context.getPack(ManagePlugin.class.getName(), "managePack") + "." + tableName + this.getCustomValue(ManagePlugin.class.getName(), "manageSuffix"));
 
         // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         serviceType = new FullyQualifiedJavaType(serviceImplPath);
@@ -175,22 +175,17 @@ public class ServicePlugin extends PluginAdapter {
         //查询条件类
         String conditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
-        //分页查询条件类
-        String limitConditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
-
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
-        String serviceFilePath = context.getPath(this.getClass().getName(), serviceProject) + LocalFileUtils.getPath(servicePath) + suffix;
-        String serviceImplFilePath = context.getPath(this.getClass().getName(), serviceImplProject) + LocalFileUtils.getPath(serviceImplPath) + suffix;
+        String serviceFilePath = serviceProject + LocalFileUtils.getPath(servicePath) + suffix;
+        String serviceImplFilePath = serviceImplProject + LocalFileUtils.getPath(serviceImplPath) + suffix;
 
         List<GeneratedJavaFile> manageFiles = new ArrayList<>();
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();
 
         Interface interface1 = new Interface(interfaceType);
         interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
-        interface1.addImportedType(new FullyQualifiedJavaType(limitConditionType));
         TopLevelClass topLevelClass = new TopLevelClass(serviceType);
         topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType(limitConditionType));
         Files.deleteIfExists(Paths.get(serviceFilePath));
         // 导入必须的类
         addImport(interface1, null);
@@ -315,9 +310,6 @@ public class ServicePlugin extends PluginAdapter {
             topLevelClass.addImportedType(service);
         }
         topLevelClass.addImportedType(serviceType);
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.*"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
         //添加Log属性

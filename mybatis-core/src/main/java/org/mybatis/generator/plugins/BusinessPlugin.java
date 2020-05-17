@@ -263,9 +263,9 @@ public class BusinessPlugin extends PluginAdapter {
 
         FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.*");
 
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(this.getCustomValue(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(this.getCustomValue(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix"));
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
 
@@ -344,7 +344,7 @@ public class BusinessPlugin extends PluginAdapter {
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
+        if (this.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
             method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
             MethodUtils.clear(method);
             interface1.addMethod(method);
@@ -399,10 +399,6 @@ public class BusinessPlugin extends PluginAdapter {
                 topLevelClass.addImportedType(new FullyQualifiedJavaType(this.modelConvertUtils));
             }
 
-            if (StringUtility.stringHasValue(this.page)) {
-                topLevelClass.addImportedType(new FullyQualifiedJavaType(this.page));
-            }
-
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
         }
@@ -413,10 +409,11 @@ public class BusinessPlugin extends PluginAdapter {
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
+        if (this.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
             method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
+            topLevelClass.addImportedType(this.page);
             topLevelClass.addImportedType("org.springframework.util.CollectionUtils");
         }
 

@@ -173,8 +173,6 @@ public class MyBatisGeneratorConfigurationParser {
 
             if ("property".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parseProperty(context, childNode);
-            } else if ("prop".equals(childNode.getNodeName())) { //$NON-NLS-1$
-                parseCustomProp(context, childNode, ConstEnum.CONTEXT_FIELD.getValue());
             } else if ("plugin".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parsePlugin(context, childNode);
             } else if ("commentGenerator".equals(childNode.getNodeName())) { //$NON-NLS-1$
@@ -206,8 +204,8 @@ public class MyBatisGeneratorConfigurationParser {
         String targetPackage = attributes.getProperty("targetPackage"); //$NON-NLS-1$
         String targetProject = attributes.getProperty("targetProject"); //$NON-NLS-1$
 
-        sqlMapGeneratorConfiguration.setTargetPackage(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX) + targetPackage);
-        sqlMapGeneratorConfiguration.setTargetProject(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PROJECT_PREFIX) + targetProject);
+        sqlMapGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
+        sqlMapGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
 
         NodeList nodeList = node.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -622,6 +620,8 @@ public class MyBatisGeneratorConfigurationParser {
                 parseProperty(pluginConfiguration, childNode);
             } else if ("prop".equals(childNode.getNodeName())) {
                 this.parseCustomProp(context, childNode, type);
+            } else if ("path".equals(childNode.getNodeName())||"pack".equals(childNode.getNodeName())) {
+                this.parsePathOrPack(context, childNode, type);
             }
         }
     }
@@ -636,8 +636,8 @@ public class MyBatisGeneratorConfigurationParser {
         String targetPackage = attributes.getProperty("targetPackage"); //$NON-NLS-1$
         String targetProject = attributes.getProperty("targetProject"); //$NON-NLS-1$
 
-        javaModelGeneratorConfiguration.setTargetPackage(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX) + targetPackage);
-        javaModelGeneratorConfiguration.setTargetProject(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PROJECT_PREFIX) + targetProject);
+        javaModelGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
+        javaModelGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
 
         NodeList nodeList = node.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -666,8 +666,8 @@ public class MyBatisGeneratorConfigurationParser {
                 .getProperty("implementationPackage"); //$NON-NLS-1$
 
         javaClientGeneratorConfiguration.setConfigurationType(type);
-        javaClientGeneratorConfiguration.setTargetPackage(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX) + targetPackage);
-        javaClientGeneratorConfiguration.setTargetProject(context.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PROJECT_PREFIX) + targetProject);
+        javaClientGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
+        javaClientGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
         javaClientGeneratorConfiguration
                 .setImplementationPackage(implementationPackage);
 
@@ -704,7 +704,7 @@ public class MyBatisGeneratorConfigurationParser {
     }
 
 
-    protected void parsePathOrPath(Context context, Node node, String propType) {
+    protected void parsePathOrPack(Context context, Node node, String propType) {
         PathOrPackConfiguration pathOrPackConfiguration = new PathOrPackConfiguration();
         Properties attributes = this.parseCustomAttributes(node);
 

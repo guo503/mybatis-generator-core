@@ -186,10 +186,10 @@ public class ManagePlugin extends PluginAdapter {
         this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-        this.managePack = this.getCustomValue(className, "managePack");
-        this.manageImplPack = this.getCustomValue(className, "manageImplPack");
-        this.manageProject = this.getCustomValue(className, "manageProject");
-        this.manageImplProject = this.getCustomValue(className, "manageImplProject");
+        this.managePack = context.getPack(className, "managePack");
+        this.manageImplPack = context.getPack(className, "manageImplPack");
+        this.manageProject = context.getPath(className, "manageProject");
+        this.manageImplProject = context.getPath(className, "manageImplProject");
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
         this.userNameMethod = this.getCustomValue(className, "userNameMethod");
@@ -229,8 +229,8 @@ public class ManagePlugin extends PluginAdapter {
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
-        String managePath = context.getPack(this.getClass().getName(), managePack) + "." + tableName + manageSuffix;
-        String manageImplPath = context.getPack(this.getClass().getName(), manageImplPack) + "." + tableName + manageSuffix + "Impl";
+        String managePath = managePack + "." + tableName + manageSuffix;
+        String manageImplPath = manageImplPack + "." + tableName + manageSuffix + "Impl";
 
         interfaceType = new FullyQualifiedJavaType(managePath);
 
@@ -252,8 +252,8 @@ public class ManagePlugin extends PluginAdapter {
         String limitConditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
-        String manageFilePath = context.getPath(this.getClass().getName(), manageProject) + LocalFileUtils.getPath(managePath) + suffix;
-        String manageImplFilePath = context.getPath(this.getClass().getName(), manageImplProject) + LocalFileUtils.getPath(manageImplPath) + suffix;
+        String manageFilePath = manageProject + LocalFileUtils.getPath(managePath) + suffix;
+        String manageImplFilePath = manageImplProject + LocalFileUtils.getPath(manageImplPath) + suffix;
 
         List<GeneratedJavaFile> manageFiles = new ArrayList<>();
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();

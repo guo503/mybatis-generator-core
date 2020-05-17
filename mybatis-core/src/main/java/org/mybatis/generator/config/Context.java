@@ -18,8 +18,6 @@ package org.mybatis.generator.config;
 import org.mybatis.generator.api.*;
 import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.XmlElement;
-import org.mybatis.generator.constant.CommonConstant;
-import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.internal.JDBCConnectionFactory;
 import org.mybatis.generator.internal.ObjectFactory;
@@ -29,6 +27,8 @@ import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.CustomKeyUtil;
 import org.mybatis.generator.utils.OsUtil;
 
+import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -101,6 +101,7 @@ public class Context extends PropertyHolder {
         tableConfigurations = new ArrayList<TableConfiguration>();
         pluginConfigurations = new ArrayList<PluginConfiguration>();
         this.customConfigurationMap = new ConcurrentHashMap<>();
+        this.pathOrPackConfigurationMap = new ConcurrentHashMap<>();
     }
 
     public void addTableConfiguration(TableConfiguration tc) {
@@ -570,11 +571,6 @@ public class Context extends PropertyHolder {
         this.customConfigurationMap.put(name, customConfiguration);
     }
 
-
-    public PathOrPackConfiguration getPathOrPackConfigurationMap(String type, String name) {
-        return this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
-    }
-
     public void setPathOrPackConfigurationMap(String name, PathOrPackConfiguration pathOrPackConfiguration) {
         this.pathOrPackConfigurationMap.put(name, pathOrPackConfiguration);
     }
@@ -592,18 +588,15 @@ public class Context extends PropertyHolder {
         if (Objects.isNull(pathOrPackConfiguration)) {
             return null;
         }
-        String prefix;
         //core
         if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
-            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX);
-            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+            return this.getCorePath() + pathOrPackConfiguration.getValue();
         }
         //api
         if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
-            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PROJECT_PREFIX);
-            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+            return this.getApiPath() + pathOrPackConfiguration.getValue();
         }
-        throw new RuntimeException("not exist this type");
+        throw new RuntimeException("not exist this type !");
     }
 
 
@@ -612,18 +605,15 @@ public class Context extends PropertyHolder {
         if (Objects.isNull(pathOrPackConfiguration)) {
             return null;
         }
-        String prefix;
         //core
         if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
-            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX);
-            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+            return this.getCorePack() + pathOrPackConfiguration.getValue();
         }
         //api
         if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
-            prefix = this.getProp(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PACKAGE_PREFIX);
-            return prefix + this.getBasePath(pathOrPackConfiguration.getValue());
+            return this.getApiPack() + pathOrPackConfiguration.getValue();
         }
-        throw new RuntimeException("not exist this type");
+        throw new RuntimeException("not exist this type !");
     }
 
 
@@ -638,47 +628,24 @@ public class Context extends PropertyHolder {
         return StringUtility.stringHasValue(customConfiguration.getValue()) && StringUtility.isTrue(customConfiguration.getEnable());
     }
 
-    public String getCoreProjectPrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PROJECT_PREFIX));
-        if (Objects.isNull(customConfiguration)) {
-            return null;
-        }
-        return this.getBasePath(customConfiguration.getValue());
-    }
-
-    public String getApiProjectPrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PROJECT_PREFIX));
-        if (Objects.isNull(customConfiguration)) {
-            return null;
-        }
-        return this.getBasePath(customConfiguration.getValue());
-    }
-
-    public String getCorePackagePrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.CORE_PACKAGE_PREFIX));
-        if (Objects.isNull(customConfiguration)) {
-            return null;
-        }
-        return this.getBasePack(customConfiguration.getValue());
-    }
-
-    public String getApiPackagePrefix() {
-        CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(ConstEnum.CONTEXT_FIELD.getValue(), KeyConst.API_PACKAGE_PREFIX));
-        if (Objects.isNull(customConfiguration)) {
-            return null;
-        }
-        return this.getBasePack(customConfiguration.getValue());
+    private String getBasePath(String prefix) {
+        return prefix + File.separator;
     }
 
 
-    private String getBasePath(String path) {
-        if (OsUtil.isWindows()) {
-            return path + OsUtil.WINDOWS_FILE_SEP;
-        }
-        return path + OsUtil.LINUX_FILE_SEP;
+    public String getCorePath() {
+        return this.getBasePath(this.getProperty(KeyConst.CORE_PROJECT_PREFIX));
     }
 
-    private String getBasePack(String pack) {
-        return pack + ".";
+    public String getCorePack() {
+        return this.getProperty(KeyConst.CORE_PACKAGE_PREFIX) + ".";
+    }
+
+    public String getApiPath() {
+        return this.getBasePath(this.getProperty(KeyConst.API_PROJECT_PREFIX));
+    }
+
+    public String getApiPack() {
+        return this.getProperty(KeyConst.API_PACKAGE_PREFIX) + ".";
     }
 }

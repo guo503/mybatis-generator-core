@@ -215,7 +215,7 @@ public class ControllerPlugin extends PluginAdapter {
 
         //vo全路径
         FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(this.aoPack + "." + domainObjectName + this.aoSuffix);
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(this.getCustomValue(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
         FullyQualifiedJavaType controllerType = new FullyQualifiedJavaType(controllerPath);

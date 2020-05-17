@@ -63,7 +63,7 @@ public class BaseRecordVoGenerator extends AbstractJavaGenerator {
     @Override
     public List<CompilationUnit> getCompilationUnits() {
 
-        String voPack = context.getProp(ExtendModelPlugin.class.getName(), "voPack");
+        String voPack = context.getPack(ExtendModelPlugin.class.getName(), "voPack");
         String voSuffix1 = context.getProp(ExtendModelPlugin.class.getName(), "voSuffix");
         String voSuffix = Objects.isNull(voSuffix1) ? CommonConstant.VO_SUFFIX : voSuffix1;
 
