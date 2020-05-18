@@ -25,10 +25,8 @@ import org.mybatis.generator.internal.PluginAggregator;
 import org.mybatis.generator.internal.db.DatabaseIntrospector;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.CustomKeyUtil;
-import org.mybatis.generator.utils.OsUtil;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -100,8 +98,8 @@ public class Context extends PropertyHolder {
 
         tableConfigurations = new ArrayList<TableConfiguration>();
         pluginConfigurations = new ArrayList<PluginConfiguration>();
-        this.customConfigurationMap = new ConcurrentHashMap<>();
-        this.pathOrPackConfigurationMap = new ConcurrentHashMap<>();
+        this.customConfigurationMap = new HashMap<>();
+        this.pathOrPackConfigurationMap = new HashMap<>();
     }
 
     public void addTableConfiguration(TableConfiguration tc) {
@@ -641,11 +639,11 @@ public class Context extends PropertyHolder {
         return this.getProperty(KeyConst.CORE_PACKAGE_PREFIX) + ".";
     }
 
-    public String getApiPath() {
+    private String getApiPath() {
         return this.getBasePath(this.getProperty(KeyConst.API_PROJECT_PREFIX));
     }
 
-    public String getApiPack() {
+    private String getApiPack() {
         return this.getProperty(KeyConst.API_PACKAGE_PREFIX) + ".";
     }
 }

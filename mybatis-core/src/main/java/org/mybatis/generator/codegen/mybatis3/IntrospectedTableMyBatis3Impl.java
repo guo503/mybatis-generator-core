@@ -155,7 +155,7 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
         }
 
         //生成ao
-        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "aoProject")) {
+        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "aoSuffix")) {
             BaseRecordAOGenerator aoGenerator = new BaseRecordAOGenerator(context);
             initializeAbstractGenerator(aoGenerator, warnings,
                     progressCallback);
@@ -164,7 +164,7 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
 
 
         //生成vo
-        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "voProject")) {
+        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "voSuffix")) {
             BaseRecordVoGenerator voGenerator = new BaseRecordVoGenerator(context);
             initializeAbstractGenerator(voGenerator, warnings,
                     progressCallback);
