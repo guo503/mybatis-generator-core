@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mybatis.generator.internal.util.StringUtility.*;
 import static org.mybatis.generator.internal.util.messages.Messages.getString;
@@ -581,37 +580,12 @@ public class Context extends PropertyHolder {
         return customConfiguration.getValue();
     }
 
-    public String getPath(String type, String name) {
+    public String getPPVal(String type, String name) {
         PathOrPackConfiguration pathOrPackConfiguration = this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
         if (Objects.isNull(pathOrPackConfiguration)) {
             return null;
         }
-        //core
-        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
-            return this.getCorePath() + pathOrPackConfiguration.getValue();
-        }
-        //api
-        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
-            return this.getApiPath() + pathOrPackConfiguration.getValue();
-        }
-        throw new RuntimeException("not exist this type !");
-    }
-
-
-    public String getPack(String type, String name) {
-        PathOrPackConfiguration pathOrPackConfiguration = this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
-        if (Objects.isNull(pathOrPackConfiguration)) {
-            return null;
-        }
-        //core
-        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.CORE)) {
-            return this.getCorePack() + pathOrPackConfiguration.getValue();
-        }
-        //api
-        if (Objects.equals(pathOrPackConfiguration.getType(), KeyConst.API)) {
-            return this.getApiPack() + pathOrPackConfiguration.getValue();
-        }
-        throw new RuntimeException("not exist this type !");
+        return pathOrPackConfiguration.getValue();
     }
 
 
@@ -626,24 +600,12 @@ public class Context extends PropertyHolder {
         return StringUtility.stringHasValue(customConfiguration.getValue()) && StringUtility.isTrue(customConfiguration.getEnable());
     }
 
-    private String getBasePath(String prefix) {
-        return prefix + File.separator;
-    }
-
 
     public String getCorePath() {
-        return this.getBasePath(this.getProperty(KeyConst.CORE_PROJECT_PREFIX));
+        return this.getProperty(KeyConst.CORE_PROJECT_PREFIX)+File.separator;
     }
 
     public String getCorePack() {
         return this.getProperty(KeyConst.CORE_PACKAGE_PREFIX) + ".";
-    }
-
-    private String getApiPath() {
-        return this.getBasePath(this.getProperty(KeyConst.API_PROJECT_PREFIX));
-    }
-
-    private String getApiPack() {
-        return this.getProperty(KeyConst.API_PACKAGE_PREFIX) + ".";
     }
 }

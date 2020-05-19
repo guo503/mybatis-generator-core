@@ -9,7 +9,6 @@ import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
-import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.*;
@@ -186,10 +185,10 @@ public class ManagePlugin extends PluginAdapter {
         this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-        this.managePack = context.getPack(className, "managePack");
-        this.manageImplPack = context.getPack(className, "manageImplPack");
-        this.manageProject = context.getPath(className, "manageProject");
-        this.manageImplProject = context.getPath(className, "manageImplProject");
+        this.managePack = context.getPPVal(className, "managePack");
+        this.manageImplPack = context.getPPVal(className, "manageImplPack");
+        this.manageProject = context.getPPVal(className, "manageProject");
+        this.manageImplProject = context.getPPVal(className, "manageImplProject");
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
         this.userNameMethod = this.getCustomValue(className, "userNameMethod");
@@ -787,14 +786,14 @@ public class ManagePlugin extends PluginAdapter {
             method.addBodyLine("Assert.notNull(" + domainName + "," + "\"" + domainName + "不能为空\");");
             if (MethodEnum.SAVE.getValue().equals(methodName)) {
                 String creator = this.getCustomValue(pluginType, "creator");
-                getUserName = this.getMethodName(userNameMethod, creator, CommonConstant.DEFAULT_USER);
+                getUserName = StringUtility.stringHasValue(creator) ? creator : CommonConstant.DEFAULT_USER;
                 getDate = this.getMethodName(dateMethod, createTime, CommonConstant.DEFAULT_TIME);
 
                 this.setMethodValue(method, params, creator, getUserName);//设置用户名
                 this.setMethodValue(method, params, createTime, getDate);//设置时间
             } else {
                 String updater = this.getCustomValue(pluginType, "updater");
-                getUserName = this.getMethodName(userNameMethod, updater, CommonConstant.DEFAULT_USER);
+                getUserName = StringUtility.stringHasValue(updater) ? updater : CommonConstant.DEFAULT_USER;
                 getDate = this.getMethodName(dateMethod, updateTime, CommonConstant.DEFAULT_TIME);
                 this.setMethodValue(method, params, updater, getUserName);//设置用户名
                 this.setMethodValue(method, params, updateTime, getDate);//设置时间

@@ -121,10 +121,10 @@ public class ServicePlugin extends PluginAdapter {
         this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-        this.servicePack = context.getPack(className, "servicePack");
-        this.serviceImplPack = context.getPack(className, "serviceImplPack");
-        this.serviceProject = context.getPath(className, "serviceProject");
-        this.serviceImplProject = context.getPath(className, "serviceImplProject");
+        this.servicePack = context.getPPVal(className, "servicePack");
+        this.serviceImplPack = context.getPPVal(className, "serviceImplPack");
+        this.serviceProject = context.getPPVal(className, "serviceProject");
+        this.serviceImplProject = context.getPPVal(className, "serviceImplProject");
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
         if (this.enableAnnotation) {
@@ -162,7 +162,7 @@ public class ServicePlugin extends PluginAdapter {
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
         // 【com.coolead.mapper.UserMapper】
-        daoType = new FullyQualifiedJavaType(context.getPack(ManagePlugin.class.getName(), "managePack") + "." + tableName + this.getCustomValue(ManagePlugin.class.getName(), "manageSuffix"));
+        daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + this.getCustomValue(ManagePlugin.class.getName(), "manageSuffix"));
 
         // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         serviceType = new FullyQualifiedJavaType(serviceImplPath);

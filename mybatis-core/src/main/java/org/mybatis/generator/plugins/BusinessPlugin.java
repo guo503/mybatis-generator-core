@@ -189,12 +189,12 @@ public class BusinessPlugin extends PluginAdapter {
         this.responseMethod = this.getCustomValue(ControllerPlugin.class.getName(), "responseMethod");
 
         this.modelConvertUtils = this.getCustomValue(className, "modelConvertUtils");
-        this.businessProject = context.getPath(className, "businessProject");
-        this.businessPack = context.getPack(className, "businessPack");
+        this.businessProject = context.getPPVal(className, "businessProject");
+        this.businessPack = context.getPPVal(className, "businessPack");
         this.businessSuffix = this.getCustomValue(className, "businessSuffix");
 
-        this.businessImplProject = context.getPath(className, "businessImplProject");
-        this.businessImplPack = context.getPack(className, "businessImplPack");
+        this.businessImplProject = context.getPPVal(className, "businessImplProject");
+        this.businessImplPack = context.getPPVal(className, "businessImplPack");
 
         this.remoteResource = this.getCustomValue(className, "remoteResource");
 
@@ -241,7 +241,7 @@ public class BusinessPlugin extends PluginAdapter {
 
         String domainObjectName = introspectedTable.getDomainObjectName();
         //service全路径
-        String servicePack = context.getPack(ServicePlugin.class.getName(), "servicePack");
+        String servicePack = context.getPPVal(ServicePlugin.class.getName(), "servicePack");
         String serviceName = domainObjectName + this.getCustomValue(ServicePlugin.class.getName(), "serviceSuffix");
         serviceType = new FullyQualifiedJavaType(servicePack + "." + serviceName);
         String businessName = domainObjectName + this.businessSuffix;
@@ -263,9 +263,9 @@ public class BusinessPlugin extends PluginAdapter {
 
         FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.*");
 
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix"));
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
 

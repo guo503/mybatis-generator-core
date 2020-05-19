@@ -147,14 +147,14 @@ public class ControllerPlugin extends PluginAdapter {
     @Override
     public boolean validate(List<String> warnings) {
         String enableAnnotation = properties.getProperty("enableAnnotation");
-        this.controllerProject = context.getPath(className, "controllerProject");
-        this.controllerPack = context.getPack(className, "controllerPack");
+        this.controllerProject = context.getPPVal(className, "controllerProject");
+        this.controllerPack = context.getPPVal(className, "controllerPack");
         this.controllerSuffix = this.getCustomValue(className, "controllerSuffix");
 
-        this.businessPack = context.getPack(BusinessPlugin.class.getName(), "businessPack");
+        this.businessPack = context.getPPVal(BusinessPlugin.class.getName(), "businessPack");
         this.businessSuffix = this.getCustomValue(BusinessPlugin.class.getName(), "businessSuffix");
 
-        this.aoPack = context.getPack(ExtendModelPlugin.class.getName(), "aoPack");
+        this.aoPack = context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack");
         this.aoSuffix = this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix");
 
 
@@ -215,7 +215,7 @@ public class ControllerPlugin extends PluginAdapter {
 
         //vo全路径
         FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(this.aoPack + "." + domainObjectName + this.aoSuffix);
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPack(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
         FullyQualifiedJavaType controllerType = new FullyQualifiedJavaType(controllerPath);

@@ -63,7 +63,7 @@ public class BaseRecordAOGenerator extends AbstractJavaGenerator {
     @Override
     public List<CompilationUnit> getCompilationUnits() {
 
-        String aoPack = context.getPack(ExtendModelPlugin.class.getName(), "aoPack");
+        String aoPack = context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack");
         String aoSuffix1 = context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix");
         String aoSuffix = Objects.isNull(aoSuffix1) ? CommonConstant.AO_SUFFIX : aoSuffix1;
 
@@ -95,6 +95,6 @@ public class BaseRecordAOGenerator extends AbstractJavaGenerator {
 
     @Override
     public String getModelTargetProject() {
-        return context.getProp(ExtendModelPlugin.class.getName(), "aoProject");
+        return context.getPPVal(ExtendModelPlugin.class.getName(), "aoProject");
     }
 }

@@ -30,10 +30,10 @@ package org.mybatis.generator.config.xml;
 
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.constant.CommonConstant;
-import org.mybatis.generator.constant.ConstEnum;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.exception.XMLParserException;
 import org.mybatis.generator.internal.ObjectFactory;
+import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.CustomKeyUtil;
 import org.mybatis.generator.utils.MethodUtils;
 import org.w3c.dom.Element;
@@ -41,6 +41,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -620,8 +621,10 @@ public class MyBatisGeneratorConfigurationParser {
                 parseProperty(pluginConfiguration, childNode);
             } else if ("prop".equals(childNode.getNodeName())) {
                 this.parseCustomProp(context, childNode, type);
-            } else if ("path".equals(childNode.getNodeName())||"pack".equals(childNode.getNodeName())) {
-                this.parsePathOrPack(context, childNode, type);
+            } else if ("path".equals(childNode.getNodeName())) {
+                this.parsePathOrPack(context, childNode, type, true);
+            } else if ("pack".equals(childNode.getNodeName())) {
+                this.parsePathOrPack(context, childNode, type, false);
             }
         }
     }
@@ -704,7 +707,7 @@ public class MyBatisGeneratorConfigurationParser {
     }
 
 
-    protected void parsePathOrPack(Context context, Node node, String propType) {
+    protected void parsePathOrPack(Context context, Node node, String propType, boolean isPath) {
         PathOrPackConfiguration pathOrPackConfiguration = new PathOrPackConfiguration();
         Properties attributes = this.parseCustomAttributes(node);
 
@@ -716,9 +719,41 @@ public class MyBatisGeneratorConfigurationParser {
             throw new RuntimeException("属性name已存在!");
         }
         pathOrPackConfiguration.setName(name);
-        pathOrPackConfiguration.setValue(value);
+        pathOrPackConfiguration.setValue(this.getPathOrPack(context, type, value, isPath));
         pathOrPackConfiguration.setType(type);
         context.setPathOrPackConfigurationMap(key, pathOrPackConfiguration);
+    }
+
+    private String getPathOrPack(Context context, String type, String value, boolean isPath) {
+        String prefix;
+        //项目路径
+        if (isPath) {
+            //core
+            if (Objects.equals(KeyConst.CORE, type)) {
+                prefix = context.getProperty(KeyConst.CORE_PROJECT_PREFIX);
+            } else {
+                prefix = context.getProperty(KeyConst.API_PROJECT_PREFIX);
+            }
+            if (!StringUtility.stringHasValue(prefix)) {
+                throw new RuntimeException(KeyConst.CORE_PROJECT_PREFIX + " or " + KeyConst.API_PROJECT_PREFIX + " must is not null");
+            }
+            prefix = prefix + File.separator;
+        }
+        //包路径3
+        else {
+            //core
+            if (Objects.equals(KeyConst.CORE, type)) {
+                prefix = context.getProperty(KeyConst.CORE_PACKAGE_PREFIX);
+            } else {
+                prefix = context.getProperty(KeyConst.API_PACKAGE_PREFIX);
+            }
+            if (!StringUtility.stringHasValue(prefix)) {
+                throw new RuntimeException(KeyConst.CORE_PACKAGE_PREFIX + " or " + KeyConst.API_PACKAGE_PREFIX + " must is not null");
+            }
+            prefix = prefix + ".";
+        }
+        return prefix + value;
+
     }
 
 
