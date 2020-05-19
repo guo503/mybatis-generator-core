@@ -575,9 +575,14 @@ public class Context extends PropertyHolder {
     public String getProp(String type, String name) {
         CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
         if (Objects.isNull(customConfiguration)) {
-            return null;
+            return this.getProperty(name);
         }
-        return customConfiguration.getValue();
+        String val = customConfiguration.getValue();
+        //prop没获取到,从properties获取
+        if (!StringUtility.stringHasValue(val)) {
+            val = this.getProperty(name);
+        }
+        return val;
     }
 
     public String getPPVal(String type, String name) {
@@ -602,7 +607,7 @@ public class Context extends PropertyHolder {
 
 
     public String getCorePath() {
-        return this.getProperty(KeyConst.CORE_PROJECT_PREFIX)+File.separator;
+        return this.getProperty(KeyConst.CORE_PROJECT_PREFIX) + File.separator;
     }
 
     public String getCorePack() {
