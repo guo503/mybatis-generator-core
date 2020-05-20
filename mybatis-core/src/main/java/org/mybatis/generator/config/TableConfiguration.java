@@ -17,7 +17,6 @@ package org.mybatis.generator.config;
 
 import org.mybatis.generator.api.dom.xml.Attribute;
 import org.mybatis.generator.api.dom.xml.XmlElement;
-import org.mybatis.generator.internal.util.StringUtility;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,42 +52,6 @@ public class TableConfiguration extends PropertyHolder {
 
     private boolean updateByExampleStatementEnabled;
 
-
-
-    /**
-     * 是否生成service类
-     */
-    private boolean enableManage;
-
-    /**
-     * 是否生成service类
-     */
-    private boolean enableService;
-
-    /**
-     * 是否生成business类
-     */
-    private boolean enableBusiness;
-
-    /**
-     * 是否生成controller类
-     */
-    private boolean enableController;
-
-    /**
-     * 是否启用乐观锁,只有versions配置才行
-     */
-    private boolean enableVersions;
-
-    /**
-     * 乐观锁列名
-     */
-    private String versionCol;
-
-    /**
-     * 逻辑删除列
-     */
-    private String delCol;
 
 
     private List<ColumnOverride> columnOverrides;
@@ -146,45 +109,9 @@ public class TableConfiguration extends PropertyHolder {
         deleteByExampleStatementEnabled = true;
         countByExampleStatementEnabled = true;
         updateByExampleStatementEnabled = true;
-        enableManage = false;
-        enableService = false;
-        enableBusiness = false;
-        enableController = false;
-        enableVersions = false;
     }
 
 
-    public boolean isEnableManage() {
-        return enableManage;
-    }
-
-    public void setEnableManage(boolean enableManage) {
-        this.enableManage = enableManage;
-    }
-
-    public boolean isEnableService() {
-        return enableService;
-    }
-
-    public void setEnableService(boolean enableService) {
-        this.enableService = enableService;
-    }
-
-    public boolean isEnableBusiness() {
-        return enableBusiness;
-    }
-
-    public void setEnableBusiness(boolean enableBusiness) {
-        this.enableBusiness = enableBusiness;
-    }
-
-    public boolean isEnableController() {
-        return enableController;
-    }
-
-    public void setEnableController(boolean enableController) {
-        this.enableController = enableController;
-    }
 
     public boolean isDeleteByPrimaryKeyStatementEnabled() {
         return deleteByPrimaryKeyStatementEnabled;
@@ -500,43 +427,6 @@ public class TableConfiguration extends PropertyHolder {
         }
 
 
-        if (enableManage) {
-            xmlElement.addAttribute(new Attribute(
-                    "enableManage", "true")); //$NON-NLS-1$
-        }
-
-        if (enableService) {
-            xmlElement.addAttribute(new Attribute(
-                    "enableService", "true")); //$NON-NLS-1$
-        }
-
-        if (enableBusiness) {
-            xmlElement.addAttribute(new Attribute(
-                    "enableBusiness", "true")); //$NON-NLS-1$
-        }
-
-        if (enableController) {
-            xmlElement.addAttribute(new Attribute(
-                    "enableController", "true")); //$NON-NLS-1$
-        }
-
-        if (StringUtility.stringHasValue(versionCol)) {
-            xmlElement.addAttribute(new Attribute(
-                    "versionCol", versionCol)); //$NON-NLS-1$
-        }
-
-        if (enableVersions) {
-            xmlElement.addAttribute(new Attribute(
-                    "enableVersions", "true")); //$NON-NLS-1$
-        }
-
-
-        if (StringUtility.stringHasValue(delCol)) {
-            xmlElement.addAttribute(new Attribute(
-                    "delCol", delCol)); //$NON-NLS-1$
-        }
-
-
         if (configuredModelType != null) {
             xmlElement.addAttribute(new Attribute(
                     "modelType", configuredModelType)); //$NON-NLS-1$
@@ -717,30 +607,5 @@ public class TableConfiguration extends PropertyHolder {
 
     public void setSqlProviderName(String sqlProviderName) {
         this.sqlProviderName = sqlProviderName;
-    }
-
-
-    public String getVersionCol() {
-        return versionCol;
-    }
-
-    public void setVersionCol(String versionCol) {
-        this.versionCol = versionCol;
-    }
-
-    public boolean isEnableVersions() {
-        return enableVersions;
-    }
-
-    public void setEnableVersions(boolean enableVersions) {
-        this.enableVersions = enableVersions;
-    }
-
-    public String getDelCol() {
-        return delCol;
-    }
-
-    public void setDelCol(String delCol) {
-        this.delCol = delCol;
     }
 }

@@ -39,7 +39,6 @@ import java.util.Properties;
  * must perform validation.
  *
  * @author Jeff Butler
- *
  */
 public abstract class PluginAdapter implements Plugin {
     protected Context context;
@@ -570,21 +569,18 @@ public abstract class PluginAdapter implements Plugin {
         return true;
     }
 
-    public CustomConfiguration getCustomConfiguration(String type, String name) {
-        return this.getContext().getCustomConfiguration(type, name);
-    }
 
     public boolean isCustomEnable(String type, String name) {
         if (!StringUtility.stringHasValue(name)) {
             return false;
         } else {
-            CustomConfiguration customConfiguration = this.getCustomConfiguration(type, name);
+            CustomConfiguration customConfiguration = context.getCustomConfiguration(type, name);
             return !Objects.isNull(customConfiguration) && StringUtility.isTrue(customConfiguration.getEnable());
         }
     }
 
     public String getCustomValue(String type, String name) {
-        CustomConfiguration customConfiguration = this.getCustomConfiguration(type, name);
-        return Objects.isNull(customConfiguration) ? null : customConfiguration.getValue();
+        CustomConfiguration customConfiguration = context.getCustomConfiguration(type, name);
+        return Objects.isNull(customConfiguration) ? context.getProperty(name) : customConfiguration.getValue();
     }
 }

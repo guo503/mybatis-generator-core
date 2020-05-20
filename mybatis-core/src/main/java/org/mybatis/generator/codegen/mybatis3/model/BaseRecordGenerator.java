@@ -22,7 +22,6 @@ import org.mybatis.generator.api.Plugin;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.codegen.AbstractJavaGenerator;
 import org.mybatis.generator.codegen.RootClassInfo;
-import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.plugins.ExtendModelPlugin;
 import org.mybatis.generator.utils.ClassUtils;
@@ -51,18 +50,11 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
                 "Progress.8", table.toString())); //$NON-NLS-1$
         Plugin plugins = context.getPlugins();
         CommentGenerator commentGenerator = context.getCommentGenerator();
-
+        String domainObjectName = introspectedTable.getDomainObjectName();
         //乐观锁列
-        List<TableConfiguration> tableConfigurationList = context.getTableConfigurations();
-        String versionCol = null, delCol = null;
-        //是否生成乐观锁
-        for (TableConfiguration tableConfiguration : tableConfigurationList) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                versionCol = tableConfiguration.getVersionCol();
-                delCol = tableConfiguration.getDelCol();
-                break;
-            }
-        }
+        String versionCol = context.getTableProp(domainObjectName,"versionCol");
+        //逻辑删除列
+        String delCol = context.getTableProp(domainObjectName,"delCol");
 
 
         String idPath = context.getProp(ExtendModelPlugin.class.getName(), "id");

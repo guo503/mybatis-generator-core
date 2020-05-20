@@ -6,8 +6,8 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.method.BusinessGen;
@@ -176,52 +176,49 @@ public class BusinessPlugin extends PluginAdapter {
         String enableAnnotation = properties.getProperty("enableAnnotation");
 
         String daoType = BaseMethodPlugin.class.getName();
-        this.insertMethod = this.getCustomValue(daoType, MethodEnum.SAVE.getName());
-        this.updateMethod = this.getCustomValue(daoType, MethodEnum.UPDATE.getName());
-        this.selectMethod = this.getCustomValue(daoType, MethodEnum.GET.getName());
-        this.listMethod = this.getCustomValue(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countMethod = this.getCustomValue(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
-        this.doBatchMethod = this.getCustomValue(className, MethodEnum.DO_BATCH.getName());
-        this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.REAL_DELETE.getName());
+        this.insertMethod = context.getProp(daoType, MethodEnum.SAVE.getName());
+        this.updateMethod = context.getProp(daoType, MethodEnum.UPDATE.getName());
+        this.selectMethod = context.getProp(daoType, MethodEnum.GET.getName());
+        this.listMethod = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
+        this.countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        this.doBatchMethod = context.getProp(className, MethodEnum.DO_BATCH.getName());
+        this.deleteByCondition = context.getProp(daoType, MethodEnum.REAL_DELETE.getName());
 
-        this.businessSuffix = this.getCustomValue(className, "businessSuffix");
+        this.businessSuffix = context.getProp(className, "businessSuffix");
 
-        this.responseMethod = this.getCustomValue(ControllerPlugin.class.getName(), "responseMethod");
+        this.responseMethod = context.getProp(ControllerPlugin.class.getName(), "responseMethod");
 
-        this.modelConvertUtils = this.getCustomValue(className, "modelConvertUtils");
+        this.modelConvertUtils = context.getProp(className, "modelConvertUtils");
         this.businessProject = context.getPPVal(className, "businessProject");
         this.businessPack = context.getPPVal(className, "businessPack");
-        this.businessSuffix = this.getCustomValue(className, "businessSuffix");
+        this.businessSuffix = context.getProp(className, "businessSuffix");
 
         this.businessImplProject = context.getPPVal(className, "businessImplProject");
         this.businessImplPack = context.getPPVal(className, "businessImplPack");
 
-        this.remoteResource = this.getCustomValue(className, "remoteResource");
+        this.remoteResource = context.getProp(className, "remoteResource");
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
 
         //是否生成logger
-        enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
 
         page = context.getProperty("page");
 
-        this.exceptionPack = this.getCustomValue(className, "exceptionPack");
+        this.exceptionPack = context.getProp(className, "exceptionPack");
 
         return true;
     }
 
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
-
+        String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
-        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                this.generatorBusiness = tableConfiguration.isEnableBusiness();
-                this.versions = tableConfiguration.getVersionCol();
-                this.enableVersions = tableConfiguration.isEnableVersions();
-                break;
-            }
-        }
+        this.generatorBusiness = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_BUSINESS));
+        //乐观锁列
+        this.versions = context.getTableProp(domainObjectName, "versionCol");
+        this.enableVersions = context.isEnableTableProp(domainObjectName, "versionCol");
+
 
         if (!generatorBusiness) {//是否生成service
             return new ArrayList<>();
@@ -238,11 +235,9 @@ public class BusinessPlugin extends PluginAdapter {
         if (!StringUtility.stringHasValue(responseMethod)) {
             throw new RuntimeException(responseMethod + "不能为空");
         }
-
-        String domainObjectName = introspectedTable.getDomainObjectName();
         //service全路径
         String servicePack = context.getPPVal(ServicePlugin.class.getName(), "servicePack");
-        String serviceName = domainObjectName + this.getCustomValue(ServicePlugin.class.getName(), "serviceSuffix");
+        String serviceName = domainObjectName + context.getProp(ServicePlugin.class.getName(), "serviceSuffix");
         serviceType = new FullyQualifiedJavaType(servicePack + "." + serviceName);
         String businessName = domainObjectName + this.businessSuffix;
         String businessPath = businessPack + "." + businessName;
@@ -252,7 +247,7 @@ public class BusinessPlugin extends PluginAdapter {
         FullyQualifiedJavaType businessImplType = new FullyQualifiedJavaType(businessImplPath);
 
         //查询条件类
-        String conditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
+        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
         Interface interface1 = new Interface(interfaceType);
         TopLevelClass businessImplClass = new TopLevelClass(businessImplType);
@@ -263,9 +258,9 @@ public class BusinessPlugin extends PluginAdapter {
 
         FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.*");
 
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
 
@@ -293,6 +288,7 @@ public class BusinessPlugin extends PluginAdapter {
         businessImplClass.addImportedType(this.interfaceType);
         businessImplClass.addImportedType(new FullyQualifiedJavaType("org.springframework.beans.BeanUtils"));
         businessImplClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
+        businessImplClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
         if (StringUtility.stringHasValue(this.exceptionPack)) {
             FullyQualifiedJavaTypeUtils.importType((Interface) null, businessImplClass, this.exceptionPack);
         }

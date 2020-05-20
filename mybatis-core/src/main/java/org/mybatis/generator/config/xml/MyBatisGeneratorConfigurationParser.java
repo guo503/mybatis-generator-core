@@ -29,7 +29,6 @@
 package org.mybatis.generator.config.xml;
 
 import org.mybatis.generator.config.*;
-import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.exception.XMLParserException;
 import org.mybatis.generator.internal.ObjectFactory;
@@ -242,12 +241,11 @@ public class MyBatisGeneratorConfigurationParser {
         }
 
         String domainObjectName = attributes.getProperty("domainObjectName"); //$NON-NLS-1$
-        if (stringHasValue(domainObjectName)) {
-            tc.setDomainObjectName(domainObjectName);
-        } else {
-            tc.setDomainObjectName(MethodUtils.toUpperCase(MethodUtils.lineToHump(tableName)));
+        //如果空，默认表名转
+        if (!stringHasValue(domainObjectName)) {
+            domainObjectName = MethodUtils.toUpperCase(MethodUtils.lineToHump(tableName));
         }
-
+        tc.setDomainObjectName(domainObjectName);
         String alias = attributes.getProperty("alias"); //$NON-NLS-1$
         if (stringHasValue(alias)) {
             tc.setAlias(alias);
@@ -319,50 +317,22 @@ public class MyBatisGeneratorConfigurationParser {
             tc.setSelectByExampleQueryId(selectByExampleQueryId);
         }
 
+        String enableManage = attributes
+                .getProperty(KeyConst.ENABLE_MANAGE); //是否生成service
+        this.addTableAttr(context, KeyConst.ENABLE_MANAGE, enableManage, domainObjectName);
 
         String enableService = attributes
-                .getProperty("enableService"); //是否生成service
-        if (stringHasValue(enableService)) {
-            tc.setEnableService(isTrue(enableService));
-        }
-
-        String enableManage = attributes
-                .getProperty("enableManage"); //是否生成service
-        if (stringHasValue(enableManage)) {
-            tc.setEnableManage(isTrue(enableManage));
-        }
-
+                .getProperty(KeyConst.ENABLE_SERVICE); //是否生成service
+        this.addTableAttr(context, KeyConst.ENABLE_SERVICE, enableService, domainObjectName);
 
         String enableBusiness = attributes
-                .getProperty("enableBusiness"); //是否生成business
-        if (stringHasValue(enableBusiness)) {
-            tc.setEnableBusiness(isTrue(enableBusiness));
-        }
+                .getProperty(KeyConst.ENABLE_BUSINESS); //是否生成business
+        this.addTableAttr(context, KeyConst.ENABLE_BUSINESS, enableBusiness, domainObjectName);
 
         String enableController = attributes
-                .getProperty("enableController"); //是否生成controller
-        if (stringHasValue(enableController)) {
-            tc.setEnableController(isTrue(enableController));
-        }
+                .getProperty(KeyConst.ENABLE_CONTROLLER); //是否生成controller
+        this.addTableAttr(context, KeyConst.ENABLE_CONTROLLER, enableController, domainObjectName);
 
-        String versionCol = attributes
-                .getProperty(CommonConstant.VERSION_COL); //是否生成乐观锁
-        if (stringHasValue(versionCol)) {
-            tc.setVersionCol(versionCol);
-        }
-
-        String enableVersions = attributes
-                .getProperty("enableVersions"); //是否启用乐观锁,只有versions配置才行
-        if (stringHasValue(enableVersions)) {
-            tc.setEnableVersions(isTrue(enableVersions));
-        }
-
-
-        String delCol = attributes
-                .getProperty(CommonConstant.DEL_COL); //是否生成乐观锁
-        if (stringHasValue(delCol)) {
-            tc.setDelCol(delCol);
-        }
 
         String modelType = attributes.getProperty("modelType"); //$NON-NLS-1$
         if (stringHasValue(modelType)) {
@@ -406,6 +376,8 @@ public class MyBatisGeneratorConfigurationParser {
 
             if ("property".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parseProperty(tc, childNode);
+            } else if ("prop".equals(childNode.getNodeName())) { //$NON-NLS-1$
+                parseTableProp(context, childNode, domainObjectName);
             } else if ("columnOverride".equals(childNode.getNodeName())) { //$NON-NLS-1$
                 parseColumnOverride(tc, childNode);
             } else if ("ignoreColumn".equals(childNode.getNodeName())) { //$NON-NLS-1$
@@ -697,13 +669,42 @@ public class MyBatisGeneratorConfigurationParser {
         String value = attributes.getProperty("value");
         String enable = attributes.getProperty("enable");
         String key = CustomKeyUtil.getPropKey(type, name);
-        if (Objects.nonNull(context.getCustomConfiguration(type, name))) {
+        if (Objects.nonNull(context.getProp(type, name))) {
             throw new RuntimeException("属性name已存在!");
         }
         customConfiguration.setName(name);
         customConfiguration.setValue(value);
         customConfiguration.setEnable(enable);
         context.setCustomConfigurationMap(key, customConfiguration);
+    }
+
+    protected void parseTableProp(Context context, Node node, String type) {
+        TableProp tableProp = new TableProp();
+        Properties attributes = this.parseCustomAttributes(node);
+
+        String name = attributes.getProperty("name");
+        String value = attributes.getProperty("value");
+        String enable = attributes.getProperty("enable");
+        String key = CustomKeyUtil.getPropKey(type, name);
+        if (Objects.nonNull(context.getTableProp(type, name))) {
+            throw new RuntimeException("属性name已存在!");
+        }
+        tableProp.setName(name);
+        tableProp.setValue(value);
+        tableProp.setEnable(enable);
+        context.setTablePropMap(key, tableProp);
+    }
+
+
+    protected void addTableAttr(Context context, String name, String val, String type) {
+        TableProp tableProp = new TableProp();
+        String key = CustomKeyUtil.getPropKey(type, name);
+        if (Objects.nonNull(context.getTableProp(type, name))) {
+            throw new RuntimeException("属性name已存在!");
+        }
+        tableProp.setName(name);
+        tableProp.setValue(val);
+        context.setTablePropMap(key, tableProp);
     }
 
 

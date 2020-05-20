@@ -7,8 +7,8 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.*;
@@ -107,11 +107,6 @@ public class ManagePlugin extends PluginAdapter {
     private String exceptionPack;
 
     /**
-     * 乐观锁
-     **/
-    private String versions;
-
-    /**
      * 表的列list
      **/
     private List<IntrospectedColumn> columns;
@@ -158,7 +153,7 @@ public class ManagePlugin extends PluginAdapter {
         String enableAnnotation = properties.getProperty("enableAnnotation");
 
         //是否生成logger
-        enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
 
         page = context.getProperty("page");
 
@@ -168,21 +163,21 @@ public class ManagePlugin extends PluginAdapter {
         }
 
         String daoType = BaseMethodPlugin.class.getName();
-        this.manageSuffix = this.getCustomValue(className, "manageSuffix");
+        this.manageSuffix = context.getProp(className, "manageSuffix");
 
-        this.selectByPrimaryKey = this.getCustomValue(daoType, MethodEnum.GET.getName());
-        this.insertSelective = this.getCustomValue(daoType, MethodEnum.SAVE.getName());
-        this.updateByPrimaryKeySelective = this.getCustomValue(daoType, MethodEnum.UPDATE.getName());
-        this.listByIds = this.getCustomValue(daoType, MethodEnum.LIST_BY_IDS.getName());
-        this.listByCondition = this.getCustomValue(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countByCondition = this.getCustomValue(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
-        this.map = this.getCustomValue(className, MethodEnum.MAP.getName());
-        this.mapByIds = this.getCustomValue(className, MethodEnum.MAP_BY_IDS.getName());
-        this.listId = this.getCustomValue(className, MethodEnum.LIST_ID.getName());
-        this.saveAndGet = this.getCustomValue(className, MethodEnum.SAVE_AND_GET.getName());
-        this.count = this.getCustomValue(daoType, MethodEnum.COUNT.getName());
-        this.list = this.getCustomValue(daoType, MethodEnum.LIST.getName());
-        this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
+        this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());
+        this.insertSelective = context.getProp(daoType, MethodEnum.SAVE.getName());
+        this.updateByPrimaryKeySelective = context.getProp(daoType, MethodEnum.UPDATE.getName());
+        this.listByIds = context.getProp(daoType, MethodEnum.LIST_BY_IDS.getName());
+        this.listByCondition = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
+        this.countByCondition = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        this.map = context.getProp(className, MethodEnum.MAP.getName());
+        this.mapByIds = context.getProp(className, MethodEnum.MAP_BY_IDS.getName());
+        this.listId = context.getProp(className, MethodEnum.LIST_ID.getName());
+        this.saveAndGet = context.getProp(className, MethodEnum.SAVE_AND_GET.getName());
+        this.count = context.getProp(daoType, MethodEnum.COUNT.getName());
+        this.list = context.getProp(daoType, MethodEnum.LIST.getName());
+        this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
         this.managePack = context.getPPVal(className, "managePack");
@@ -191,11 +186,11 @@ public class ManagePlugin extends PluginAdapter {
         this.manageImplProject = context.getPPVal(className, "manageImplProject");
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
-        this.userNameMethod = this.getCustomValue(className, "userNameMethod");
-        this.dateMethod = this.getCustomValue(className, "dateMethod");
-        this.createTime = this.getCustomValue(className, "create_time");
-        this.updateTime = this.getCustomValue(className, "update_time");
-        this.exceptionPack = this.getCustomValue(className, "exceptionPack");
+        this.userNameMethod = context.getProp(className, "userNameMethod");
+        this.dateMethod = context.getProp(className, "dateMethod");
+        this.createTime = context.getProp(className, "create_time");
+        this.updateTime = context.getProp(className, "update_time");
+        this.exceptionPack = context.getProp(className, "exceptionPack");
 
         if (this.enableAnnotation) {
             autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
@@ -209,15 +204,9 @@ public class ManagePlugin extends PluginAdapter {
      */
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
+        String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
-        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                this.generatorManage = tableConfiguration.isEnableManage();
-                this.versions = tableConfiguration.getVersionCol();
-                break;
-            }
-        }
-
+        this.generatorManage = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_MANAGE));
         if (!generatorManage) {//是否生成service
             return new ArrayList<>();
         }
@@ -245,10 +234,10 @@ public class ManagePlugin extends PluginAdapter {
         listType = new FullyQualifiedJavaType("java.util.*");
 
         //查询条件类
-        String conditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
+        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
         //分页查询条件类
-        String limitConditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
+        String limitConditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
         String manageFilePath = manageProject + LocalFileUtils.getPath(managePath) + suffix;
@@ -285,7 +274,7 @@ public class ManagePlugin extends PluginAdapter {
             FullyQualifiedJavaTypeUtils.importType(null, topLevelClass, "java.util.Date");
         }
 
-        if (StringUtility.stringHasValue(exceptionPack) && StringUtility.stringHasValue(versions)) {
+        if (StringUtility.stringHasValue(exceptionPack)) {
             FullyQualifiedJavaTypeUtils.importType(null, topLevelClass, exceptionPack);
         }
         // 实现类
@@ -785,14 +774,14 @@ public class ManagePlugin extends PluginAdapter {
             String getDate;
             method.addBodyLine("Assert.notNull(" + domainName + "," + "\"" + domainName + "不能为空\");");
             if (MethodEnum.SAVE.getValue().equals(methodName)) {
-                String creator = this.getCustomValue(pluginType, "creator");
+                String creator = context.getProp(pluginType, "creator");
                 getUserName = StringUtility.stringHasValue(creator) ? creator : CommonConstant.DEFAULT_USER;
                 getDate = this.getMethodName(dateMethod, createTime, CommonConstant.DEFAULT_TIME);
 
                 this.setMethodValue(method, params, creator, getUserName);//设置用户名
                 this.setMethodValue(method, params, createTime, getDate);//设置时间
             } else {
-                String updater = this.getCustomValue(pluginType, "updater");
+                String updater = context.getProp(pluginType, "updater");
                 getUserName = StringUtility.stringHasValue(updater) ? updater : CommonConstant.DEFAULT_USER;
                 getDate = this.getMethodName(dateMethod, updateTime, CommonConstant.DEFAULT_TIME);
                 this.setMethodValue(method, params, updater, getUserName);//设置用户名

@@ -5,7 +5,7 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.config.TableConfiguration;
+import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.method.ControllerGen;
@@ -149,30 +149,30 @@ public class ControllerPlugin extends PluginAdapter {
         String enableAnnotation = properties.getProperty("enableAnnotation");
         this.controllerProject = context.getPPVal(className, "controllerProject");
         this.controllerPack = context.getPPVal(className, "controllerPack");
-        this.controllerSuffix = this.getCustomValue(className, "controllerSuffix");
+        this.controllerSuffix = context.getProp(className, "controllerSuffix");
 
         this.businessPack = context.getPPVal(BusinessPlugin.class.getName(), "businessPack");
-        this.businessSuffix = this.getCustomValue(BusinessPlugin.class.getName(), "businessSuffix");
+        this.businessSuffix = context.getProp(BusinessPlugin.class.getName(), "businessSuffix");
 
         this.aoPack = context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack");
-        this.aoSuffix = this.getCustomValue(ExtendModelPlugin.class.getName(), "aoSuffix");
+        this.aoSuffix = context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix");
 
 
-        this.responseMethod = this.getCustomValue(className, "responseMethod");
+        this.responseMethod = context.getProp(className, "responseMethod");
 
-        this.baseController = this.getCustomValue(className, "baseController");
+        this.baseController = context.getProp(className, "baseController");
 
         String daoType = BaseMethodPlugin.class.getName();
-        this.insertMethod = this.getCustomValue(daoType, MethodEnum.SAVE.getName());
-        this.updateMethod = this.getCustomValue(daoType, MethodEnum.UPDATE.getName());
-        this.selectMethod = this.getCustomValue(daoType, MethodEnum.GET.getName());
-        this.listMethod = this.getCustomValue(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countMethod = this.getCustomValue(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        this.insertMethod = context.getProp(daoType, MethodEnum.SAVE.getName());
+        this.updateMethod = context.getProp(daoType, MethodEnum.UPDATE.getName());
+        this.selectMethod = context.getProp(daoType, MethodEnum.GET.getName());
+        this.listMethod = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
+        this.countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
 
         //是否生成logger
-        enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
 
 
         if (StringUtility.stringHasValue(enableAnnotation)) {
@@ -190,14 +190,9 @@ public class ControllerPlugin extends PluginAdapter {
      */
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
-
+        String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成controller
-        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                this.generatorController = tableConfiguration.isEnableController();
-                break;
-            }
-        }
+        this.generatorController = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_CONTROLLER));
         if (!generatorController) {//是否生成service
             return new ArrayList<>();
         }
@@ -207,15 +202,13 @@ public class ControllerPlugin extends PluginAdapter {
         }
 
         List<GeneratedJavaFile> files = new ArrayList<>();
-        //po全路径
 
-        String domainObjectName = introspectedTable.getDomainObjectName();
         //business全路径
         businessType = new FullyQualifiedJavaType(businessPack + "." + domainObjectName + businessSuffix);
 
         //vo全路径
         FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(this.aoPack + "." + domainObjectName + this.aoSuffix);
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + this.getCustomValue(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
         FullyQualifiedJavaType controllerType = new FullyQualifiedJavaType(controllerPath);

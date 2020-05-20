@@ -6,6 +6,7 @@ import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.api.dom.java.Method;
 import org.mybatis.generator.config.Context;
+import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.plugins.ExtendModelPlugin;
@@ -150,7 +151,13 @@ public class BusinessGen {
             }
         }
         method.addBodyLine("if (" + lowAo + " == null) {");
-        method.addBodyLine(ExceptionUtils.generateCode(new FullyQualifiedJavaType(exceptionPack).getShortName(), remarks, "不能为空!"));
+        String exceptionName;
+        if (StringUtility.stringHasValue(exceptionPack)) {
+            exceptionName = new FullyQualifiedJavaType(exceptionPack).getShortName();
+        } else {
+            exceptionName = CommonConstant.DEFAULT_EXCEPTION;
+        }
+        method.addBodyLine(ExceptionUtils.generateCode(exceptionName, remarks, "不能为空!"));
         method.addBodyLine("}");
         if (hasVersions) {
             method.addBodyLine(poName + " " + oldName + " = this." + MethodEnum.GET.getValue() + "(" + lowAo + ".get" + MethodUtils.toUpperCase(introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty()) + "());");

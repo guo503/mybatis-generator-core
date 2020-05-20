@@ -72,7 +72,7 @@ public class UpdateByPrimaryKeySelectiveElementGenerator extends
         //是否生成乐观锁
         for (TableConfiguration tableConfiguration : tableConfigurationList) {
             if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                versionCol = tableConfiguration.getVersionCol();
+                versionCol = context.getTableProp(introspectedTable.getDomainObjectName(),"versionCol");
             }
         }
         boolean hasVersions = false;

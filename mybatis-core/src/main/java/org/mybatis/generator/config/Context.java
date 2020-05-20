@@ -76,6 +76,8 @@ public class Context extends PropertyHolder {
 
     private Map<String, PathOrPackConfiguration> pathOrPackConfigurationMap;
 
+    private Map<String, TableProp> tablePropMap;
+
     private String targetRuntime;
 
     private String introspectedColumnImpl;
@@ -99,6 +101,7 @@ public class Context extends PropertyHolder {
         pluginConfigurations = new ArrayList<PluginConfiguration>();
         this.customConfigurationMap = new HashMap<>();
         this.pathOrPackConfigurationMap = new HashMap<>();
+        this.tablePropMap = new HashMap<>();
     }
 
     public void addTableConfiguration(TableConfiguration tc) {
@@ -572,6 +575,10 @@ public class Context extends PropertyHolder {
         this.pathOrPackConfigurationMap.put(name, pathOrPackConfiguration);
     }
 
+    public void setTablePropMap(String name, TableProp tableProp) {
+        this.tablePropMap.put(name, tableProp);
+    }
+
     public String getProp(String type, String name) {
         CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
         if (Objects.isNull(customConfiguration)) {
@@ -584,6 +591,29 @@ public class Context extends PropertyHolder {
         }
         return val;
     }
+
+
+    public String getTableProp(String type, String name) {
+        TableProp tableProp = this.tablePropMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(tableProp)) {
+            return this.getProperty(name);
+        }
+        String val = tableProp.getValue();
+        //prop没获取到,从properties获取
+        if (!StringUtility.stringHasValue(val)) {
+            val = this.getProperty(name);
+        }
+        return val;
+    }
+
+    public boolean isEnableTableProp(String type, String name) {
+        TableProp tableProp = this.tablePropMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(tableProp)) {
+            return StringUtility.isTrue(this.getProperty(name));
+        }
+        return StringUtility.isTrue(tableProp.getEnable());
+    }
+
 
     public String getPPVal(String type, String name) {
         PathOrPackConfiguration pathOrPackConfiguration = this.pathOrPackConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));

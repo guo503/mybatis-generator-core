@@ -101,7 +101,7 @@
 <!ATTLIST prop
    name CDATA #REQUIRED
    value CDATA #REQUIRED
-   enable CDATA #REQUIRED>
+   enable CDATA #IMPLIED>
 
  <!ELEMENT path EMPTY>
  <!ATTLIST path
@@ -169,7 +169,7 @@
   The table element is used to specify a database table that will be the source information
   for a set of generated objects.
 -->
-<!ELEMENT table (property*, generatedKey?, domainObjectRenamingRule?, columnRenamingRule?, (columnOverride | ignoreColumn | ignoreColumnsByRegex)*) >
+<!ELEMENT table ((property | prop)*, generatedKey?, domainObjectRenamingRule?, columnRenamingRule?, (columnOverride | ignoreColumn | ignoreColumnsByRegex)*) >
 <!ATTLIST table
   catalog CDATA #IMPLIED
   schema CDATA #IMPLIED
@@ -213,6 +213,7 @@
   typeHandler CDATA #IMPLIED
   isGeneratedAlways CDATA #IMPLIED
   delimitedColumnName CDATA #IMPLIED>
+
 
 <!--
   The ignoreColumn element is used to identify a column that should be ignored.

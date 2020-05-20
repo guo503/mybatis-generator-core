@@ -6,8 +6,8 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.config.TableConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.*;
@@ -96,7 +96,7 @@ public class ServicePlugin extends PluginAdapter {
         String enableAnnotation = properties.getProperty("enableAnnotation");
 
         //是否生成logger
-        enableLogger = StringUtility.isTrue(this.getCustomValue(className, "enableLogger"));
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
 
 
         if (StringUtility.stringHasValue(enableAnnotation)) {
@@ -104,21 +104,21 @@ public class ServicePlugin extends PluginAdapter {
         }
 
         String daoType = BaseMethodPlugin.class.getName();
-        this.serviceSuffix = this.getCustomValue(className, "serviceSuffix");
+        this.serviceSuffix = context.getProp(className, "serviceSuffix");
 
-        this.selectByPrimaryKey = this.getCustomValue(daoType, MethodEnum.GET.getName());
-        this.insertSelective = this.getCustomValue(daoType, MethodEnum.SAVE.getName());
-        this.updateByPrimaryKeySelective = this.getCustomValue(daoType, MethodEnum.UPDATE.getName());
-        this.listByIds = this.getCustomValue(daoType, MethodEnum.LIST_BY_IDS.getName());
-        this.listByCondition = this.getCustomValue(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countByCondition = this.getCustomValue(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
-        this.map = this.getCustomValue(className, MethodEnum.MAP.getName());
-        this.mapByIds = this.getCustomValue(className, MethodEnum.MAP_BY_IDS.getName());
-        this.listId = this.getCustomValue(className, MethodEnum.LIST_ID.getName());
-        this.saveAndGet = this.getCustomValue(className, MethodEnum.SAVE_AND_GET.getName());
-        this.count = this.getCustomValue(daoType, MethodEnum.COUNT.getName());
-        this.list = this.getCustomValue(daoType, MethodEnum.LIST.getName());
-        this.deleteByCondition = this.getCustomValue(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
+        this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());
+        this.insertSelective = context.getProp(daoType, MethodEnum.SAVE.getName());
+        this.updateByPrimaryKeySelective = context.getProp(daoType, MethodEnum.UPDATE.getName());
+        this.listByIds = context.getProp(daoType, MethodEnum.LIST_BY_IDS.getName());
+        this.listByCondition = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
+        this.countByCondition = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        this.map = context.getProp(className, MethodEnum.MAP.getName());
+        this.mapByIds = context.getProp(className, MethodEnum.MAP_BY_IDS.getName());
+        this.listId = context.getProp(className, MethodEnum.LIST_ID.getName());
+        this.saveAndGet = context.getProp(className, MethodEnum.SAVE_AND_GET.getName());
+        this.count = context.getProp(daoType, MethodEnum.COUNT.getName());
+        this.list = context.getProp(daoType, MethodEnum.LIST.getName());
+        this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
         this.servicePack = context.getPPVal(className, "servicePack");
@@ -139,20 +139,12 @@ public class ServicePlugin extends PluginAdapter {
      */
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
-
-
-        //是否生成business
-        for (TableConfiguration tableConfiguration : context.getTableConfigurations()) {
-            if (tableConfiguration.getTableName().equals(introspectedTable.getTableName())) {
-                this.generatorService = tableConfiguration.isEnableService();
-                break;
-            }
-        }
-
+        String domainObjectName = introspectedTable.getDomainObjectName();
+        //是否生成service
+        this.generatorService = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_SERVICE));
         if (!generatorService) {//是否生成service
             return new ArrayList<>();
         }
-
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
@@ -162,7 +154,7 @@ public class ServicePlugin extends PluginAdapter {
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
         // 【com.coolead.mapper.UserMapper】
-        daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + this.getCustomValue(ManagePlugin.class.getName(), "manageSuffix"));
+        daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getProp(ManagePlugin.class.getName(), "manageSuffix"));
 
         // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         serviceType = new FullyQualifiedJavaType(serviceImplPath);
@@ -173,7 +165,7 @@ public class ServicePlugin extends PluginAdapter {
         listType = new FullyQualifiedJavaType("java.util.*");
 
         //查询条件类
-        String conditionType = this.getCustomValue(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
+        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
         String serviceFilePath = serviceProject + LocalFileUtils.getPath(servicePath) + suffix;

@@ -25,4 +25,24 @@ public class KeyConst {
      *api包路径前缀
      */
     public static final String API_PACKAGE_PREFIX = "api_package_prefix";
+
+    /**
+     * 是否生成manage
+     */
+    public static final String ENABLE_MANAGE = "enableManage";
+
+    /**
+     * 是否生成service
+     */
+    public static final String ENABLE_SERVICE = "enableService";
+
+    /**
+     * 是否生成business
+     */
+    public static final String ENABLE_BUSINESS = "enableBusiness";
+
+    /**
+     * 是否生成controller
+     */
+    public static final String ENABLE_CONTROLLER = "enableController";
 }
