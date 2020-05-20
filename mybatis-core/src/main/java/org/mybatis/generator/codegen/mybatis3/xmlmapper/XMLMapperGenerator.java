@@ -23,11 +23,10 @@ import org.mybatis.generator.codegen.AbstractXmlGenerator;
 import org.mybatis.generator.codegen.XmlConstants;
 import org.mybatis.generator.codegen.mybatis3.xmlmapper.elements.*;
 import org.mybatis.generator.config.PluginConfiguration;
-import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
+import org.mybatis.generator.plugins.ExtendModelPlugin;
 import org.mybatis.generator.utils.BasePluginUtils;
-import org.mybatis.generator.utils.ContextUtils;
 import org.mybatis.generator.utils.LocalFileUtils;
 import org.mybatis.generator.utils.MapperXmlUtils;
 
@@ -67,11 +66,7 @@ public class XMLMapperGenerator extends AbstractXmlGenerator {
 
         context.getCommentGenerator().addRootComment(answer);
 
-        extentModelPlugin = ContextUtils.getPlugin(context, CommonConstant.EXTEND_MODEL_PLUGIN);
-
-        baseMethodPlugin = ContextUtils.getPlugin(context, CommonConstant.BASE_METHOD_PLUGIN);
-
-        String generatorXml = extentModelPlugin.getProperty("generatorXml");
+        String generatorXml = context.getProp(ExtendModelPlugin.class.getName(),"generatorXml");
 
         String domainPojoName = introspectedTable.getDomainObjectName();
         String suffix = ".xml";
@@ -86,11 +81,11 @@ public class XMLMapperGenerator extends AbstractXmlGenerator {
             if (xmlFileExist) {
                 xmlFile.delete();
             }
-            //resultMap
-            this.addXmlElement(answer, MethodEnum.RESULT_MAP.getName());
             //update
             //this.addXmlElement(answer, MethodEnum.UPDATE.getName());
         }
+        //resultMap
+        this.addXmlElement(answer, MethodEnum.RESULT_MAP.getName());
         return answer;
     }
 

@@ -205,7 +205,7 @@ public class MyBatisGeneratorConfigurationParser {
         String targetPackage = attributes.getProperty("targetPackage"); //$NON-NLS-1$
         String targetProject = attributes.getProperty("targetProject"); //$NON-NLS-1$
 
-        sqlMapGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
+        sqlMapGeneratorConfiguration.setTargetPackage(targetPackage);
         sqlMapGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
 
         NodeList nodeList = node.getChildNodes();
