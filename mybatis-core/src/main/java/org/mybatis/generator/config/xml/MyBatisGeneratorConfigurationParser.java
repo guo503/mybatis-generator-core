@@ -735,7 +735,7 @@ public class MyBatisGeneratorConfigurationParser {
                 prefix = context.getProperty(KeyConst.API_PROJECT_PREFIX);
             }
             if (!StringUtility.stringHasValue(prefix)) {
-                throw new RuntimeException(KeyConst.CORE_PROJECT_PREFIX + " or " + KeyConst.API_PROJECT_PREFIX + " must is not null");
+                throw new RuntimeException(KeyConst.CORE_PROJECT_PREFIX + " or " + KeyConst.API_PROJECT_PREFIX + " must be not null");
             }
             prefix = prefix + File.separator;
         }
@@ -748,7 +748,7 @@ public class MyBatisGeneratorConfigurationParser {
                 prefix = context.getProperty(KeyConst.API_PACKAGE_PREFIX);
             }
             if (!StringUtility.stringHasValue(prefix)) {
-                throw new RuntimeException(KeyConst.CORE_PACKAGE_PREFIX + " or " + KeyConst.API_PACKAGE_PREFIX + " must is not null");
+                throw new RuntimeException(KeyConst.CORE_PACKAGE_PREFIX + " or " + KeyConst.API_PACKAGE_PREFIX + " must be not null");
             }
             prefix = prefix + ".";
         }
