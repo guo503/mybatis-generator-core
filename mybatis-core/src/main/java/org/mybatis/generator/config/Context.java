@@ -582,13 +582,14 @@ public class Context extends PropertyHolder {
     public String getProp(String type, String name) {
         CustomConfiguration customConfiguration = this.customConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
         if (Objects.isNull(customConfiguration)) {
-            return this.getProperty(name);
+            return this.getValByPluginType(type,name);
         }
         String val = customConfiguration.getValue();
         //prop没获取到,从properties获取
         if (!StringUtility.stringHasValue(val)) {
-            val = this.getProperty(name);
+            val = this.getValByPluginType(type,name);
         }
+
         return val;
     }
 
@@ -601,7 +602,7 @@ public class Context extends PropertyHolder {
         String val = tableProp.getValue();
         //prop没获取到,从properties获取
         if (!StringUtility.stringHasValue(val)) {
-            val = this.getProperty(name);
+            val = tableProp.getProperty(name);
         }
         return val;
     }
@@ -642,5 +643,21 @@ public class Context extends PropertyHolder {
 
     public String getCorePack() {
         return this.getProperty(KeyConst.CORE_PACKAGE_PREFIX) + ".";
+    }
+
+
+    private String getValByPluginType(String type, String name) {
+        List<PluginConfiguration> pluginConfigurations = this.getPluginConfigurations();
+        if (pluginConfigurations == null || pluginConfigurations.size() == 0) {
+            return null;
+        }
+        String val = null;
+        for (PluginConfiguration pluginConfiguration : pluginConfigurations) {
+            if (Objects.equals(pluginConfiguration.getConfigurationType(), type)) {
+                val = pluginConfiguration.getProperty(name);
+                break;
+            }
+        }
+        return val;
     }
 }

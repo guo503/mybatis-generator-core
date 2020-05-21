@@ -5,8 +5,7 @@ package org.mybatis.generator.config;
  * @description
  * @date 2020/4/27 18:18
  **/
-public class TableProp {
-
+public class TableProp extends PropertyHolder{
 
     private String name;
 

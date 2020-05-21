@@ -27,8 +27,8 @@ import java.util.List;
  **/
 public class ServicePlugin extends PluginAdapter {
 
-    private FullyQualifiedJavaType slf4jLogger;
-    private FullyQualifiedJavaType slf4jLoggerFactory;
+    private final FullyQualifiedJavaType slf4jLogger;
+    private final FullyQualifiedJavaType slf4jLoggerFactory;
     private FullyQualifiedJavaType serviceType;
     private FullyQualifiedJavaType daoType;
     private FullyQualifiedJavaType interfaceType;
@@ -36,7 +36,6 @@ public class ServicePlugin extends PluginAdapter {
     private FullyQualifiedJavaType listType;
     private FullyQualifiedJavaType autowired;
     private FullyQualifiedJavaType service;
-    private FullyQualifiedJavaType returnType;
     private String servicePack;
     private String serviceImplPack;
     private String serviceProject;
@@ -47,7 +46,6 @@ public class ServicePlugin extends PluginAdapter {
      */
     private boolean enableAnnotation = true;
     private String deleteByCondition;
-    private boolean generatorService = false;
     private String insertSelective;
     private String updateByPrimaryKeySelective;
     private String selectByPrimaryKey;
@@ -141,7 +139,7 @@ public class ServicePlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成service
-        this.generatorService = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_SERVICE));
+        boolean generatorService = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_SERVICE));
         if (!generatorService) {//是否生成service
             return new ArrayList<>();
         }
@@ -849,7 +847,7 @@ public class ServicePlugin extends PluginAdapter {
     }
 
     public boolean clientInsertMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
-        returnType = method.getReturnType();
+        FullyQualifiedJavaType returnType = method.getReturnType();
         return true;
     }
 }

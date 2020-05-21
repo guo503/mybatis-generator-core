@@ -5,7 +5,6 @@ import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
@@ -28,8 +27,8 @@ import java.util.List;
  **/
 public class ManagePlugin extends PluginAdapter {
 
-    private FullyQualifiedJavaType slf4jLogger;
-    private FullyQualifiedJavaType slf4jLoggerFactory;
+    private final FullyQualifiedJavaType slf4jLogger;
+    private final FullyQualifiedJavaType slf4jLoggerFactory;
     private FullyQualifiedJavaType manageType;
     private FullyQualifiedJavaType daoType;
     private FullyQualifiedJavaType interfaceType;
@@ -37,22 +36,16 @@ public class ManagePlugin extends PluginAdapter {
     private FullyQualifiedJavaType listType;
     private FullyQualifiedJavaType autowired;
     private FullyQualifiedJavaType service;
-    private FullyQualifiedJavaType returnType;
     private String managePack;
     private String manageImplPack;
     private String manageProject;
     private String manageImplProject;
     private String pojoUrl;
     /**
-     * 所有的方法
-     */
-    private List<Method> methods;
-    /**
      * 是否添加注解
      */
     private boolean enableAnnotation = true;
     private String deleteByCondition;
-    private boolean generatorManage = false;
     private String insertSelective;
     private String updateByPrimaryKeySelective;
     private String selectByPrimaryKey;
@@ -82,16 +75,6 @@ public class ManagePlugin extends PluginAdapter {
     private String dateMethod = null;
 
     /**
-     * remote注解所在包
-     **/
-    private String remote = null;
-
-    /**
-     * applicationName类所在包
-     **/
-    private String applicationName = null;
-
-    /**
      * 创建时间
      **/
     private String createTime;
@@ -110,11 +93,6 @@ public class ManagePlugin extends PluginAdapter {
      * 表的列list
      **/
     private List<IntrospectedColumn> columns;
-
-    /**
-     * extentModel插件类
-     **/
-    private PluginConfiguration extentModelPlugin;
 
     /**
      * 是否生成logger日志
@@ -138,7 +116,10 @@ public class ManagePlugin extends PluginAdapter {
         // default is slf4j
         slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
         slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
-        methods = new ArrayList<>();
+        /**
+         * 所有的方法
+         */
+        List<Method> methods = new ArrayList<>();
         className = this.getClass().getName();
     }
 
@@ -147,8 +128,6 @@ public class ManagePlugin extends PluginAdapter {
      */
     @Override
     public boolean validate(List<String> warnings) {
-
-        extentModelPlugin = ContextUtils.getPlugin(context, CommonConstant.EXTEND_MODEL_PLUGIN);
 
         String enableAnnotation = properties.getProperty("enableAnnotation");
 
@@ -206,7 +185,7 @@ public class ManagePlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
-        this.generatorManage = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_MANAGE));
+        boolean generatorManage = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_MANAGE));
         if (!generatorManage) {//是否生成service
             return new ArrayList<>();
         }
@@ -1021,7 +1000,7 @@ public class ManagePlugin extends PluginAdapter {
     }
 
     public boolean clientInsertMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
-        returnType = method.getReturnType();
+        FullyQualifiedJavaType returnType = method.getReturnType();
         return true;
     }
 

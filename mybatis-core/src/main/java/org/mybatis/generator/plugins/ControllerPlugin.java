@@ -25,8 +25,8 @@ import java.util.List;
  **/
 public class ControllerPlugin extends PluginAdapter {
 
-    private FullyQualifiedJavaType slf4jLogger;
-    private FullyQualifiedJavaType slf4jLoggerFactory;
+    private final FullyQualifiedJavaType slf4jLogger;
+    private final FullyQualifiedJavaType slf4jLoggerFactory;
     private FullyQualifiedJavaType classAnnotation;
 
     private FullyQualifiedJavaType businessType;
@@ -93,16 +93,6 @@ public class ControllerPlugin extends PluginAdapter {
      **/
     private String listMethod = null;
 
-    /**
-     * 查询总数
-     **/
-    private String countMethod = null;
-
-    /**
-     * 条件方法
-     **/
-    private String listByIds = null;
-
 
     /**
      * business包路径
@@ -167,7 +157,10 @@ public class ControllerPlugin extends PluginAdapter {
         this.updateMethod = context.getProp(daoType, MethodEnum.UPDATE.getName());
         this.selectMethod = context.getProp(daoType, MethodEnum.GET.getName());
         this.listMethod = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        /**
+         * 查询总数
+         **/
+        String countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
 
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
 

@@ -34,11 +34,6 @@ public class BusinessPlugin extends PluginAdapter {
     private FullyQualifiedJavaType interfaceType;
 
     /**
-     * 是否添加注解
-     */
-    private boolean enableAnnotation = true;
-
-    /**
      * service插件类
      **/
     PluginConfiguration servicePlugin;
@@ -117,11 +112,6 @@ public class BusinessPlugin extends PluginAdapter {
      * 远程注入注解
      **/
     private String remoteResource;
-
-    /**
-     * 是否生成business
-     **/
-    private boolean generatorBusiness = false;
 
     /**
      * 是否启用乐观锁,只有versions配置才行
@@ -214,7 +204,10 @@ public class BusinessPlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
-        this.generatorBusiness = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_BUSINESS));
+        /**
+         * 是否生成business
+         **/
+        boolean generatorBusiness = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_BUSINESS));
         //乐观锁列
         this.versions = context.getTableProp(domainObjectName, "versionCol");
         this.enableVersions = context.isEnableTableProp(domainObjectName, "versionCol");
@@ -353,7 +346,11 @@ public class BusinessPlugin extends PluginAdapter {
     protected void addBusinessImpl(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         topLevelClass.addSuperInterface(this.interfaceType);
-        if (this.enableAnnotation) {
+        /**
+         * 是否添加注解
+         */
+        boolean enableAnnotation = true;
+        if (enableAnnotation) {
             topLevelClass.addAnnotation("@Service");
             topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.stereotype.Service"));
         }
