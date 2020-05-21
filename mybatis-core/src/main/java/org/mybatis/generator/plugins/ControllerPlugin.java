@@ -2,9 +2,7 @@ package org.mybatis.generator.plugins;
 
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
@@ -23,19 +21,9 @@ import java.util.List;
  * Author: guos
  * Date: 2019/1/30 14:26
  **/
-public class ControllerPlugin extends PluginAdapter {
-
-    private final FullyQualifiedJavaType slf4jLogger;
-    private final FullyQualifiedJavaType slf4jLoggerFactory;
-    private FullyQualifiedJavaType classAnnotation;
+public class ControllerPlugin extends BasePlugin {
 
     private FullyQualifiedJavaType businessType;
-
-
-    /**
-     * 是否添加注解
-     */
-    private boolean enableAnnotation = true;
 
     /**
      * controller包路径
@@ -73,26 +61,6 @@ public class ControllerPlugin extends PluginAdapter {
      */
     private String baseController;
 
-    /**
-     * 新增方法
-     **/
-    private String insertMethod = null;
-
-    /**
-     * 更新方法
-     **/
-    private String updateMethod = null;
-
-    /**
-     * 单个方法
-     **/
-    private String selectMethod = null;
-
-    /**
-     * 条件方法
-     **/
-    private String listMethod = null;
-
 
     /**
      * business包路径
@@ -104,17 +72,6 @@ public class ControllerPlugin extends PluginAdapter {
      */
     private String businessSuffix;
 
-    /**
-     * 编码
-     **/
-    private String fileEncoding;
-
-
-    /**
-     * 是否生成controller
-     **/
-    private boolean generatorController = false;
-
 
     private final String className;
 
@@ -125,9 +82,6 @@ public class ControllerPlugin extends PluginAdapter {
 
     public ControllerPlugin() {
         super();
-        // default is slf4j
-        slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
-        slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
         className = this.getClass().getName();
     }
 
@@ -136,7 +90,12 @@ public class ControllerPlugin extends PluginAdapter {
      */
     @Override
     public boolean validate(List<String> warnings) {
-        String enableAnnotation = properties.getProperty("enableAnnotation");
+        //是否生成logger
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
+        String enableAnnotationStr = context.getProp(className, "enableAnnotation");
+        if (StringUtility.stringHasValue(enableAnnotationStr)) {
+            enableAnnotation = StringUtility.isTrue(enableAnnotationStr);
+        }
         this.controllerProject = context.getPPVal(className, "controllerProject");
         this.controllerPack = context.getPPVal(className, "controllerPack");
         this.controllerSuffix = context.getProp(className, "controllerSuffix");
@@ -151,30 +110,6 @@ public class ControllerPlugin extends PluginAdapter {
         this.responseMethod = context.getProp(className, "responseMethod");
 
         this.baseController = context.getProp(className, "baseController");
-
-        String daoType = BaseMethodPlugin.class.getName();
-        this.insertMethod = context.getProp(daoType, MethodEnum.SAVE.getName());
-        this.updateMethod = context.getProp(daoType, MethodEnum.UPDATE.getName());
-        this.selectMethod = context.getProp(daoType, MethodEnum.GET.getName());
-        this.listMethod = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        /**
-         * 查询总数
-         **/
-        String countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
-
-        this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-
-        //是否生成logger
-        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
-
-
-        if (StringUtility.stringHasValue(enableAnnotation)) {
-            this.enableAnnotation = StringUtility.isTrue(enableAnnotation);
-        }
-
-        if (this.enableAnnotation) {
-            classAnnotation = new FullyQualifiedJavaType("org.springframework.web.bind.annotation.*");
-        }
         return true;
     }
 
@@ -185,7 +120,10 @@ public class ControllerPlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成controller
-        this.generatorController = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_CONTROLLER));
+        /**
+         * 是否生成controller
+         **/
+        boolean generatorController = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_CONTROLLER));
         if (!generatorController) {//是否生成service
             return new ArrayList<>();
         }
@@ -206,8 +144,6 @@ public class ControllerPlugin extends PluginAdapter {
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
         FullyQualifiedJavaType controllerType = new FullyQualifiedJavaType(controllerPath);
 
-        FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.List");
-
         String controllerFilePath = controllerProject + LocalFileUtils.getPath(controllerPath);
         Files.deleteIfExists(Paths.get(controllerFilePath));
         //controller
@@ -226,6 +162,7 @@ public class ControllerPlugin extends PluginAdapter {
         controllerClass.addImportedType(aoType);
         controllerClass.addImportedType(voType);
         controllerClass.addImportedType(listType);
+        controllerClass.addImportedType("org.springframework.web.bind.annotation.*");
         if (StringUtility.stringHasValue(responseMethod)) {
             FullyQualifiedJavaType response = new FullyQualifiedJavaType(MethodUtils.getFullClass(responseMethod, ":"));
             controllerClass.addImportedType(response);
@@ -242,7 +179,6 @@ public class ControllerPlugin extends PluginAdapter {
         if (this.enableAnnotation) {
             topLevelClass.addAnnotation("@RestController");
             topLevelClass.addAnnotation(AnnotationUtils.generateAnnotation("@RequestMapping", MethodUtils.humpToMiddleLine(introspectedTable.getTableName())));
-            topLevelClass.addImportedType(this.classAnnotation);
         }
 
         if (this.enableLogger) {
@@ -251,20 +187,20 @@ public class ControllerPlugin extends PluginAdapter {
 
         ClassUtils.addField(topLevelClass, this.businessType, null);
         ControllerGen controllerGen = new ControllerGen(context, this.responseMethod, this.enableLogger);
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
-            topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectMethod));
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
+            topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectByPrimaryKey));
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
-            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertMethod));
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
+            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertSelective));
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
-            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateMethod));
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
+            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateByPrimaryKeySelective));
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
-            topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listMethod));
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
+            topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listByCondition));
         }
 
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.controllerProject, this.fileEncoding, this.context.getJavaFormatter());

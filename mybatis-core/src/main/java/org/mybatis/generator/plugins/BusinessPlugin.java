@@ -2,10 +2,8 @@ package org.mybatis.generator.plugins;
 
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.PluginConfiguration;
-import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
@@ -18,16 +16,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Description: 自定义方法生成
  * Author: guos
  * Date: 2019/2/1 11:31
  **/
-public class BusinessPlugin extends PluginAdapter {
-
-    private final FullyQualifiedJavaType slf4jLogger;
-    private final FullyQualifiedJavaType slf4jLoggerFactory;
+public class BusinessPlugin extends BasePlugin {
 
     private FullyQualifiedJavaType serviceType;
 
@@ -69,44 +65,9 @@ public class BusinessPlugin extends PluginAdapter {
     private String doBatchMethod = null;
 
     /**
-     * 新增方法
-     **/
-    private String insertMethod = null;
-
-    /**
-     * 更新方法
-     **/
-    private String updateMethod = null;
-
-    /**
-     * 单个方法
-     **/
-    private String selectMethod = null;
-
-    /**
-     * 条件方法
-     **/
-    private String listMethod = null;
-
-    /**
-     * 查询总数
-     **/
-    private String countMethod = null;
-
-    /**
-     * 物理删除
-     */
-    private String deleteByCondition = null;
-
-    /**
      * 返回类方法
      */
     private String responseMethod;
-
-    /**
-     * 编码
-     **/
-    private String fileEncoding;
 
     /**
      * 远程注入注解
@@ -116,7 +77,7 @@ public class BusinessPlugin extends PluginAdapter {
     /**
      * 是否启用乐观锁,只有versions配置才行
      */
-    private boolean enableVersions = false;
+    private boolean enableVersions;
 
     /**
      * 乐观锁列名
@@ -128,11 +89,6 @@ public class BusinessPlugin extends PluginAdapter {
      * 对象转换类
      */
     private String modelConvertUtils;
-
-    /**
-     * 是否生成logger日志
-     */
-    private boolean enableLogger;
 
     /**
      * 分页类路径
@@ -150,10 +106,6 @@ public class BusinessPlugin extends PluginAdapter {
 
     public BusinessPlugin() {
         super();
-        // default is slf4j
-
-        slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
-        slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
         /**
          * 所有的方法
          */
@@ -163,17 +115,13 @@ public class BusinessPlugin extends PluginAdapter {
 
     @Override
     public boolean validate(List<String> warnings) {
-        String enableAnnotation = properties.getProperty("enableAnnotation");
-
-        String daoType = BaseMethodPlugin.class.getName();
-        this.insertMethod = context.getProp(daoType, MethodEnum.SAVE.getName());
-        this.updateMethod = context.getProp(daoType, MethodEnum.UPDATE.getName());
-        this.selectMethod = context.getProp(daoType, MethodEnum.GET.getName());
-        this.listMethod = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countMethod = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
+        //是否生成logger
+        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
+        String enableAnnotationStr = context.getProp(className, "enableAnnotation");
+        if (StringUtility.stringHasValue(enableAnnotationStr)) {
+            enableAnnotation = StringUtility.isTrue(enableAnnotationStr);
+        }
         this.doBatchMethod = context.getProp(className, MethodEnum.DO_BATCH.getName());
-        this.deleteByCondition = context.getProp(daoType, MethodEnum.REAL_DELETE.getName());
-
         this.businessSuffix = context.getProp(className, "businessSuffix");
 
         this.responseMethod = context.getProp(ControllerPlugin.class.getName(), "responseMethod");
@@ -187,11 +135,6 @@ public class BusinessPlugin extends PluginAdapter {
         this.businessImplPack = context.getPPVal(className, "businessImplPack");
 
         this.remoteResource = context.getProp(className, "remoteResource");
-
-        this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-
-        //是否生成logger
-        enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
 
         page = context.getProperty("page");
 
@@ -249,8 +192,6 @@ public class BusinessPlugin extends PluginAdapter {
         businessImplClass.addImportedType(responseType);
         interface1.addImportedType(responseType);
 
-        FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.*");
-
         FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
         FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
@@ -286,7 +227,7 @@ public class BusinessPlugin extends PluginAdapter {
             FullyQualifiedJavaTypeUtils.importType((Interface) null, businessImplClass, this.exceptionPack);
         }
 
-        this.addBusinessImpl(businessImplClass, introspectedTable, tableName, businessImplFiles);
+        this.addBusinessImpl(businessImplClass, introspectedTable, businessImplFiles);
         CommentUtils.addBusinessClassComment(businessImplClass, introspectedTable);
         files.addAll(businessImplFiles);
         return files;
@@ -295,122 +236,80 @@ public class BusinessPlugin extends PluginAdapter {
 
     protected void addBusiness(Interface interface1, IntrospectedTable introspectedTable, List<GeneratedJavaFile> files) {
         interface1.setVisibility(JavaVisibility.PUBLIC);
-        BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
-        Method method;
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
-            method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
-            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertMethod, this.exceptionPack, this.versions, this.enableVersions);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
-            method = businessGen.delete(this.serviceType, introspectedTable, this.deleteByCondition);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
-            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateMethod, this.exceptionPack, this.versions, this.enableVersions);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
-            method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listMethod, this.page);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
-            method = businessGen.count(this.serviceType, introspectedTable, this.countMethod);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
-            method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
+        this.addMethods(interface1, null, introspectedTable, true);
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, this.businessProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);
     }
 
-    protected void addBusinessImpl(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
+    protected void addBusinessImpl(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, List<GeneratedJavaFile> files) {
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         topLevelClass.addSuperInterface(this.interfaceType);
-        /**
-         * 是否添加注解
-         */
-        boolean enableAnnotation = true;
         if (enableAnnotation) {
             topLevelClass.addAnnotation("@Service");
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.stereotype.Service"));
+            topLevelClass.addImportedType(service);
         }
-
         if (this.enableLogger) {
             ClassUtils.addLogger(topLevelClass);
         }
 
         ClassUtils.addField(topLevelClass, this.serviceType, this.remoteResource);
+        this.addMethods(null, topLevelClass, introspectedTable, false);
+        GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.businessImplProject, this.fileEncoding, this.context.getJavaFormatter());
+        files.add(file);
+    }
+
+
+
+    private void addMethods(Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, boolean isInterface) {
         BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
-            method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
+            method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectByPrimaryKey);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
-            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertMethod, this.exceptionPack, this.versions, this.enableVersions);
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
+            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertSelective, this.exceptionPack, this.versions, this.enableVersions);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
             method = businessGen.delete(this.serviceType, introspectedTable, this.deleteByCondition);
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
-            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateMethod, this.exceptionPack, this.versions, this.enableVersions);
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
+            method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateByPrimaryKeySelective, this.exceptionPack, this.versions, this.enableVersions);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
-        if (StringUtility.stringHasValue(this.listMethod) || StringUtility.stringHasValue(this.countMethod)) {
-            method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listMethod, this.page);
-            if (StringUtility.stringHasValue(this.modelConvertUtils)) {
-                topLevelClass.addImportedType(new FullyQualifiedJavaType(this.modelConvertUtils));
-            }
-
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
+            method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listByCondition, this.page);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
-            method = businessGen.count(this.serviceType, introspectedTable, this.countMethod);
-            method.addAnnotation("@Override");
-            topLevelClass.addMethod(method);
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countByCondition))) {
+            method = businessGen.count(this.serviceType, introspectedTable, this.countByCondition);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
         }
 
         if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
             method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
+            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+        }
+    }
+
+    private void addMethod(Method method, Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, boolean isInterface) {
+        if (isInterface) {
+            MethodUtils.clear(method);
+            interface1.addMethod(method);
+        } else {
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
-            topLevelClass.addImportedType(this.page);
-            topLevelClass.addImportedType("org.springframework.util.CollectionUtils");
+            if (Objects.equals(method.getName(), MethodEnum.getNameByValue(this.doBatchMethod))) {
+                topLevelClass.addImportedType(this.page);
+                topLevelClass.addImportedType("org.springframework.util.CollectionUtils");
+            }
         }
-
-        GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.businessImplProject, this.fileEncoding, this.context.getJavaFormatter());
-        files.add(file);
     }
 }

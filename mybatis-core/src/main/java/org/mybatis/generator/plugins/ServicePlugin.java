@@ -3,9 +3,7 @@ package org.mybatis.generator.plugins;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
-import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.constant.MethodEnum;
@@ -25,36 +23,15 @@ import java.util.List;
  * guos
  * 2019/1/17 11:51
  **/
-public class ServicePlugin extends PluginAdapter {
+public class ServicePlugin extends BasePlugin {
 
-    private final FullyQualifiedJavaType slf4jLogger;
-    private final FullyQualifiedJavaType slf4jLoggerFactory;
     private FullyQualifiedJavaType serviceType;
     private FullyQualifiedJavaType daoType;
     private FullyQualifiedJavaType interfaceType;
-    private FullyQualifiedJavaType pojoType;
-    private FullyQualifiedJavaType listType;
-    private FullyQualifiedJavaType autowired;
-    private FullyQualifiedJavaType service;
     private String servicePack;
     private String serviceImplPack;
     private String serviceProject;
     private String serviceImplProject;
-    private String pojoUrl;
-    /**
-     * 是否添加注解
-     */
-    private boolean enableAnnotation = true;
-    private String deleteByCondition;
-    private String insertSelective;
-    private String updateByPrimaryKeySelective;
-    private String selectByPrimaryKey;
-    private String listByIds;
-    private String countByCondition;
-    private String listByCondition;
-    private String count;
-    private String list;
-    private String fileEncoding;
 
 
     private String mapByIds;
@@ -64,24 +41,13 @@ public class ServicePlugin extends PluginAdapter {
 
     private String saveAndGet;
 
-
-    /**
-     * 是否生成logger日志
-     */
-    private boolean enableLogger;
-
-
     private String serviceSuffix;
-
 
     private final String className;
 
 
     public ServicePlugin() {
         super();
-        // default is slf4j
-        slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
-        slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
         className = this.getClass().getName();
     }
 
@@ -90,45 +56,21 @@ public class ServicePlugin extends PluginAdapter {
      */
     @Override
     public boolean validate(List<String> warnings) {
-
-        String enableAnnotation = properties.getProperty("enableAnnotation");
-
         //是否生成logger
         enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
-
-
-        if (StringUtility.stringHasValue(enableAnnotation)) {
-            this.enableAnnotation = StringUtility.isTrue(enableAnnotation);
+        String enableAnnotationStr = context.getProp(className,"enableAnnotation");
+        if (StringUtility.stringHasValue(enableAnnotationStr)) {
+            enableAnnotation = StringUtility.isTrue(enableAnnotationStr);
         }
-
-        String daoType = BaseMethodPlugin.class.getName();
         this.serviceSuffix = context.getProp(className, "serviceSuffix");
-
-        this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());
-        this.insertSelective = context.getProp(daoType, MethodEnum.SAVE.getName());
-        this.updateByPrimaryKeySelective = context.getProp(daoType, MethodEnum.UPDATE.getName());
-        this.listByIds = context.getProp(daoType, MethodEnum.LIST_BY_IDS.getName());
-        this.listByCondition = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countByCondition = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
         this.map = context.getProp(className, MethodEnum.MAP.getName());
         this.mapByIds = context.getProp(className, MethodEnum.MAP_BY_IDS.getName());
         this.listId = context.getProp(className, MethodEnum.LIST_ID.getName());
         this.saveAndGet = context.getProp(className, MethodEnum.SAVE_AND_GET.getName());
-        this.count = context.getProp(daoType, MethodEnum.COUNT.getName());
-        this.list = context.getProp(daoType, MethodEnum.LIST.getName());
-        this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
-
-        this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
         this.servicePack = context.getPPVal(className, "servicePack");
         this.serviceImplPack = context.getPPVal(className, "serviceImplPack");
         this.serviceProject = context.getPPVal(className, "serviceProject");
         this.serviceImplProject = context.getPPVal(className, "serviceImplProject");
-        this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
-
-        if (this.enableAnnotation) {
-            autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
-            service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");
-        }
         return true;
     }
 
@@ -159,8 +101,6 @@ public class ServicePlugin extends PluginAdapter {
 
         // 【com.coolead.domain.Pet】
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-
-        listType = new FullyQualifiedJavaType("java.util.*");
 
         //查询条件类
         String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
