@@ -444,7 +444,7 @@ public class ManagePlugin extends PluginAdapter {
      * flag 1:根据id查询
      */
     protected Method selectByPrimaryKey(IntrospectedTable introspectedTable, String alias, String tableName) {
-        if (!this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
+        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
             return null;
         }
         Method method = new Method();
@@ -526,7 +526,7 @@ public class ManagePlugin extends PluginAdapter {
      * 删除
      */
     protected Method delete(IntrospectedTable introspectedTable, String alias, String tableName, int flag) {
-        if (!this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
+        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
             return null;
         }
         Method method = new Method();
@@ -574,7 +574,7 @@ public class ManagePlugin extends PluginAdapter {
      * add method
      */
     protected Method countByCondition(IntrospectedTable introspectedTable, String methodName) {
-        if (!this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         String domainObjectName = introspectedTable.getDomainObjectName();
@@ -619,7 +619,7 @@ public class ManagePlugin extends PluginAdapter {
      * return
      */
     protected Method listByCondition(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
-        if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         String domainObjectName = introspectedTable.getDomainObjectName();
@@ -699,7 +699,7 @@ public class ManagePlugin extends PluginAdapter {
      * add method
      */
     protected Method listByIds(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
-        if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         Method method = new Method();
@@ -723,7 +723,7 @@ public class ManagePlugin extends PluginAdapter {
      * add method
      */
     protected Method getOtherInteger(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         Method method = new Method();
@@ -791,7 +791,7 @@ public class ManagePlugin extends PluginAdapter {
      * add method
      */
     protected Method getOtherList(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!this.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         Method method = new Method();
@@ -867,7 +867,7 @@ public class ManagePlugin extends PluginAdapter {
      * add method
      */
     protected Method getOtherMap(String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!this.isCustomEnable(this.className, MethodEnum.getNameByValue(methodName))) {
+        if (!context.isCustomEnable(this.className, MethodEnum.getNameByValue(methodName))) {
             return null;
         }
         Method method = new Method();

@@ -251,19 +251,19 @@ public class ControllerPlugin extends PluginAdapter {
 
         ClassUtils.addField(topLevelClass, this.businessType, null);
         ControllerGen controllerGen = new ControllerGen(context, this.responseMethod, this.enableLogger);
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
             topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectMethod));
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
             topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertMethod));
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
             topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateMethod));
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
             topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listMethod));
         }
 

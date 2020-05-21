@@ -30,7 +30,7 @@ public class LombokPlugin extends PluginAdapter {
         if (hasLombok) {
             //添加domain的import
             if (Objects.equals(topLevelClass.getType().getShortName(),introspectedTable.getDomainObjectName())) {
-                String tableAnno = this.getCustomValue(ExtendModelPlugin.class.getName(), "table");
+                String tableAnno = context.getProp(ExtendModelPlugin.class.getName(), "table");
                 topLevelClass.addImportedType(tableAnno);
                 topLevelClass.addAnnotation("@" + MethodUtils.getClassName(tableAnno, ".") + "(name = \"" + introspectedTable.getTableName() + "\")");
             }

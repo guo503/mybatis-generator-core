@@ -297,43 +297,43 @@ public class BusinessPlugin extends PluginAdapter {
         interface1.setVisibility(JavaVisibility.PUBLIC);
         BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
             method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertMethod, this.exceptionPack, this.versions, this.enableVersions);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
             method = businessGen.delete(this.serviceType, introspectedTable, this.deleteByCondition);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateMethod, this.exceptionPack, this.versions, this.enableVersions);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listMethod))) {
             method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listMethod, this.page);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
             method = businessGen.count(this.serviceType, introspectedTable, this.countMethod);
             MethodUtils.clear(method);
             interface1.addMethod(method);
         }
 
-        if (this.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
+        if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
             method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
             MethodUtils.clear(method);
             interface1.addMethod(method);
@@ -362,25 +362,25 @@ public class BusinessPlugin extends PluginAdapter {
         ClassUtils.addField(topLevelClass, this.serviceType, this.remoteResource);
         BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectMethod))) {
             method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectMethod);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertMethod))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertMethod, this.exceptionPack, this.versions, this.enableVersions);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
             method = businessGen.delete(this.serviceType, introspectedTable, this.deleteByCondition);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateMethod))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateMethod, this.exceptionPack, this.versions, this.enableVersions);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
@@ -396,13 +396,13 @@ public class BusinessPlugin extends PluginAdapter {
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
+        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countMethod))) {
             method = businessGen.count(this.serviceType, introspectedTable, this.countMethod);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
         }
 
-        if (this.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
+        if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
             method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);

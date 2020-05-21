@@ -22,12 +22,9 @@ import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.Document;
 import org.mybatis.generator.api.dom.xml.XmlElement;
 import org.mybatis.generator.config.Context;
-import org.mybatis.generator.config.CustomConfiguration;
-import org.mybatis.generator.internal.util.StringUtility;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -567,20 +564,5 @@ public abstract class PluginAdapter implements Plugin {
     public boolean sqlMapSelectAllElementGenerated(XmlElement element,
                                                    IntrospectedTable introspectedTable) {
         return true;
-    }
-
-
-    public boolean isCustomEnable(String type, String name) {
-        if (!StringUtility.stringHasValue(name)) {
-            return false;
-        } else {
-            CustomConfiguration customConfiguration = context.getCustomConfiguration(type, name);
-            return !Objects.isNull(customConfiguration) && StringUtility.isTrue(customConfiguration.getEnable());
-        }
-    }
-
-    public String getCustomValue(String type, String name) {
-        CustomConfiguration customConfiguration = context.getCustomConfiguration(type, name);
-        return Objects.isNull(customConfiguration) ? context.getProperty(name) : customConfiguration.getValue();
     }
 }
