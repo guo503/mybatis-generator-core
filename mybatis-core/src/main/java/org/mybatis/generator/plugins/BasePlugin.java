@@ -83,7 +83,7 @@ public class BasePlugin extends PluginAdapter {
     public void setProperties(Properties properties) {
         super.setProperties(properties);
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
-        listType = new FullyQualifiedJavaType("java.util.*");
+        this.listType = new FullyQualifiedJavaType("java.util.*");
         String daoType = BaseMethodPlugin.class.getName();
         this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());
         this.insertSelective = context.getProp(daoType, MethodEnum.SAVE.getName());
@@ -96,7 +96,7 @@ public class BasePlugin extends PluginAdapter {
         this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
 
-        autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
-        service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");
+        this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
+        this.service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");
     }
 }
