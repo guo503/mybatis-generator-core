@@ -55,12 +55,10 @@ public class ControllerPlugin extends BasePlugin {
      */
     private String responseMethod;
 
-
     /**
      * 要继承的基础controller
      */
     private String baseController;
-
 
     /**
      * business包路径
@@ -72,13 +70,6 @@ public class ControllerPlugin extends BasePlugin {
      */
     private String businessSuffix;
 
-
-    private final String className;
-
-    /**
-     * 是否生成logger日志
-     */
-    private boolean enableLogger;
 
     public ControllerPlugin() {
         super();
@@ -120,9 +111,6 @@ public class ControllerPlugin extends BasePlugin {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成controller
-        /**
-         * 是否生成controller
-         **/
         boolean generatorController = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_CONTROLLER));
         if (!generatorController) {//是否生成service
             return new ArrayList<>();

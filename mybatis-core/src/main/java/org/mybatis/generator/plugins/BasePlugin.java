@@ -10,6 +10,7 @@ import java.util.Properties;
 
 /**
  * 基础公共业务代码
+ *
  * @author guos
  * description
  * date 2020/5/21 16:00
@@ -18,7 +19,7 @@ public class BasePlugin extends PluginAdapter {
 
     protected FullyQualifiedJavaType slf4jLogger;
 
-    protected  FullyQualifiedJavaType slf4jLoggerFactory;
+    protected FullyQualifiedJavaType slf4jLoggerFactory;
 
     protected FullyQualifiedJavaType autowired;
 
@@ -49,10 +50,25 @@ public class BasePlugin extends PluginAdapter {
      */
     protected boolean enableLogger;
 
+    /**
+     * 类名
+     */
+    protected String className;
+
+    /**
+     * 分页类路径
+     */
+    protected String page;
+
+    /**
+     * 自定义异常类全路径
+     **/
+    protected String exceptionPack;
+
 
     public BasePlugin() {
         super();
-        // default is slf4j
+        className = this.getClass().getName();
         slf4jLogger = new FullyQualifiedJavaType("org.slf4j.Logger");
         slf4jLoggerFactory = new FullyQualifiedJavaType("org.slf4j.LoggerFactory");
     }

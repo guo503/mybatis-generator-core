@@ -43,8 +43,6 @@ public class ServicePlugin extends BasePlugin {
 
     private String serviceSuffix;
 
-    private final String className;
-
 
     public ServicePlugin() {
         super();

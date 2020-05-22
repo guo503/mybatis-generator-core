@@ -71,14 +71,7 @@ public class ManagePlugin extends BasePlugin {
      **/
     private List<IntrospectedColumn> columns;
 
-    /**
-     * 分页类路径
-     */
-    private String page;
-
     private String manageSuffix;
-
-    private final String className;
 
 
     public ManagePlugin() {

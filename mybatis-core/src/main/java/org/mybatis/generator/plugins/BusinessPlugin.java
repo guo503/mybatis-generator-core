@@ -84,31 +84,14 @@ public class BusinessPlugin extends BasePlugin {
      */
     private String versions;
 
-
     /**
      * 对象转换类
      */
     private String modelConvertUtils;
 
-    /**
-     * 分页类路径
-     */
-    private String page;
-
-
-    /**
-     * 自定义异常类全路径
-     **/
-    private String exceptionPack;
-
-    private final String className;
-
 
     public BusinessPlugin() {
         super();
-        /**
-         * 所有的方法
-         */
         className = this.getClass().getName();
     }
 
@@ -147,9 +130,6 @@ public class BusinessPlugin extends BasePlugin {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) throws IOException {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
-        /**
-         * 是否生成business
-         **/
         boolean generatorBusiness = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_BUSINESS));
         //乐观锁列
         this.versions = context.getTableProp(domainObjectName, "versionCol");
@@ -200,8 +180,6 @@ public class BusinessPlugin extends BasePlugin {
 
         String businessFilePath = businessProject + LocalFileUtils.getPath(businessPath) + suffix;
         String businessImplFilePath = businessImplProject + LocalFileUtils.getPath(businessImplPath) + suffix;
-
-        String tableName = introspectedTable.getBaseRecordType();
 
         Files.deleteIfExists(Paths.get(businessFilePath));
         interface1.addImportedType(listType);
