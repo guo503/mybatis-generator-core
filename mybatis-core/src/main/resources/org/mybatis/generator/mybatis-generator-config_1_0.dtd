@@ -195,10 +195,7 @@
   enableManage CDATA #IMPLIED
   enableService CDATA #IMPLIED
   enableBusiness CDATA #IMPLIED
-  enableController CDATA #IMPLIED
-  versionCol CDATA #IMPLIED
-  enableVersions CDATA #IMPLIED
-  delCol CDATA #IMPLIED>
+  enableController CDATA #IMPLIED>
 
 <!--
   The columnOverride element is used to change certain attributes of the column
