@@ -440,15 +440,9 @@ public class ManagePlugin extends BasePlugin {
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, lowPo);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("return ");
-        sb.append(getDaoShort());
-        sb.append(alias).append("x");
-        sb.append("(");
-        sb.append(lowPo);
-        sb.append(");");
         method.addBodyLine("Assert.notNull(" + lowPo + ",\"" + lowPo + "不能为空\");");
-        method.addBodyLine(sb.toString());
+        String sb = "return " + getDaoShort() + alias + "x" + "(" + lowPo + ");";
+        method.addBodyLine(sb);
         return method;
     }
 
@@ -529,18 +523,13 @@ public class ManagePlugin extends BasePlugin {
         method.addParameter(parameter);
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        StringBuilder sb = new StringBuilder();
-        sb.append(getDaoShort());
-        sb.append(methodName).append("x");
-        sb.append("(");
-        sb.append(tip);
-        sb.append(");");
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, condName);
         }
         method.addBodyLine("Assert.notNull(" + tip + ",\"" + tip + "不能为空\");");
-        method.addBodyLine("return " + sb.toString());
+        String sb = getDaoShort() + methodName + "x" + "(" + tip + ");";
+        method.addBodyLine("return " + sb);
         return method;
     }
 
@@ -603,12 +592,6 @@ public class ManagePlugin extends BasePlugin {
         method.addAnnotation("@Override");
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(getDaoShort());
-        sb.append(methodName);
-        sb.append("(");
-        sb.append(condName);
-        sb.append(");");
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, new String[]{CommonConstant.GT_ID, condName});
@@ -687,14 +670,14 @@ public class ManagePlugin extends BasePlugin {
             if (MethodEnum.SAVE.getValue().equals(methodName)) {
                 String creator = context.getProp(pluginType, "creator");
                 getUserName = StringUtility.stringHasValue(creator) ? creator : CommonConstant.DEFAULT_USER;
-                getDate = this.getMethodName(dateMethod, createTime, CommonConstant.DEFAULT_TIME);
+                getDate = this.getMethodName(dateMethod, createTime);
 
                 this.setMethodValue(method, params, creator, getUserName);//设置用户名
                 this.setMethodValue(method, params, createTime, getDate);//设置时间
             } else {
                 String updater = context.getProp(pluginType, "updater");
                 getUserName = StringUtility.stringHasValue(updater) ? updater : CommonConstant.DEFAULT_USER;
-                getDate = this.getMethodName(dateMethod, updateTime, CommonConstant.DEFAULT_TIME);
+                getDate = this.getMethodName(dateMethod, updateTime);
                 this.setMethodValue(method, params, updater, getUserName);//设置用户名
                 this.setMethodValue(method, params, updateTime, getDate);//设置时间
             }
@@ -859,7 +842,7 @@ public class ManagePlugin extends BasePlugin {
                         method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
                     }
                 }
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
                     sb.append(introspectedColumn.getJavaProperty());
                     sb.append(",");
@@ -937,7 +920,7 @@ public class ManagePlugin extends BasePlugin {
     }
 
 
-    private String getMethodName(String fullMethodName, String str, String defaultValue) {
+    private String getMethodName(String fullMethodName, String str) {
         String setValue = null;
         if (!hasColumn(str)) {
             return null;
@@ -946,7 +929,7 @@ public class ManagePlugin extends BasePlugin {
             setValue = MethodUtils.getFullMethod(fullMethodName, ".");
         }
         if (!StringUtility.stringHasValue(setValue)) {//没有配置默认方法，则使用默认值
-            setValue = defaultValue;
+            setValue = CommonConstant.DEFAULT_TIME;
         }
         return setValue;
     }

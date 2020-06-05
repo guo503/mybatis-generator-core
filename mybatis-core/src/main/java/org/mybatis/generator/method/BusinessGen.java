@@ -170,11 +170,7 @@ public class BusinessGen {
         if (hasVersions) {
             method.addBodyLine(lowPo + ".set" + MethodUtils.toUpperCase(versions) + "(" + oldName + ".get" + MethodUtils.toUpperCase(versions) + "());");
         }
-        String sb = CommonGen.getShortName(serviceType) +
-                alias +
-                "(" +
-                param +
-                ")";
+        String sb = CommonGen.getShortName(serviceType) + alias + "(" + param + ")";
         method.addBodyLine("return " + sb + ";");
         return method;
     }

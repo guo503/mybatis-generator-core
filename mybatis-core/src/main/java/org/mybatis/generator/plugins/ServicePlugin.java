@@ -210,7 +210,7 @@ public class ServicePlugin extends BasePlugin {
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = batchList(null, introspectedTable, MethodEnum.BATCH_LIST.getValue());
+        method = batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue());
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
@@ -282,7 +282,7 @@ public class ServicePlugin extends BasePlugin {
 
         topLevelClass.addMethod(getOtherMap(mapByIds, introspectedTable, tableName, 6));
 
-        topLevelClass.addMethod(batchList(topLevelClass, introspectedTable, MethodEnum.BATCH_LIST.getValue()));
+        topLevelClass.addMethod(batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue()));
 
         //此外报错[已修2016-03-22，增加:",context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, serviceImplProject, fileEncoding, context.getJavaFormatter());
@@ -377,15 +377,9 @@ public class ServicePlugin extends BasePlugin {
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, lowPo);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("return ");
-        sb.append(getDaoShort());
-        sb.append(alias);
-        sb.append("(");
-        sb.append(lowPo);
-        sb.append(");");
         method.addBodyLine("Assert.notNull(" + lowPo + ",\"" + lowPo + "不能为空\");");
-        method.addBodyLine(sb.toString());
+        String sb = "return " + getDaoShort() + alias + "(" + lowPo + ");";
+        method.addBodyLine(sb);
         return method;
     }
 
@@ -465,18 +459,13 @@ public class ServicePlugin extends BasePlugin {
         method.addParameter(parameter);
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        StringBuilder sb = new StringBuilder();
-        sb.append(getDaoShort());
-        sb.append(methodName);
-        sb.append("(");
-        sb.append(tip);
-        sb.append(");");
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, condName);
         }
         method.addBodyLine("Assert.notNull(" + tip + ",\"" + tip + "不能为空\");");
-        method.addBodyLine("return " + sb.toString());
+        String sb = getDaoShort() + methodName + "(" + tip + ");";
+        method.addBodyLine("return " + sb);
         return method;
     }
 
@@ -524,7 +513,7 @@ public class ServicePlugin extends BasePlugin {
      * param type
      * return
      */
-    protected Method batchList(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String methodName) {
+    protected Method batchList(IntrospectedTable introspectedTable, String methodName) {
         String domainObjectName = introspectedTable.getDomainObjectName();
         String condName = MethodUtils.toLowerCase(MethodGeneratorUtils.getCondName(domainObjectName));
         Method method = new Method();
@@ -542,14 +531,8 @@ public class ServicePlugin extends BasePlugin {
             MethodUtils.addLoggerInfo(method, new String[]{CommonConstant.GT_ID, condName});
         }
         method.addBodyLine("Assert.notNull(" + condName + ",\"" + condName + "不能为空\");");
-        StringBuilder sb = new StringBuilder();
-        sb.append(getDaoShort());
-        sb.append(methodName);
-        sb.append("(");
-        sb.append(CommonConstant.GT_ID).append(", ");
-        sb.append(condName);
-        sb.append(");");
-        method.addBodyLine("return " + sb.toString());
+        String sb = getDaoShort() + methodName + "(" + CommonConstant.GT_ID + ", " + condName + ");";
+        method.addBodyLine("return " + sb);
         return method;
     }
 
@@ -720,7 +703,7 @@ public class ServicePlugin extends BasePlugin {
                         method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
                     }
                 }
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
                     sb.append(introspectedColumn.getJavaProperty());
                     sb.append(",");
