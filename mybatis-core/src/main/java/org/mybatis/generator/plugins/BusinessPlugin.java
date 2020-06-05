@@ -285,8 +285,10 @@ public class BusinessPlugin extends BasePlugin {
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
             if (Objects.equals(method.getName(), MethodEnum.getNameByValue(this.doBatchMethod))) {
-                topLevelClass.addImportedType(this.page);
                 topLevelClass.addImportedType("org.springframework.util.CollectionUtils");
+            }
+            if (Objects.equals(method.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
+                topLevelClass.addImportedType(modelConvertUtils);
             }
         }
     }
