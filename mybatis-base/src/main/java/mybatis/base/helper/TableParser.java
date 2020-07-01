@@ -4,9 +4,12 @@ package mybatis.base.helper;
 import mybatis.base.exception.EntityUnDefinedException;
 import mybatis.base.meta.*;
 import mybatis.core.annotation.*;
+import mybatis.core.utils.StrUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 
@@ -147,5 +150,49 @@ public class TableParser {
         return Objects.nonNull(name) && name.length() > 0;
     }
 
+
+    public static String getPrimaryKeyName(Class<?> clz) {
+        Field[] fields = clz.getDeclaredFields();
+        String primaryKeyName = null;
+        for (Field field : fields) {
+            //解析主键
+            Id id = field.getAnnotation(Id.class);
+            if (Objects.nonNull(id)) {
+                primaryKeyName = StrUtils.isEmpty(id.name()) ? field.getName() : id.name();
+                break;
+            }
+        }
+        if (StrUtils.isEmpty(primaryKeyName)) {
+            throw new RuntimeException("表必须要有主键!");
+        }
+        return primaryKeyName;
+    }
+
+
+    public static <T> T getInstance(Object o) {
+        try {
+            Type type = o.getClass().getGenericSuperclass();
+            if (type == null) {
+                return null;
+            }
+            ParameterizedType parameterizedType = null;
+            if (type instanceof ParameterizedType) {
+                parameterizedType = (ParameterizedType) type;
+            }
+            if (parameterizedType == null) {
+                return null;
+            }
+            Type[] types = parameterizedType.getActualTypeArguments();
+            if (types.length == 0) {
+                return null;
+            }
+            Type realType = parameterizedType.getActualTypeArguments()[0];
+            Class<T> clz = (Class<T>) realType;
+            return clz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

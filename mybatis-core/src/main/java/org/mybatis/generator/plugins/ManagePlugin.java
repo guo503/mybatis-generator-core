@@ -135,13 +135,10 @@ public class ManagePlugin extends BasePlugin {
 
         interfaceType = new FullyQualifiedJavaType(managePath);
 
-        // 【com.coolead.mapper.UserMapper】
         daoType = new FullyQualifiedJavaType(introspectedTable.getMyBatis3JavaMapperType());
 
-        // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         manageType = new FullyQualifiedJavaType(manageImplPath);
 
-        // 【com.coolead.domain.Pet】
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
 
         //查询条件类
@@ -157,10 +154,17 @@ public class ManagePlugin extends BasePlugin {
         List<GeneratedJavaFile> manageFiles = new ArrayList<>();
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();
 
+        //接口
         Interface interface1 = new Interface(interfaceType);
+        interface1.addSuperInterface(new FullyQualifiedJavaType(iManage.getShortName() + "<" + domainObjectName + ">"));
+        interface1.addImportedType(iManage);
         interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
         interface1.addImportedType(new FullyQualifiedJavaType(limitConditionType));
+
+        //实现类
         TopLevelClass topLevelClass = new TopLevelClass(manageType);
+        topLevelClass.setSuperClass(new FullyQualifiedJavaType(manageImpl.getShortName() + "<" + daoType.getShortName() + ", " + domainObjectName + ">"));
+        topLevelClass.addImportedType(manageImpl);
         topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
         topLevelClass.addImportedType(new FullyQualifiedJavaType(limitConditionType));
         //先删除
@@ -207,25 +211,25 @@ public class ManagePlugin extends BasePlugin {
         // add method
         Method method;
 
-        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
-        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
-        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
         if (StringUtility.stringHasValue(deleteByCondition)) {
             method = delete(introspectedTable, deleteByCondition, tableName, 1);
@@ -233,28 +237,28 @@ public class ManagePlugin extends BasePlugin {
             interface1.addMethod(method);
         }
 
-        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-
-        method = countByCondition(introspectedTable, count);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
 
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = countByCondition(introspectedTable, count);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
 
-        method = countByCondition(introspectedTable, countByCondition);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
+
+
+//        method = countByCondition(introspectedTable, countByCondition);
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
 
         method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
@@ -269,9 +273,9 @@ public class ManagePlugin extends BasePlugin {
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-        method = batchList(null, introspectedTable, MethodEnum.BATCH_LIST.getValue());
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
+//        method = batchList(null, introspectedTable, MethodEnum.BATCH_LIST.getValue());
+//        MethodUtils.clear(method);
+//        interface1.addMethod(method);
 
         //此外报错[已修2016-03-22，增加:"context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, manageProject, fileEncoding, context.getJavaFormatter());
@@ -297,7 +301,6 @@ public class ManagePlugin extends BasePlugin {
             topLevelClass.addImportedType(service);
         }
         topLevelClass.addImportedType(manageType);
-        ;
         topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.*"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
         topLevelClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
@@ -315,29 +318,29 @@ public class ManagePlugin extends BasePlugin {
          */
 
 
-        topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName));
+        //topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName));
 
-        topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
+        //topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
 
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
+        //topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
 
         if (StringUtility.stringHasValue(deleteByCondition)) {
             topLevelClass.addMethod(delete(introspectedTable, deleteByCondition, tableName, 1));
         }
 
-        topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
+        //topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
 
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
+        //topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
+        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
+        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
 
-        topLevelClass.addMethod(countByCondition(introspectedTable, count));
+        //topLevelClass.addMethod(countByCondition(introspectedTable, count));
 
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
+        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
 
-        topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
+        //topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
 
         topLevelClass.addMethod(getOtherList(this.getClass().getName(), listId, introspectedTable, tableName, 7));
 
@@ -345,7 +348,7 @@ public class ManagePlugin extends BasePlugin {
 
         topLevelClass.addMethod(getOtherMap(mapByIds, introspectedTable, tableName, 6));
 
-        topLevelClass.addMethod(batchList(topLevelClass, introspectedTable, MethodEnum.BATCH_LIST.getValue()));
+        //topLevelClass.addMethod(batchList(topLevelClass, introspectedTable, MethodEnum.BATCH_LIST.getValue()));
 
         //此外报错[已修2016-03-22，增加:",context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, manageImplProject, fileEncoding, context.getJavaFormatter());

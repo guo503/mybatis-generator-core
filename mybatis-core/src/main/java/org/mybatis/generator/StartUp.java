@@ -19,8 +19,8 @@ public class StartUp {
             List<String> warnings = new ArrayList<String>();
             boolean overwrite = true;
             //直接获取generatorConfig.xml的文件路径 根据具体情况查看
-            //File configFile = new File("D:\\project\\generator-template\\generatorConfig.xml");
-            File configFile = new File("D:\\project\\generator2\\test-generatorConfig.xml");
+            File configFile = new File("D:\\project\\test\\generator-template\\test-generatorConfig.xml");
+            //File configFile = new File("D:\\project\\generator2\\test-generatorConfig.xml");
             //File configFile = new File("D:\\project\\ac-generator\\user-generatorConfig.xml");
             ConfigurationParser cp = new ConfigurationParser(warnings);
             Configuration config = cp.parseConfiguration(configFile);

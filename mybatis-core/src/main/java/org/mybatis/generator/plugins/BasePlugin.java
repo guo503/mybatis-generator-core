@@ -44,6 +44,8 @@ public class BasePlugin extends PluginAdapter {
     protected String listByCondition;
     protected String count;
     protected String list;
+    protected FullyQualifiedJavaType iManage;
+    protected FullyQualifiedJavaType manageImpl;
 
     /**
      * 是否生成logger日志
@@ -95,6 +97,9 @@ public class BasePlugin extends PluginAdapter {
         this.list = context.getProp(daoType, MethodEnum.LIST.getName());
         this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
+
+        this.iManage = new FullyQualifiedJavaType("mybatis.base.template.manage.IManage");
+        this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.manage.ManageImpl");
 
         this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
         this.service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");
