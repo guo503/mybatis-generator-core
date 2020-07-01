@@ -67,12 +67,14 @@ public interface IManage<T> {
     /**
      * 根据po查询列表
      *
-     * @param t
+     * @param t t
+     * @param pageNum 页码
+     * @param pageSize 每页数量
      * @return
      * @author guos
-     * @date 2020/6/30 20:08
+     * @date 2020/7/1 9:27
      **/
-    List<T> list(T t);
+    List<T> list(T t, int pageNum, int pageSize);
 
 
     /**

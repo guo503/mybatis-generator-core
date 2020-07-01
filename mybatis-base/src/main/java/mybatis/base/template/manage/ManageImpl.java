@@ -6,6 +6,7 @@ import mybatis.base.helper.TableParser;
 import mybatis.base.mapper.Mapper;
 import mybatis.core.entity.Condition;
 import mybatis.core.entity.LimitCondition;
+import mybatis.core.page.PageInfo;
 import mybatis.core.utils.ReflectionKit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,18 +102,18 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     /**
      * 根据po查询列表
      *
-     * @param t t
+     * @param t        t
+     * @param pageNum  页码
+     * @param pageSize 每页数量
      * @return
      * @author guos
-     * @date 2020/6/30 20:08
+     * @date 2020/7/1 9:27
      **/
     @Override
-    public List<T> list(T t) {
+    public List<T> list(T t, int pageNum, int pageSize) {
         Assert.notNull(t, t + "不能为空");
-        Class<?> entityClass = t.getClass();
-        Object start = ReflectionKit.getMethodValue(entityClass, t, "start");
-        Object row = ReflectionKit.getMethodValue(entityClass, t, "row");
-        return baseMapper.listLimitx(t, new LimitCondition((int) start, (int) row));
+        PageInfo<T> pageInfo = new PageInfo<>(pageNum, pageSize);
+        return baseMapper.listLimitx(t, new LimitCondition(pageInfo.getOffset(), pageSize));
     }
 
     /**

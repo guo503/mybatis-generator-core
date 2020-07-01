@@ -88,6 +88,10 @@ public class PageInfo<T> {
         this.totalPage = totalPage;
     }
 
+    public int getOffset() {
+        return (pageNum - 1) * pageSize;
+    }
+
     @Override
     public String toString() {
         return "PageInfo{" +
