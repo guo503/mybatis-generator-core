@@ -42,31 +42,6 @@ public class ManagePlugin extends BasePlugin {
     private String saveAndGet;
 
     /**
-     * 获取用户名方法
-     **/
-    private String userNameMethod = null;
-
-    /**
-     * 日期格式方法
-     **/
-    private String dateMethod = null;
-
-    /**
-     * 创建时间
-     **/
-    private String createTime;
-
-    /**
-     * 修改时间
-     **/
-    private String updateTime;
-
-    /**
-     * 自定义异常类全路径
-     **/
-    private String exceptionPack;
-
-    /**
      * 表的列list
      **/
     private List<IntrospectedColumn> columns;
@@ -106,11 +81,6 @@ public class ManagePlugin extends BasePlugin {
         this.manageProject = context.getPPVal(className, "manageProject");
         this.manageImplProject = context.getPPVal(className, "manageImplProject");
 
-        this.userNameMethod = context.getProp(className, "userNameMethod");
-        this.dateMethod = context.getProp(className, "dateMethod");
-        this.createTime = context.getProp(className, "create_time");
-        this.updateTime = context.getProp(className, "update_time");
-        this.exceptionPack = context.getProp(className, "exceptionPack");
         return true;
     }
 
@@ -142,10 +112,10 @@ public class ManagePlugin extends BasePlugin {
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
 
         //查询条件类
-        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
+        //String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
         //分页查询条件类
-        String limitConditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
+        //String limitConditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.LIMIT_CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
         String manageFilePath = manageProject + LocalFileUtils.getPath(managePath) + suffix;
@@ -158,22 +128,22 @@ public class ManagePlugin extends BasePlugin {
         Interface interface1 = new Interface(interfaceType);
         interface1.addSuperInterface(new FullyQualifiedJavaType(iManage.getShortName() + "<" + domainObjectName + ">"));
         interface1.addImportedType(iManage);
-        interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
-        interface1.addImportedType(new FullyQualifiedJavaType(limitConditionType));
+        //interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
+        //interface1.addImportedType(new FullyQualifiedJavaType(limitConditionType));
 
         //实现类
         TopLevelClass topLevelClass = new TopLevelClass(manageType);
         topLevelClass.setSuperClass(new FullyQualifiedJavaType(manageImpl.getShortName() + "<" + daoType.getShortName() + ", " + domainObjectName + ">"));
         topLevelClass.addImportedType(manageImpl);
-        topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType(limitConditionType));
+        //topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
+        //topLevelClass.addImportedType(new FullyQualifiedJavaType(limitConditionType));
         //先删除
         Files.deleteIfExists(Paths.get(manageFilePath));
         // 导入必须的类
-        addImport(interface1, null);
+        //addImport(interface1, null);
         interface1.addImportedType(MethodGeneratorUtils.getPoType(context, introspectedTable));
-        // 接口
-        addService(interface1, introspectedTable, tableName, manageFiles);
+        //生成接口文件
+        addService(interface1, manageFiles);
         //添加接口注释
         CommentUtils.addGeneralInterfaceComment(interface1, introspectedTable);
         List<GeneratedJavaFile> files = new ArrayList<>(manageFiles);
@@ -185,15 +155,11 @@ public class ManagePlugin extends BasePlugin {
         //添加类注释
         CommentUtils.addGeneralClassComment(topLevelClass, introspectedTable);
 
-        if (this.hasDateColumn(dateMethod, createTime, updateTime)) {//是否需要导入date类
-            FullyQualifiedJavaTypeUtils.importType(null, topLevelClass, "java.util.Date");
-        }
-
         if (StringUtility.stringHasValue(exceptionPack)) {
             FullyQualifiedJavaTypeUtils.importType(null, topLevelClass, exceptionPack);
         }
         // 实现类
-        addServiceImpl(topLevelClass, introspectedTable, tableName, manageImplFiles);
+        addServiceImpl(topLevelClass, manageImplFiles);
         files.addAll(manageImplFiles);
         return files;
     }
@@ -202,34 +168,28 @@ public class ManagePlugin extends BasePlugin {
      * add interface
      *
      * @param tableName
-     * @param files
      */
-    protected void addService(Interface interface1, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
-
-        interface1.setVisibility(JavaVisibility.PUBLIC);
-
-        // add method
+    protected void addServiceMethods(Interface interface1, IntrospectedTable introspectedTable, String tableName) {
         Method method;
+        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
-//        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
-//        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
-//        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
-//        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
-
-//        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
         if (StringUtility.stringHasValue(deleteByCondition)) {
             method = delete(introspectedTable, deleteByCondition, tableName, 1);
@@ -237,28 +197,28 @@ public class ManagePlugin extends BasePlugin {
             interface1.addMethod(method);
         }
 
-//        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
-//        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
-
-
-//        method = countByCondition(introspectedTable, count);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
 
-//        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = countByCondition(introspectedTable, count);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
 
-//        method = countByCondition(introspectedTable, countByCondition);
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
+
+
+        method = countByCondition(introspectedTable, countByCondition);
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
 
 
         method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
@@ -273,25 +233,66 @@ public class ManagePlugin extends BasePlugin {
         MethodUtils.clear(method);
         interface1.addMethod(method);
 
-//        method = batchList(null, introspectedTable, MethodEnum.BATCH_LIST.getValue());
-//        MethodUtils.clear(method);
-//        interface1.addMethod(method);
+        method = batchList(null, introspectedTable, MethodEnum.BATCH_LIST.getValue());
+        MethodUtils.clear(method);
+        interface1.addMethod(method);
+    }
 
+    protected void addService(Interface interface1,List<GeneratedJavaFile> files){
+        interface1.setVisibility(JavaVisibility.PUBLIC);
         //此外报错[已修2016-03-22，增加:"context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, manageProject, fileEncoding, context.getJavaFormatter());
-
         files.add(file);
+    }
+
+
+    protected void addServiceImplMethods(TopLevelClass topLevelClass,IntrospectedTable introspectedTable,String tableName){
+        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.*"));
+        topLevelClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
+        topLevelClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
+        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
+        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
+        topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName));
+
+        topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
+
+        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
+
+        if (StringUtility.stringHasValue(deleteByCondition)) {
+            topLevelClass.addMethod(delete(introspectedTable, deleteByCondition, tableName, 1));
+        }
+
+        topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
+
+        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
+
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
+
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
+
+        topLevelClass.addMethod(countByCondition(introspectedTable, count));
+
+        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
+
+        topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
+
+        topLevelClass.addMethod(getOtherList(this.getClass().getName(), listId, introspectedTable, tableName, 7));
+
+        topLevelClass.addMethod(getOtherMap(map, introspectedTable, tableName, 7));
+
+        topLevelClass.addMethod(getOtherMap(mapByIds, introspectedTable, tableName, 6));
+
+        topLevelClass.addMethod(batchList(topLevelClass, introspectedTable, MethodEnum.BATCH_LIST.getValue()));
+
     }
 
 
     /**
      * add implements class
      *
-     * @param introspectedTable
-     * @param tableName
      * @param files
      */
-    protected void addServiceImpl(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
+    protected void addServiceImpl(TopLevelClass topLevelClass, List<GeneratedJavaFile> files) {
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         // set implements interface
         topLevelClass.addSuperInterface(interfaceType);
@@ -301,55 +302,13 @@ public class ManagePlugin extends BasePlugin {
             topLevelClass.addImportedType(service);
         }
         topLevelClass.addImportedType(manageType);
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.*"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
+
         //添加Log属性
         if (enableLogger) {
             ClassUtils.addLogger(topLevelClass);
         }
         // add import dao
         addField(topLevelClass);
-
-        /**
-         * type:  pojo 1 ;key 2 ;example 3 ;pojo+example 4
-         */
-
-
-        //topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName));
-
-        //topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
-
-        //topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
-
-        if (StringUtility.stringHasValue(deleteByCondition)) {
-            topLevelClass.addMethod(delete(introspectedTable, deleteByCondition, tableName, 1));
-        }
-
-        //topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
-
-        //topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
-
-        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
-
-        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
-
-        //topLevelClass.addMethod(countByCondition(introspectedTable, count));
-
-        //topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
-
-        //topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
-
-        topLevelClass.addMethod(getOtherList(this.getClass().getName(), listId, introspectedTable, tableName, 7));
-
-        topLevelClass.addMethod(getOtherMap(map, introspectedTable, tableName, 7));
-
-        topLevelClass.addMethod(getOtherMap(mapByIds, introspectedTable, tableName, 6));
-
-        //topLevelClass.addMethod(batchList(topLevelClass, introspectedTable, MethodEnum.BATCH_LIST.getValue()));
-
         //此外报错[已修2016-03-22，增加:",context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, manageImplProject, fileEncoding, context.getJavaFormatter());
         files.add(file);
@@ -667,23 +626,7 @@ public class ManagePlugin extends BasePlugin {
         }
 
         if (MethodEnum.SAVE.getValue().equals(methodName) || MethodEnum.UPDATE.getValue().equals(methodName)) {
-            String getUserName;
-            String getDate;
             method.addBodyLine("Assert.notNull(" + domainName + "," + "\"" + domainName + "不能为空\");");
-            if (MethodEnum.SAVE.getValue().equals(methodName)) {
-                String creator = context.getProp(pluginType, "creator");
-                getUserName = StringUtility.stringHasValue(creator) ? creator : CommonConstant.DEFAULT_USER;
-                getDate = this.getMethodName(dateMethod, createTime);
-
-                this.setMethodValue(method, params, creator, getUserName);//设置用户名
-                this.setMethodValue(method, params, createTime, getDate);//设置时间
-            } else {
-                String updater = context.getProp(pluginType, "updater");
-                getUserName = StringUtility.stringHasValue(updater) ? updater : CommonConstant.DEFAULT_USER;
-                getDate = this.getMethodName(dateMethod, updateTime);
-                this.setMethodValue(method, params, updater, getUserName);//设置用户名
-                this.setMethodValue(method, params, updateTime, getDate);//设置时间
-            }
         }
         //saveAndGet
         if (MethodEnum.SAVE_AND_GET.getValue().equals(methodName)) {
@@ -695,7 +638,6 @@ public class ManagePlugin extends BasePlugin {
         sb.append(getDaoShort());
         sb.append(methodName);
         sb.append("x");
-
 
         sb.append("(");
         sb.append(params);
@@ -887,7 +829,7 @@ public class ManagePlugin extends BasePlugin {
             topLevelClass.addImportedType(daoType);
             topLevelClass.addImportedType(interfaceType);
             topLevelClass.addImportedType(pojoType);
-            topLevelClass.addImportedType(listType);
+            //topLevelClass.addImportedType(listType);
             if (enableLogger) {
                 topLevelClass.addImportedType(slf4jLogger);
                 topLevelClass.addImportedType(slf4jLoggerFactory);
@@ -895,19 +837,6 @@ public class ManagePlugin extends BasePlugin {
             if (enableAnnotation) {
                 topLevelClass.addImportedType(service);
                 topLevelClass.addImportedType(autowired);
-            }
-
-            if (topLevelClass.getType().getShortName().endsWith("Impl")) {
-                FullyQualifiedJavaType override = new FullyQualifiedJavaType("java.lang.Override");
-                topLevelClass.addImportedType(override);
-                if (StringUtility.stringHasValue(userNameMethod)) {
-                    FullyQualifiedJavaTypeUtils.importType(null, topLevelClass, MethodUtils.getFullClass(userNameMethod, "."));
-                }
-
-                if (StringUtility.stringHasValue(dateMethod)) {
-                    FullyQualifiedJavaTypeUtils.importType(interfaces, topLevelClass, MethodUtils.getFullClass(dateMethod, "."));
-                }
-
             }
         }
     }
@@ -920,60 +849,5 @@ public class ManagePlugin extends BasePlugin {
     public boolean clientInsertMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
         FullyQualifiedJavaType returnType = method.getReturnType();
         return true;
-    }
-
-
-    private String getMethodName(String fullMethodName, String str) {
-        String setValue = null;
-        if (!hasColumn(str)) {
-            return null;
-        }
-        if (StringUtility.stringHasValue(fullMethodName)) {
-            setValue = MethodUtils.getFullMethod(fullMethodName, ".");
-        }
-        if (!StringUtility.stringHasValue(setValue)) {//没有配置默认方法，则使用默认值
-            setValue = CommonConstant.DEFAULT_TIME;
-        }
-        return setValue;
-    }
-
-
-    private boolean hasColumn(String str) {
-        if (!StringUtility.stringHasValue(str)) {
-            return false;
-        }
-        for (IntrospectedColumn column : columns) {
-            if (str.equals(column.getActualColumnName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //设置方法值
-    private void setMethodValue(Method method, String params, String column, String val) {
-        if (!hasColumn(column)) {
-            return;
-        }
-        method.addBodyLine("if (StringUtils.isEmpty(" + MethodUtils.generateGet(params, column) + ")) {");
-        if (CommonConstant.DEFAULT_USER.equals(val)) {
-            method.addBodyLine(MethodUtils.generateSet(params, column, "\"" + val + "\"") + ";");
-        } else {
-            method.addBodyLine(MethodUtils.generateSet(params, column, val) + ";");
-        }
-        method.addBodyLine("}");
-    }
-
-    private boolean hasDateColumn(String dateMethod, String... actualColumns) {
-        if (!StringUtility.stringHasValue(dateMethod)) {
-            if (actualColumns != null && actualColumns.length > 0) {
-                for (String column : actualColumns) {
-                    if (hasColumn(column)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 }

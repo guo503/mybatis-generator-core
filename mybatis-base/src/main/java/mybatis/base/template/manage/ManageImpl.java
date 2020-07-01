@@ -2,18 +2,19 @@ package mybatis.base.template.manage;
 
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import mybatis.base.helper.TableParser;
 import mybatis.base.mapper.Mapper;
 import mybatis.core.entity.Condition;
 import mybatis.core.entity.LimitCondition;
 import mybatis.core.page.PageInfo;
-import mybatis.core.utils.ReflectionKit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -78,10 +79,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     @Transactional
     public T saveAndGet(T t) {
         this.save(t);
-        Class<?> entityClass = t.getClass();
-        String primaryKeyName = TableParser.getPrimaryKeyName(entityClass);
-        Object idVal = ReflectionKit.getMethodValue(entityClass, t, primaryKeyName);
-        return this.get((Integer) idVal);
+        return this.get(TableParser.getPrimaryKeyVal(t));
     }
 
     /**
@@ -100,17 +98,52 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
 
 
     /**
+     * 根据条件查询id集合
+     *
+     * @param condition
+     * @return
+     * @author guos
+     * @date 2020/7/1 9:47
+     **/
+    @Override
+    public List<Integer> listId(Condition<T> condition) {
+        List<T> list = this.listByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return Lists.newArrayList();
+        }
+        List<Integer> ids = Lists.newArrayList();
+        list.forEach(t -> {
+            ids.add(TableParser.getPrimaryKeyVal(t));
+        });
+        return ids;
+    }
+
+
+    /**
      * 根据po查询列表
      *
-     * @param t        t
-     * @param pageNum  页码
-     * @param pageSize 每页数量
+     * @param t t
      * @return
      * @author guos
      * @date 2020/7/1 9:27
      **/
     @Override
-    public List<T> list(T t, int pageNum, int pageSize) {
+    public List<T> list(T t) {
+        return this.list(t, Integer.MAX_VALUE, 1);
+    }
+
+    /**
+     * 根据po查询列表
+     *
+     * @param t        t
+     * @param pageSize 每页数量
+     * @param pageNum  页码
+     * @return
+     * @author guos
+     * @date 2020/7/1 9:27
+     **/
+    @Override
+    public List<T> list(T t, int pageSize, int pageNum) {
         Assert.notNull(t, t + "不能为空");
         PageInfo<T> pageInfo = new PageInfo<>(pageSize, pageNum);
         return baseMapper.listLimitx(t, new LimitCondition(pageInfo.getOffset(), pageSize));
@@ -196,6 +229,46 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
         condition.createCriteria().andIn(primaryKeyName, ids);
         condition.limit(maxSize);
         return this.listByCondition(condition);
+    }
+
+
+    /**
+     * 根据ids查询map
+     *
+     * @param ids ids
+     * @return
+     * @author guos
+     * @date 2020/7/1 10:12
+     **/
+    @Override
+    public Map<Integer, T> mapByIds(List<Integer> ids) {
+        List<T> list = this.listByIds(ids);
+        Map<Integer, T> map = Maps.newHashMap();
+        list.forEach(t -> {
+            map.put(TableParser.getPrimaryKeyVal(t), t);
+        });
+        return map;
+    }
+
+    /**
+     * 根据条件查询map
+     *
+     * @param condition 条件
+     * @return
+     * @author guos
+     * @date 2020/7/1 10:12
+     **/
+    @Override
+    public Map<Integer, T> map(Condition<T> condition) {
+        List<T> list = this.listByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return Maps.newHashMap();
+        }
+        Map<Integer, T> map = Maps.newHashMap();
+        list.forEach(t -> {
+            map.put(TableParser.getPrimaryKeyVal(t), t);
+        });
+        return map;
     }
 
     /**

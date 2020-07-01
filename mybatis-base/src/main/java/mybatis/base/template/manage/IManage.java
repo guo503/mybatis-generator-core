@@ -4,6 +4,7 @@ package mybatis.base.template.manage;
 import mybatis.core.entity.Condition;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author guos
@@ -63,18 +64,39 @@ public interface IManage<T> {
      **/
     int update(T t);
 
+    /**
+     * 根据条件查询id集合
+     *
+     * @param condition
+     * @return
+     * @author guos
+     * @date 2020/7/1 9:47
+     **/
+    List<Integer> listId(Condition<T> condition);
+
 
     /**
      * 根据po查询列表
      *
      * @param t t
-     * @param pageNum 页码
-     * @param pageSize 每页数量
      * @return
      * @author guos
      * @date 2020/7/1 9:27
      **/
-    List<T> list(T t, int pageNum, int pageSize);
+    List<T> list(T t);
+
+
+    /**
+     * 根据po查询列表
+     *
+     * @param t        t
+     * @param pageSize 每页数量
+     * @param pageNum  页码
+     * @return
+     * @author guos
+     * @date 2020/7/1 9:27
+     **/
+    List<T> list(T t, int pageSize, int pageNum);
 
 
     /**
@@ -121,7 +143,6 @@ public interface IManage<T> {
     List<T> listByIds(List<Integer> ids);
 
 
-
     /**
      * 根据ids查询列表
      *
@@ -132,6 +153,28 @@ public interface IManage<T> {
      * @date 2020/6/30 20:59
      **/
     List<T> listByIds(List<Integer> ids, int maxSize);
+
+
+    /**
+     * 根据ids查询map
+     *
+     * @param ids ids
+     * @return
+     * @author guos
+     * @date 2020/7/1 10:12
+     **/
+    Map<Integer, T> mapByIds(List<Integer> ids);
+
+
+    /**
+     * 根据条件查询map
+     *
+     * @param condition 条件
+     * @return
+     * @author guos
+     * @date 2020/7/1 10:12
+     **/
+    Map<Integer, T> map(Condition<T> condition);
 
     /**
      * 分批查询

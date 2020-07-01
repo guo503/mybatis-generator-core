@@ -4,6 +4,7 @@ package mybatis.base.helper;
 import mybatis.base.exception.EntityUnDefinedException;
 import mybatis.base.meta.*;
 import mybatis.core.annotation.*;
+import mybatis.core.utils.ReflectionKit;
 import mybatis.core.utils.StrUtils;
 
 import java.lang.reflect.Field;
@@ -193,6 +194,20 @@ public class TableParser {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+    /**
+     * 根据实例获取主键值
+     * @param t	t
+     * @author guos
+     * @date 2020/7/1 9:56
+     * @return
+     **/
+    public static <T> Integer getPrimaryKeyVal(T t) {
+        Class<?> entityClass = t.getClass();
+        String primaryKeyName = TableParser.getPrimaryKeyName(entityClass);
+        return (Integer) ReflectionKit.getMethodValue(entityClass, t, primaryKeyName);
     }
 
 }
