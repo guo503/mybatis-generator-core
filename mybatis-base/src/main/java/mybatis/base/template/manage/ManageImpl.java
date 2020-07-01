@@ -112,7 +112,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     @Override
     public List<T> list(T t, int pageNum, int pageSize) {
         Assert.notNull(t, t + "不能为空");
-        PageInfo<T> pageInfo = new PageInfo<>(pageNum, pageSize);
+        PageInfo<T> pageInfo = new PageInfo<>(pageSize, pageNum);
         return baseMapper.listLimitx(t, new LimitCondition(pageInfo.getOffset(), pageSize));
     }
 
