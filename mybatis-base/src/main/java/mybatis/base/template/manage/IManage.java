@@ -90,13 +90,13 @@ public interface IManage<T> {
      * 根据po查询列表
      *
      * @param t        t
-     * @param pageSize 每页数量
      * @param pageNum  页码
+     * @param pageSize 每页数量
      * @return
      * @author guos
      * @date 2020/7/1 9:27
      **/
-    List<T> list(T t, int pageSize, int pageNum);
+    List<T> list(T t, int pageNum, int pageSize);
 
 
     /**
