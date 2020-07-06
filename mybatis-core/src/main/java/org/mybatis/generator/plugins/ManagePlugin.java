@@ -65,7 +65,7 @@ public class ManagePlugin extends BasePlugin {
 
         this.managePack = context.getPPVal(className, "managePack");
         this.manageImplPack = context.getPPVal(className, "manageImplPack");
-        this.manageSuffix = context.getPPVal(className, "manageSuffix");
+        this.manageSuffix = context.getProp(className, "manageSuffix");
         this.manageProject = context.getPPVal(className, "manageProject");
         this.manageImplProject = context.getPPVal(className, "manageImplProject");
 
