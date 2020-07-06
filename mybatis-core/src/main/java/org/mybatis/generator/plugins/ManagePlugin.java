@@ -34,13 +34,6 @@ public class ManagePlugin extends BasePlugin {
     private String manageImplProject;
 
 
-    private String mapByIds;
-    private String map;
-
-    private String listId;
-
-    private String saveAndGet;
-
     /**
      * 表的列list
      **/
@@ -70,14 +63,9 @@ public class ManagePlugin extends BasePlugin {
             enableAnnotation = StringUtility.isTrue(enableAnnotationStr);
         }
 
-        this.manageSuffix = context.getProp(className, "manageSuffix");
-        this.map = context.getProp(className, MethodEnum.MAP.getName());
-        this.mapByIds = context.getProp(className, MethodEnum.MAP_BY_IDS.getName());
-        this.listId = context.getProp(className, MethodEnum.LIST_ID.getName());
-        this.saveAndGet = context.getProp(className, MethodEnum.SAVE_AND_GET.getName());
-
         this.managePack = context.getPPVal(className, "managePack");
         this.manageImplPack = context.getPPVal(className, "manageImplPack");
+        this.manageSuffix = context.getPPVal(className, "manageSuffix");
         this.manageProject = context.getPPVal(className, "manageProject");
         this.manageImplProject = context.getPPVal(className, "manageImplProject");
 

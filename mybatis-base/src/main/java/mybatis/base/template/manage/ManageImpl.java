@@ -1,13 +1,13 @@
 package mybatis.base.template.manage;
 
 
-import com.github.pagehelper.Page;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import mybatis.base.helper.TableParser;
 import mybatis.base.mapper.Mapper;
 import mybatis.core.entity.Condition;
 import mybatis.core.entity.LimitCondition;
+import mybatis.core.page.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -145,8 +145,8 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     @Override
     public List<T> list(T t, int pageNum,int pageSize) {
         Assert.notNull(t, t + "不能为空");
-        Page<T> page = new Page<>(pageNum,pageSize);
-        return baseMapper.listLimitx(t, new LimitCondition(page.getStartRow(), pageSize));
+        PageInfo<T> page = new PageInfo<>(pageNum,pageSize);
+        return baseMapper.listLimitx(t, new LimitCondition(page.getOffset(), pageSize));
     }
 
     /**

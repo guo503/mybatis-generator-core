@@ -44,6 +44,12 @@ public class BasePlugin extends PluginAdapter {
     protected String listByCondition;
     protected String count;
     protected String list;
+    protected String mapByIds;
+    protected String map;
+    protected String listId;
+    protected String saveAndGet;
+
+
     protected FullyQualifiedJavaType iManage;
     protected FullyQualifiedJavaType manageImpl;
 
@@ -97,6 +103,10 @@ public class BasePlugin extends PluginAdapter {
         this.list = context.getProp(daoType, MethodEnum.LIST.getName());
         this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
         this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
+        this.map = context.getProp(daoType, MethodEnum.MAP.getName());
+        this.mapByIds = context.getProp(daoType, MethodEnum.MAP_BY_IDS.getName());
+        this.listId = context.getProp(daoType, MethodEnum.LIST_ID.getName());
+        this.saveAndGet = context.getProp(daoType, MethodEnum.SAVE_AND_GET.getName());
 
         this.iManage = new FullyQualifiedJavaType("mybatis.base.template.manage.IManage");
         this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.manage.ManageImpl");

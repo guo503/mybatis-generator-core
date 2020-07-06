@@ -51,7 +51,7 @@ public class PageInfo<T> {
     }
 
     public void setPageSize(int pageSize) {
-        this.pageSize = pageSize > MAX_PAGE_SIZE ? MAX_PAGE_SIZE : pageSize;
+        this.pageSize = Math.min(pageSize, MAX_PAGE_SIZE);
     }
 
     /**
@@ -60,7 +60,7 @@ public class PageInfo<T> {
      * @return 页数
      */
     public int getPageNum() {
-        return pageNum < 1 ? 1 : pageNum;
+        return Math.max(pageNum, 1);
     }
 
     public void setPageNum(int pageNum) {
