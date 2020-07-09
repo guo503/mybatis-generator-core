@@ -296,7 +296,7 @@ public class ManagePlugin extends BasePlugin {
             ClassUtils.addLogger(topLevelClass);
         }
         // add import dao
-        addField(topLevelClass);
+        //addField(topLevelClass);
         //此外报错[已修2016-03-22，增加:",context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, manageImplProject, fileEncoding, context.getJavaFormatter());
         files.add(file);
@@ -809,9 +809,9 @@ public class ManagePlugin extends BasePlugin {
     private void addImport(Interface interfaces, TopLevelClass topLevelClass) {
         if (interfaces != null) {
             interfaces.addImportedType(pojoType);
-            interfaces.addImportedType(listType);
-            FullyQualifiedJavaType mapType = new FullyQualifiedJavaType("java.util.Map");
-            interfaces.addImportedType(mapType);
+            //interfaces.addImportedType(listType);
+            //FullyQualifiedJavaType mapType = new FullyQualifiedJavaType("java.util.Map");
+            //interfaces.addImportedType(mapType);
         }
         if (topLevelClass != null) {
             topLevelClass.addImportedType(daoType);
@@ -824,7 +824,7 @@ public class ManagePlugin extends BasePlugin {
             }
             if (enableAnnotation) {
                 topLevelClass.addImportedType(service);
-                topLevelClass.addImportedType(autowired);
+                //topLevelClass.addImportedType(autowired);
             }
         }
     }
