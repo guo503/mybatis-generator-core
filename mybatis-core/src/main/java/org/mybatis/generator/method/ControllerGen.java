@@ -136,7 +136,7 @@ public class ControllerGen {
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, paramVo);
         }
-        method.addBodyLine("return " + methodPrefix + alias + "(" + paramVo + ");");
+        method.addBodyLine("return " + methodPrefix + alias + "(" + paramVo + ", this.getPageNum(), this.getPageSize());");
         return method;
     }
 

@@ -5,6 +5,7 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.api.dom.java.Method;
+import org.mybatis.generator.api.dom.java.Parameter;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.MethodEnum;
@@ -192,6 +193,10 @@ public class BusinessGen {
         String resMethod = MethodUtils.getResponseMethod(responseMethod, 2);
         method.setReturnType(returnType);
         CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        //pageNum
+        method.addParameter(new Parameter(new FullyQualifiedJavaType("int"), "pageNum"));
+        //pageSize
+        method.addParameter(new Parameter(new FullyQualifiedJavaType("int"), "pageSize"));
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
@@ -218,7 +223,7 @@ public class BusinessGen {
         String ltCondName = MethodUtils.toLowerCase(condName);
         method.addBodyLine("Condition<" + poName + "> " + ltCondName + " = new Condition<>();");
         if (StringUtility.stringHasValue(page)) {
-            method.addBodyLine(ltCondName + ".limit(" + paramAo + ".getNum(), " + paramAo + ".getRow());");
+            method.addBodyLine(ltCondName + ".limit(pageNum, pageSize);");
         }
         method.addBodyLine("int count = " + methodPrefix + MethodEnum.COUNT_BY_CONDITION.getValue() + "(" + ltCondName + ");");
         method.addBodyLine("if (count == 0){");
