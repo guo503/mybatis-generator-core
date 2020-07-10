@@ -4,7 +4,7 @@ package mybatis.base.mapper;
 import mybatis.base.exception.ParamErrorException;
 import mybatis.core.entity.Condition;
 import mybatis.core.entity.LimitCondition;
-import mybatis.core.page.PageInfo;
+import mybatis.core.page.Page;
 
 import java.util.Collections;
 
@@ -16,7 +16,7 @@ import java.util.Collections;
  */
 public interface PageSelectMapper<T> extends SelectMapper<T> {
 
-    default PageInfo<T> pageByEntity(PageInfo<T> pageInfo, T t) {
+    default Page<T> pageByEntity(Page<T> pageInfo, T t) {
         if (pageInfo.getPageSize() <= 0) {
             throw new ParamErrorException("每页数量不能少于0");
         }
@@ -32,7 +32,7 @@ public interface PageSelectMapper<T> extends SelectMapper<T> {
         return pageInfo;
     }
 
-    default PageInfo<T> pageByCondition(PageInfo<T> pageInfo, Condition<T> condition) {
+    default Page<T> pageByCondition(Page<T> pageInfo, Condition<T> condition) {
         if (pageInfo.getPageSize() <= 0) {
             throw new ParamErrorException("每页数量不能少于0");
         }

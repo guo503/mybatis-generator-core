@@ -180,7 +180,7 @@ public class BusinessGen {
     /**
      * 添加方法
      */
-    public Method listByCondition(FullyQualifiedJavaType serviceType, IntrospectedTable introspectedTable, String alias, String page) {
+    public Method listByCondition(FullyQualifiedJavaType serviceType, IntrospectedTable introspectedTable, String alias) {
 
         Method method = new Method();
         method.setName(alias);
@@ -194,9 +194,9 @@ public class BusinessGen {
         method.setReturnType(returnType);
         CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
         //pageNum
-        method.addParameter(new Parameter(new FullyQualifiedJavaType("int"), "pageNum"));
+        method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), "pageNum"));
         //pageSize
-        method.addParameter(new Parameter(new FullyQualifiedJavaType("int"), "pageSize"));
+        method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), "pageSize"));
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
@@ -222,9 +222,7 @@ public class BusinessGen {
         method.addBodyLine(res);
         String ltCondName = MethodUtils.toLowerCase(condName);
         method.addBodyLine("Condition<" + poName + "> " + ltCondName + " = new Condition<>();");
-        if (StringUtility.stringHasValue(page)) {
-            method.addBodyLine(ltCondName + ".limit(pageNum, pageSize);");
-        }
+        method.addBodyLine(ltCondName + ".limit(pageNum, pageSize);");
         method.addBodyLine("int count = " + methodPrefix + MethodEnum.COUNT_BY_CONDITION.getValue() + "(" + ltCondName + ");");
         method.addBodyLine("if (count == 0){");
         method.addBodyLine("return result;");
@@ -289,7 +287,7 @@ public class BusinessGen {
      * date 2019/3/22 16:42
      * return
      **/
-    public Method doBatch(FullyQualifiedJavaType serviceType, IntrospectedTable introspectedTable, String alias, String page) {
+    public Method doBatch(FullyQualifiedJavaType serviceType, IntrospectedTable introspectedTable, String alias) {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
@@ -306,11 +304,14 @@ public class BusinessGen {
             MethodUtils.addLoggerInfo(method, paramAo);
         }
         String ltCondName = MethodUtils.toLowerCase(condName);
-        String pageSizeStr = MethodUtils.getClassName(page) + ".getMaxRow() - 1";
+        String pageSizeStr = "Page.MAX_SIZE - 1";
+        String maxSize = "maxSize";
+        method.addBodyLine("int " + maxSize + " = " + pageSizeStr + " ;");
         method.addBodyLine("Condition<" + poName + "> " + ltCondName + " = new Condition<>();");
-        method.addBodyLine("int size = " + pageSizeStr + " ;");
+        method.addBodyLine(ltCondName + ".limit(" + maxSize + ") ;");
+        method.addBodyLine("int size = " + maxSize + " ;");
         method.addBodyLine("int gtId = 0;");
-        method.addBodyLine("while (size >= " + pageSizeStr + ") {");
+        method.addBodyLine("while (size >= " + maxSize + ") {");
         method.addBodyLine("List<" + poName + "> list = " + CommonGen.getShortName(serviceType) + MethodEnum.BATCH_LIST.getValue() + "(gtId," + ltCondName + ");");
         method.addBodyLine("if (CollectionUtils.isEmpty(list)) {");
         method.addBodyLine("break;");

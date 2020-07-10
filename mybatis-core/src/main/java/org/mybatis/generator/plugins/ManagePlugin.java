@@ -551,7 +551,7 @@ public class ManagePlugin extends BasePlugin {
             if (topLevelClass != null) {
                 topLevelClass.addImportedType(page);
             }
-            method.addBodyLine(condName + ".limit(1," + MethodUtils.getClassName(page) + ".getMaxRow() - 1);");
+            method.addBodyLine(condName + ".limit(1," + MethodUtils.getClassName(page) + ".MAX_SIZE - 1);");
             method.addBodyLine(condName + ".setOrderBy(" + domainObjectName + ".ID);");
             method.addBodyLine(condName + ".andCriteria().andGreaterThan(" + domainObjectName + ".ID, gtId);");
         }

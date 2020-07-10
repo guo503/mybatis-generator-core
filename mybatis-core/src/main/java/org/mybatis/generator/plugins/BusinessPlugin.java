@@ -119,8 +119,6 @@ public class BusinessPlugin extends BasePlugin {
 
         this.remoteResource = context.getProp(className, "remoteResource");
 
-        page = context.getProperty("page");
-
         this.exceptionPack = context.getProp(className, "exceptionPack");
 
         return true;
@@ -237,57 +235,57 @@ public class BusinessPlugin extends BasePlugin {
     }
 
 
-
     private void addMethods(Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, boolean isInterface) {
         BusinessGen businessGen = new BusinessGen(context, this.responseMethod, this.modelConvertUtils, this.enableLogger);
         Method method;
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
             method = businessGen.selectByPrimaryKey(this.serviceType, introspectedTable, this.selectByPrimaryKey);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.insertSelective, this.exceptionPack, this.versions, this.enableVersions);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.deleteByCondition))) {
             method = businessGen.delete(this.serviceType, introspectedTable, this.deleteByCondition);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
             method = businessGen.insertOrUpdate(this.serviceType, introspectedTable, this.updateByPrimaryKeySelective, this.exceptionPack, this.versions, this.enableVersions);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
-            method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listByCondition, this.page);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listByCondition);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countByCondition))) {
             method = businessGen.count(this.serviceType, introspectedTable, this.countByCondition);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
 
-        if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod)) && StringUtility.stringHasValue(this.page)) {
-            method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue(), this.page);
-            this.addMethod(method, interface1, topLevelClass, introspectedTable, isInterface);
+        if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod))) {
+            method = businessGen.doBatch(this.serviceType, introspectedTable, MethodEnum.DO_BATCH.getValue());
+            this.addMethod(method, interface1, topLevelClass, isInterface);
         }
     }
 
-    private void addMethod(Method method, Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, boolean isInterface) {
+    private void addMethod(Method method, Interface interface1, TopLevelClass topLevelClass, boolean isInterface) {
         if (isInterface) {
             MethodUtils.clear(method);
             interface1.addMethod(method);
         } else {
             method.addAnnotation("@Override");
             topLevelClass.addMethod(method);
-            if (Objects.equals(method.getName(), MethodEnum.getNameByValue(this.doBatchMethod))) {
+            if (Objects.equals(method.getName(), this.doBatchMethod)) {
                 topLevelClass.addImportedType("org.springframework.util.CollectionUtils");
+                topLevelClass.addImportedType("mybatis.core.page.Page");
             }
-            if (Objects.equals(method.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
+            if (Objects.equals(method.getName(), this.listByCondition)) {
                 topLevelClass.addImportedType(modelConvertUtils);
             }
         }

@@ -108,6 +108,8 @@ public class BasePlugin extends PluginAdapter {
         this.listId = context.getProp(daoType, MethodEnum.LIST_ID.getName());
         this.saveAndGet = context.getProp(daoType, MethodEnum.SAVE_AND_GET.getName());
 
+        this.page="mybatis.core.page.Page";
+
         this.iManage = new FullyQualifiedJavaType("mybatis.base.template.manage.IManage");
         this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.manage.ManageImpl");
 

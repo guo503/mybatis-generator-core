@@ -2,11 +2,11 @@ package mybatis.core.page;
 
 import java.util.List;
 
-public class PageInfo<T> {
+public class Page<T> {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    private static final int MAX_PAGE_SIZE = 2000;
+    public static final int MAX_SIZE = 2000;
 
     /**
      * 实体类
@@ -30,10 +30,10 @@ public class PageInfo<T> {
      */
     private int totalPage;
 
-    public PageInfo() {
+    public Page() {
     }
 
-    public PageInfo(int pageSize, int pageNum) {
+    public Page(int pageSize, int pageNum) {
         this.pageSize = pageSize;
         this.pageNum = pageNum;
     }
@@ -51,7 +51,7 @@ public class PageInfo<T> {
     }
 
     public void setPageSize(int pageSize) {
-        this.pageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+        this.pageSize = Math.min(pageSize, MAX_SIZE);
     }
 
     /**
@@ -94,7 +94,7 @@ public class PageInfo<T> {
 
     @Override
     public String toString() {
-        return "PageInfo{" +
+        return "Page{" +
                 "list=" + list +
                 ", pageSize=" + pageSize +
                 ", pageNum=" + pageNum +

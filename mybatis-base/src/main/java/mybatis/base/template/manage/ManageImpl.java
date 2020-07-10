@@ -7,7 +7,7 @@ import mybatis.base.helper.TableParser;
 import mybatis.base.mapper.Mapper;
 import mybatis.core.entity.Condition;
 import mybatis.core.entity.LimitCondition;
-import mybatis.core.page.PageInfo;
+import mybatis.core.page.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -145,7 +145,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     @Override
     public List<T> list(T t, int pageNum,int pageSize) {
         Assert.notNull(t, t + "不能为空");
-        PageInfo<T> page = new PageInfo<>(pageNum,pageSize);
+        Page<T> page = new Page<>(pageNum,pageSize);
         return baseMapper.listLimitx(t, new LimitCondition(page.getOffset(), pageSize));
     }
 
@@ -282,22 +282,6 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      **/
     @Override
     public List<T> batchList(int gtId, Condition<T> condition) {
-        return this.batchList(gtId, condition, Integer.MAX_VALUE);
-    }
-
-
-    /**
-     * 分批查询
-     *
-     * @param gtId         每批最大id
-     * @param condition    查询条件
-     * @param maxBatchSize 每批最大查询数量
-     * @return
-     * @author guos
-     * @date 2020/6/30 20:22
-     **/
-    @Override
-    public List<T> batchList(int gtId, Condition<T> condition, int maxBatchSize) {
         Assert.notNull(condition, condition + "不能为空");
         T t = TableParser.getInstance(condition);
         if (Objects.isNull(t)) {
@@ -305,7 +289,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
         }
         String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
         //每次最多查询2000条数据
-        condition.limit(1, maxBatchSize);
+        condition.limit(1, condition.getLimitCondition().getLimit());
         condition.setOrderBy(primaryKeyName);
         condition.andCriteria().andGreaterThan(primaryKeyName, gtId);
         return this.listByCondition(condition);

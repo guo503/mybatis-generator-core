@@ -186,16 +186,4 @@ public interface IManage<T> {
      * @date 2020/6/30 20:22
      **/
     List<T> batchList(int gtId, Condition<T> condition);
-
-    /**
-     * 分批查询
-     *
-     * @param gtId         每批最大id
-     * @param condition    查询条件
-     * @param maxBatchSize 每批最大查询数量
-     * @return
-     * @author guos
-     * @date 2020/6/30 20:22
-     **/
-    List<T> batchList(int gtId, Condition<T> condition, int maxBatchSize);
 }
