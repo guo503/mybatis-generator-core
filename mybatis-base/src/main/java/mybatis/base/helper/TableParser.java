@@ -170,6 +170,24 @@ public class TableParser {
     }
 
 
+    public static String getPrimaryKeyType(Class<?> clz) {
+        Field[] fields = clz.getDeclaredFields();
+        String typeName = null;
+        for (Field field : fields) {
+            //解析主键
+            Id id = field.getAnnotation(Id.class);
+            if (Objects.nonNull(id)) {
+                typeName = field.getType().getSimpleName();
+                break;
+            }
+        }
+        if (StrUtils.isEmpty(typeName)) {
+            throw new RuntimeException("主键类型异常!");
+        }
+        return typeName;
+    }
+
+
     public static <T> T getInstance(Object o) {
         try {
             Type type = o.getClass().getGenericSuperclass();
@@ -199,10 +217,11 @@ public class TableParser {
 
     /**
      * 根据实例获取主键值
-     * @param t	t
+     *
+     * @param t t
+     * @return
      * @author guos
      * @date 2020/7/1 9:56
-     * @return
      **/
     public static <T> Integer getPrimaryKeyVal(T t) {
         Class<?> entityClass = t.getClass();

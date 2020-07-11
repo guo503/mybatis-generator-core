@@ -49,7 +49,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      * @date 2020/6/29 16:01
      **/
     public T getOne(T t) {
-        Assert.notNull(t, t + "不能为空");
+        Assert.notNull(t, "t不能为空");
         return baseMapper.getOnex(t);
     }
 
@@ -63,7 +63,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      * @date 2020/6/29 16:01
      **/
     public int save(T t) {
-        Assert.notNull(t, t + "不能为空");
+        Assert.notNull(t, "t不能为空");
         return baseMapper.savex(t);
     }
 
@@ -92,7 +92,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      **/
     @Override
     public int update(T t) {
-        Assert.notNull(t, t + "不能为空");
+        Assert.notNull(t, "t不能为空");
         return baseMapper.updatex(t);
     }
 
@@ -144,7 +144,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      **/
     @Override
     public List<T> list(T t, int pageNum,int pageSize) {
-        Assert.notNull(t, t + "不能为空");
+        Assert.notNull(t, "t不能为空");
         Page<T> page = new Page<>(pageNum,pageSize);
         return baseMapper.listLimitx(t, new LimitCondition(page.getOffset(), pageSize));
     }
@@ -159,7 +159,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      **/
     @Override
     public int count(T t) {
-        Assert.notNull(t, t + "不能为空");
+        Assert.notNull(t, "t不能为空");
         return baseMapper.countx(t);
     }
 
@@ -282,7 +282,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      **/
     @Override
     public List<T> batchList(int gtId, Condition<T> condition) {
-        Assert.notNull(condition, condition + "不能为空");
+        Assert.notNull(condition,  "condition不能为空");
         T t = TableParser.getInstance(condition);
         if (Objects.isNull(t)) {
             throw new RuntimeException("获取condition实例失败");
