@@ -53,6 +53,9 @@ public class BasePlugin extends PluginAdapter {
     protected FullyQualifiedJavaType iManage;
     protected FullyQualifiedJavaType manageImpl;
 
+    protected FullyQualifiedJavaType iService;
+    protected FullyQualifiedJavaType serviceImpl;
+
     /**
      * 是否生成logger日志
      */
@@ -112,6 +115,9 @@ public class BasePlugin extends PluginAdapter {
 
         this.iManage = new FullyQualifiedJavaType("mybatis.base.template.manage.IManage");
         this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.manage.ManageImpl");
+
+        this.iService = new FullyQualifiedJavaType("mybatis.base.template.service.IService");
+        this.serviceImpl = new FullyQualifiedJavaType("mybatis.base.template.service.ServiceImpl");
 
         this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
         this.service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");

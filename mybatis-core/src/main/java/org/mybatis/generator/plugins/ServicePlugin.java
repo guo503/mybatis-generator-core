@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -33,14 +34,6 @@ public class ServicePlugin extends BasePlugin {
     private String serviceProject;
     private String serviceImplProject;
 
-
-    private String mapByIds;
-    private String map;
-
-    private String listId;
-
-    private String saveAndGet;
-
     private String serviceSuffix;
 
 
@@ -56,15 +49,11 @@ public class ServicePlugin extends BasePlugin {
     public boolean validate(List<String> warnings) {
         //是否生成logger
         enableLogger = StringUtility.isTrue(context.getProp(className, "enableLogger"));
-        String enableAnnotationStr = context.getProp(className,"enableAnnotation");
+        String enableAnnotationStr = context.getProp(className, "enableAnnotation");
         if (StringUtility.stringHasValue(enableAnnotationStr)) {
             enableAnnotation = StringUtility.isTrue(enableAnnotationStr);
         }
         this.serviceSuffix = context.getProp(className, "serviceSuffix");
-        this.map = context.getProp(className, MethodEnum.MAP.getName());
-        this.mapByIds = context.getProp(className, MethodEnum.MAP_BY_IDS.getName());
-        this.listId = context.getProp(className, MethodEnum.LIST_ID.getName());
-        this.saveAndGet = context.getProp(className, MethodEnum.SAVE_AND_GET.getName());
         this.servicePack = context.getPPVal(className, "servicePack");
         this.serviceImplPack = context.getPPVal(className, "serviceImplPack");
         this.serviceProject = context.getPPVal(className, "serviceProject");
@@ -83,7 +72,7 @@ public class ServicePlugin extends BasePlugin {
         if (!generatorService) {//是否生成service
             return new ArrayList<>();
         }
-        // 取Service名称【com.coolead.service.PetService】
+
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");
         String servicePath = servicePack + "." + tableName + serviceSuffix;
@@ -91,13 +80,10 @@ public class ServicePlugin extends BasePlugin {
 
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
-        // 【com.coolead.mapper.UserMapper】
         daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getProp(ManagePlugin.class.getName(), "manageSuffix"));
 
-        // 【com.coolead.service.impl.PetServiceImpl】logger.info(toLowerCase(daoType.getShortName()));
         serviceType = new FullyQualifiedJavaType(serviceImplPath);
 
-        // 【com.coolead.domain.Pet】
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
 
         //查询条件类
@@ -111,15 +97,22 @@ public class ServicePlugin extends BasePlugin {
         List<GeneratedJavaFile> manageImplFiles = new ArrayList<>();
 
         Interface interface1 = new Interface(interfaceType);
-        interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
+        interface1.addSuperInterface(new FullyQualifiedJavaType(iService.getShortName() + "<" + domainObjectName + ">"));
+        interface1.addImportedType(iService);
+
+        //interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
+
         TopLevelClass topLevelClass = new TopLevelClass(serviceType);
-        topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
+        topLevelClass.setSuperClass(new FullyQualifiedJavaType(serviceImpl.getShortName() + "<" + daoType.getShortName() + ", " + domainObjectName + ">"));
+        topLevelClass.addImportedType(serviceImpl);
+
+        //topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
         Files.deleteIfExists(Paths.get(serviceFilePath));
         // 导入必须的类
         addImport(interface1, null);
         interface1.addImportedType(MethodGeneratorUtils.getPoType(context, introspectedTable));
         // 接口
-        addService(interface1, introspectedTable, tableName, manageFiles);
+        addService(interface1, manageFiles);
         //添加接口注释
         CommentUtils.addGeneralInterfaceComment(interface1, introspectedTable);
         List<GeneratedJavaFile> files = new ArrayList<>(manageFiles);
@@ -130,7 +123,7 @@ public class ServicePlugin extends BasePlugin {
         //添加类注释
         CommentUtils.addGeneralClassComment(topLevelClass, introspectedTable);
         // 实现类
-        addServiceImpl(topLevelClass, introspectedTable, tableName, manageImplFiles);
+        addServiceImpl(topLevelClass, manageImplFiles);
         files.addAll(manageImplFiles);
         return files;
     }
@@ -138,85 +131,13 @@ public class ServicePlugin extends BasePlugin {
     /**
      * add interface
      *
-     * @param tableName
      * @param files
      */
-    protected void addService(Interface interface1, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
+    protected void addService(Interface interface1, List<GeneratedJavaFile> files) {
 
         interface1.setVisibility(JavaVisibility.PUBLIC);
-
-        // add method
-        Method method;
-
-        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        if (StringUtility.stringHasValue(deleteByCondition)) {
-            method = delete(introspectedTable, deleteByCondition, tableName, 1);
-            MethodUtils.clear(method);
-            interface1.addMethod(method);
-        }
-
-        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-
-        method = countByCondition(introspectedTable, count);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-
-        method = countByCondition(introspectedTable, countByCondition);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-
-        method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = listByIds(this.getClass().getName(), introspectedTable, mapByIds, 2);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = listByCondition(this.getClass().getName(), introspectedTable, map, 3);
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
-        method = batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue());
-        MethodUtils.clear(method);
-        interface1.addMethod(method);
-
         //此外报错[已修2016-03-22，增加:"context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, serviceProject, fileEncoding, context.getJavaFormatter());
-
         files.add(file);
     }
 
@@ -224,11 +145,9 @@ public class ServicePlugin extends BasePlugin {
     /**
      * add implements class
      *
-     * @param introspectedTable
-     * @param tableName
      * @param files
      */
-    protected void addServiceImpl(TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName, List<GeneratedJavaFile> files) {
+    protected void addServiceImpl(TopLevelClass topLevelClass, List<GeneratedJavaFile> files) {
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         // set implements interface
         topLevelClass.addSuperInterface(interfaceType);
@@ -237,56 +156,144 @@ public class ServicePlugin extends BasePlugin {
             topLevelClass.addAnnotation("@Service");
             topLevelClass.addImportedType(service);
         }
-        topLevelClass.addImportedType(serviceType);
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
         //添加Log属性
         if (enableLogger) {
             ClassUtils.addLogger(topLevelClass);
         }
         // add import dao
-        addField(topLevelClass, tableName);
-
-        /**
-         * type:  pojo 1 ;key 2 ;example 3 ;pojo+example 4
-         */
-
-
-        topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName));
-
-        topLevelClass.addMethod(selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue()));
-
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1));
-
-        if (StringUtility.stringHasValue(deleteByCondition)) {
-            topLevelClass.addMethod(delete(introspectedTable, deleteByCondition, tableName, 1));
-        }
-
-        topLevelClass.addMethod(getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1));
-
-        topLevelClass.addMethod(getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1));
-
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByIds, introspectedTable, tableName, 6));
-
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), list, introspectedTable, tableName, 5));
-
-        topLevelClass.addMethod(countByCondition(introspectedTable, count));
-
-        topLevelClass.addMethod(getOtherList(BaseMethodPlugin.class.getName(), listByCondition, introspectedTable, tableName, 8));
-
-        topLevelClass.addMethod(countByCondition(introspectedTable, countByCondition));
-
-        topLevelClass.addMethod(getOtherList(this.getClass().getName(), listId, introspectedTable, tableName, 7));
-
-        topLevelClass.addMethod(getOtherMap(map, introspectedTable, tableName, 7));
-
-        topLevelClass.addMethod(getOtherMap(mapByIds, introspectedTable, tableName, 6));
-
-        topLevelClass.addMethod(batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue()));
+        //addField(topLevelClass, tableName);
 
         //此外报错[已修2016-03-22，增加:",context.getJavaFormatter()"]
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, serviceImplProject, fileEncoding, context.getJavaFormatter());
         files.add(file);
+    }
+
+    private void addMethods(Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName) {
+        // add method
+        Method method;
+        //是否是接口
+        boolean isInterface = Objects.nonNull(interface1);
+        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = countByCondition(introspectedTable, count);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+
+        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+
+        method = countByCondition(introspectedTable, countByCondition);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+
+        method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = listByIds(this.getClass().getName(), introspectedTable, mapByIds, 2);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = listByCondition(this.getClass().getName(), introspectedTable, map, 3);
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        method = batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue());
+        if (isInterface) {
+            interface1.addMethod(method);
+            MethodUtils.clear(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+
+        //实现类
+        if (!isInterface) {
+            topLevelClass.addImportedType(serviceType);
+            topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
+            topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
+        }
     }
 
     /**
@@ -294,7 +301,7 @@ public class ServicePlugin extends BasePlugin {
      *
      * @param topLevelClass
      */
-    protected void addField(TopLevelClass topLevelClass, String tableName) {
+    protected void addField(TopLevelClass topLevelClass) {
         // add dao
         Field field = new Field();
         field.setName(MethodUtils.toLowerCase(daoType.getShortName())); // set var name
@@ -737,28 +744,27 @@ public class ServicePlugin extends BasePlugin {
     private void addImport(Interface interfaces, TopLevelClass topLevelClass) {
         if (interfaces != null) {
             interfaces.addImportedType(pojoType);
-            interfaces.addImportedType(listType);
-            FullyQualifiedJavaType mapType = new FullyQualifiedJavaType("java.util.Map");
-            interfaces.addImportedType(mapType);
+            //interfaces.addImportedType(listType);
+            //FullyQualifiedJavaType mapType = new FullyQualifiedJavaType("java.util.Map");
+            //interfaces.addImportedType(mapType);
         }
         if (topLevelClass != null) {
             topLevelClass.addImportedType(daoType);
             topLevelClass.addImportedType(interfaceType);
             topLevelClass.addImportedType(pojoType);
-            topLevelClass.addImportedType(listType);
+            //topLevelClass.addImportedType(listType);
             if (enableLogger) {
                 topLevelClass.addImportedType(slf4jLogger);
                 topLevelClass.addImportedType(slf4jLoggerFactory);
             }
             if (enableAnnotation) {
                 topLevelClass.addImportedType(service);
-                topLevelClass.addImportedType(autowired);
+                //topLevelClass.addImportedType(autowired);
             }
-
-            if (topLevelClass.getType().getShortName().endsWith("Impl")) {
-                FullyQualifiedJavaType override = new FullyQualifiedJavaType("java.lang.Override");
-                topLevelClass.addImportedType(override);
-            }
+//            if (topLevelClass.getType().getShortName().endsWith("Impl")) {
+//                FullyQualifiedJavaType override = new FullyQualifiedJavaType("java.lang.Override");
+//                topLevelClass.addImportedType(override);
+//            }
         }
     }
 

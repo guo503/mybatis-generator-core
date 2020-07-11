@@ -34,6 +34,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      * @author guos
      * @date 2020/06/20 15:12
      */
+    @Override
     public T get(Integer id) {
         Assert.notNull(id, "id不能为空");
         return baseMapper.getx(id);
@@ -48,6 +49,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      * @author guos
      * @date 2020/6/29 16:01
      **/
+    @Override
     public T getOne(T t) {
         Assert.notNull(t, "t不能为空");
         return baseMapper.getOnex(t);
@@ -62,6 +64,7 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
      * @author guos
      * @date 2020/6/29 16:01
      **/
+    @Override
     public int save(T t) {
         Assert.notNull(t, "t不能为空");
         return baseMapper.savex(t);
