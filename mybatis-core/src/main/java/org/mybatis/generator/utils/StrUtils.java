@@ -12,6 +12,26 @@ import java.util.Random;
  */
 public class StrUtils {
 
+
+    /**
+     * 判空
+     * param str
+     * return
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.equals("");
+    }
+
+    /**
+     * 非空
+     * param str
+     * return
+     */
+    public static boolean isNotEmpty(String str) {
+        return !isEmpty(str);
+    }
+
+
     /**
      * 字符串去空格
      *

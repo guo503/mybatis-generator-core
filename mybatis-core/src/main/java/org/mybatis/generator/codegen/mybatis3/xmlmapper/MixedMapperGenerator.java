@@ -15,34 +15,10 @@
  */
 package org.mybatis.generator.codegen.mybatis3.xmlmapper;
 
-import org.mybatis.generator.api.dom.xml.XmlElement;
-
 /**
  * 
  * @author Jeff Butler
  *
  */
 public class MixedMapperGenerator extends XMLMapperGenerator {
-
-    @Override
-    protected void addSelectByPrimaryKeyElement(XmlElement parentElement) {
-    }
-
-    @Override
-    protected void addDeleteByPrimaryKeyElement(XmlElement parentElement) {
-    }
-
-    @Override
-    protected void addInsertElement(XmlElement parentElement) {
-    }
-
-    @Override
-    protected void addUpdateByPrimaryKeyWithBLOBsElement(
-            XmlElement parentElement) {
-    }
-
-    @Override
-    protected void addUpdateByPrimaryKeyWithoutBLOBsElement(
-            XmlElement parentElement) {
-    }
 }

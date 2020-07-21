@@ -206,12 +206,8 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
                 answer.add(gjf);
             }
         }
-        boolean enableMapper = false;
         String generatorMapper = context.getProp(ExtendModelPlugin.class.getName(), "generatorMapper");
-        if (StringUtility.stringHasValue(generatorMapper) || StringUtility.isTrue(generatorMapper)) {
-            enableMapper = true;
-        }
-        if (enableMapper) {
+        if (StringUtility.isTrue(generatorMapper)) {
             for (AbstractJavaGenerator javaGenerator : clientGenerators) {
                 List<CompilationUnit> compilationUnits = javaGenerator
                         .getCompilationUnits();
@@ -223,7 +219,6 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
                     answer.add(gjf);
                 }
             }
-
         }
         return answer;
     }
@@ -231,12 +226,8 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
     @Override
     public List<GeneratedXmlFile> getGeneratedXmlFiles() {
         List<GeneratedXmlFile> answer = new ArrayList<GeneratedXmlFile>();
-        boolean enableXml = false;
         String generatorXml = context.getProp(ExtendModelPlugin.class.getName(), "generatorXml");
-        if (StringUtility.stringHasValue(generatorXml) || StringUtility.isTrue(generatorXml)) {
-            enableXml = true;
-        }
-        if (enableXml) {
+        if (StringUtility.isTrue(generatorXml)) {
             if (xmlMapperGenerator != null) {
                 Document document = xmlMapperGenerator.getDocument();
                 GeneratedXmlFile gxf = new GeneratedXmlFile(document,

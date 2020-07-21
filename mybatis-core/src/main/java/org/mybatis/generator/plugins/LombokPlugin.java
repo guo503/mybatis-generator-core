@@ -28,18 +28,23 @@ public class LombokPlugin extends PluginAdapter {
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         boolean hasLombok = this.hasLombok();
         if (hasLombok) {
+            String classType = ExtendModelPlugin.class.getName();
+            boolean isPo = Objects.equals(topLevelClass.getType().getShortName(), introspectedTable.getDomainObjectName());
             //添加domain的import
-            if (Objects.equals(topLevelClass.getType().getShortName(),introspectedTable.getDomainObjectName())) {
-                String tableAnno = context.getProp(ExtendModelPlugin.class.getName(), "table");
+            if (isPo) {
+                String tableAnno = context.getProp(classType, "table");
                 topLevelClass.addImportedType(tableAnno);
                 topLevelClass.addAnnotation("@" + MethodUtils.getClassName(tableAnno, ".") + "(name = \"" + introspectedTable.getTableName() + "\")");
             }
             topLevelClass.addImportedType("lombok.Data");
-            //添加domain的注解
             topLevelClass.addAnnotation("@Data");
+            //添加domain的注释
+            CommentUtils.addModelClassComment(topLevelClass, introspectedTable);
+            if (isPo) {
+                topLevelClass.addImportedType("lombok.Builder");
+                topLevelClass.addAnnotation("@Builder");
+            }
         }
-        //添加domain的注释
-        CommentUtils.addModelClassComment(topLevelClass, introspectedTable);
         return true;
     }
 
