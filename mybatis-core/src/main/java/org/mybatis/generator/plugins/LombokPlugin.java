@@ -41,6 +41,10 @@ public class LombokPlugin extends PluginAdapter {
             //添加domain的注释
             CommentUtils.addModelClassComment(topLevelClass, introspectedTable);
             if (isPo) {
+                topLevelClass.addImportedType("lombok.AllArgsConstructor");
+                topLevelClass.addAnnotation("@AllArgsConstructor");
+                topLevelClass.addImportedType("lombok.NoArgsConstructor");
+                topLevelClass.addAnnotation("@NoArgsConstructor");
                 topLevelClass.addImportedType("lombok.Builder");
                 topLevelClass.addAnnotation("@Builder");
             }

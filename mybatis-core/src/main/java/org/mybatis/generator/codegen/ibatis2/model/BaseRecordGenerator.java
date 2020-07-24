@@ -130,14 +130,4 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
 
         return superClass;
     }
-
-    private boolean includePrimaryKeyColumns() {
-        return !introspectedTable.getRules().generatePrimaryKeyClass()
-                && introspectedTable.hasPrimaryKeyColumns();
-    }
-
-    private boolean includeBLOBColumns() {
-        return !introspectedTable.getRules().generateRecordWithBLOBsClass()
-                && introspectedTable.hasBLOBColumns();
-    }
 }

@@ -149,6 +149,9 @@ public class BusinessPlugin extends BasePlugin {
         if (!StringUtility.stringHasValue(responseMethod)) {
             throw new RuntimeException(responseMethod + "不能为空");
         }
+
+        pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
+
         //service全路径
         String servicePack = context.getPPVal(ServicePlugin.class.getName(), "servicePack");
         String serviceName = domainObjectName + context.getProp(ServicePlugin.class.getName(), "serviceSuffix");
@@ -172,7 +175,7 @@ public class BusinessPlugin extends BasePlugin {
 
         FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
 
@@ -181,8 +184,9 @@ public class BusinessPlugin extends BasePlugin {
 
         Files.deleteIfExists(Paths.get(businessFilePath));
         interface1.addImportedType(listType);
+        interface1.addImportedType(pojoType);
         interface1.addImportedType(voType);
-        interface1.addImportedType(aoType);
+        interface1.addImportedType(queryType);
         this.addBusiness(interface1, introspectedTable, businessFiles);
         CommentUtils.addGeneralInterfaceComment(interface1, introspectedTable);
         List<GeneratedJavaFile> files = new ArrayList<>(businessFiles);
@@ -192,7 +196,7 @@ public class BusinessPlugin extends BasePlugin {
         }
         Files.deleteIfExists(Paths.get(businessImplFilePath));
         businessImplClass.addImportedType(voType);
-        businessImplClass.addImportedType(aoType);
+        businessImplClass.addImportedType(queryType);
         businessImplClass.addImportedType(pojoType);
         businessImplClass.addImportedType(listType);
         businessImplClass.addImportedType(this.interfaceType);

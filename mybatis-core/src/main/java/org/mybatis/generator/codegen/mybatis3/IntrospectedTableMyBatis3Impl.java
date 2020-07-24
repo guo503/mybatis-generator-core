@@ -155,11 +155,11 @@ public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
         }
 
         //生成ao
-        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "aoSuffix")) {
-            BaseRecordAOGenerator aoGenerator = new BaseRecordAOGenerator(context);
-            initializeAbstractGenerator(aoGenerator, warnings,
+        if (context.isCustomEnable(ExtendModelPlugin.class.getName(), "querySuffix")) {
+            BaseRecordQueryGenerator queryGenerator = new BaseRecordQueryGenerator(context);
+            initializeAbstractGenerator(queryGenerator, warnings,
                     progressCallback);
-            javaModelGenerators.add(aoGenerator);
+            javaModelGenerators.add(queryGenerator);
         }
 
 

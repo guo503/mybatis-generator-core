@@ -15,6 +15,7 @@
  */
 package org.mybatis.generator.codegen;
 
+import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.ProgressCallback;
 import org.mybatis.generator.config.Context;
@@ -61,5 +62,35 @@ public abstract class AbstractGenerator {
 
     public void setProgressCallback(ProgressCallback progressCallback) {
         this.progressCallback = progressCallback;
+    }
+
+
+    protected List<IntrospectedColumn> getColumnsInThisClass() {
+        List<IntrospectedColumn> introspectedColumns;
+        if (includePrimaryKeyColumns()) {
+            if (includeBLOBColumns()) {
+                introspectedColumns = introspectedTable.getAllColumns();
+            } else {
+                introspectedColumns = introspectedTable.getNonBLOBColumns();
+            }
+        } else {
+            if (includeBLOBColumns()) {
+                introspectedColumns = introspectedTable
+                        .getNonPrimaryKeyColumns();
+            } else {
+                introspectedColumns = introspectedTable.getBaseColumns();
+            }
+        }
+        return introspectedColumns;
+    }
+
+    protected boolean includePrimaryKeyColumns() {
+        return !introspectedTable.getRules().generatePrimaryKeyClass()
+                && introspectedTable.hasPrimaryKeyColumns();
+    }
+
+    protected boolean includeBLOBColumns() {
+        return !introspectedTable.getRules().generateRecordWithBLOBsClass()
+                && introspectedTable.hasBLOBColumns();
     }
 }

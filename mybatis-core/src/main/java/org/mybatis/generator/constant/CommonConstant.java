@@ -30,7 +30,7 @@ public class CommonConstant {
     /**
      * ao后缀
      **/
-    public static final String AO_SUFFIX = "AO";
+    public static final String QUERY_SUFFIX = "Query";
 
     /**
      * cond后缀

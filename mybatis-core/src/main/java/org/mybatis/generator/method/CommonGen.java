@@ -46,6 +46,12 @@ public class CommonGen {
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(domainName + suffix);
         method.addParameter(new Parameter(type, name));
     }
+
+    public static void setMethodParameter(Method method, String domainName) {
+        String name = MethodUtils.toLowerCase(domainName);
+        FullyQualifiedJavaType type = new FullyQualifiedJavaType(domainName);
+        method.addParameter(new Parameter(type, name));
+    }
 }
 
 

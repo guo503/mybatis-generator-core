@@ -80,17 +80,16 @@ public class ControllerGen {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
-        String aoName = this.getAoName(poName);
         String remarks = introspectedTable.getRemarks();
         method.setReturnType(MethodUtils.getResponseType(responseMethod, "Object"));
-        String param = MethodUtils.toLowerCase(aoName);
+        String param = MethodUtils.toLowerCase(poName);
         if (MethodEnum.SAVE.getValue().equals(alias)) {
             method.addAnnotation(AnnotationUtils.generateAnnotation("@PostMapping", null));
-            method.addParameter(new Parameter(new FullyQualifiedJavaType("@RequestBody"), aoName + " " + param));
+            method.addParameter(new Parameter(new FullyQualifiedJavaType("@RequestBody"), poName + " " + param));
         } else {
             method.addAnnotation(AnnotationUtils.generateAnnotation("@PutMapping", "{" + id + "}"));
             method.addParameter(new Parameter(new FullyQualifiedJavaType("@PathVariable(\"" + id + "\")"), "Integer " + id));
-            method.addParameter(new Parameter(new FullyQualifiedJavaType("@RequestBody"), aoName + " " + param));
+            method.addParameter(new Parameter(new FullyQualifiedJavaType("@RequestBody"), poName + " " + param));
         }
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
@@ -123,14 +122,14 @@ public class ControllerGen {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
-        String aoName = this.getAoName(poName);
+        String queryName = this.getAoName(poName);
         String voName = this.getVoName(poName);
         method.setReturnType(MethodUtils.getResponseType(responseMethod, "List<" + voName + ">"));
         method.addAnnotation(AnnotationUtils.generateAnnotation("@GetMapping", null));
-        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        String paramVo = MethodUtils.toLowerCase(aoName);
+        String paramVo = MethodUtils.toLowerCase(queryName);
         String methodPrefix = CommonGen.getShortName(serviceType);
         //生成日志信息
         if (enableLogger) {
@@ -141,7 +140,7 @@ public class ControllerGen {
     }
 
     private String getAoName(String poName) {
-        return CommonGen.getObjectWithSuffix(poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        return CommonGen.getObjectWithSuffix(poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
     }
 
     private String getVoName(String poName) {

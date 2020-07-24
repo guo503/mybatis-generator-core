@@ -43,12 +43,12 @@ public class ControllerPlugin extends BasePlugin {
     /**
      * vo包路径
      */
-    private String aoPack;
+    private String queryPack;
 
     /**
      * vo类后缀
      */
-    private String aoSuffix;
+    private String querySuffix;
 
     /**
      * 返回类方法
@@ -94,8 +94,8 @@ public class ControllerPlugin extends BasePlugin {
         this.businessPack = context.getPPVal(BusinessPlugin.class.getName(), "businessPack");
         this.businessSuffix = context.getProp(BusinessPlugin.class.getName(), "businessSuffix");
 
-        this.aoPack = context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack");
-        this.aoSuffix = context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix");
+        this.queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
+        this.querySuffix = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
 
 
         this.responseMethod = context.getProp(className, "responseMethod");
@@ -120,13 +120,15 @@ public class ControllerPlugin extends BasePlugin {
             throw new RuntimeException(responseMethod + "不能为空");
         }
 
+        pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
+
         List<GeneratedJavaFile> files = new ArrayList<>();
 
         //business全路径
         businessType = new FullyQualifiedJavaType(businessPack + "." + domainObjectName + businessSuffix);
 
         //vo全路径
-        FullyQualifiedJavaType aoType = new FullyQualifiedJavaType(this.aoPack + "." + domainObjectName + this.aoSuffix);
+        FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(this.queryPack + "." + domainObjectName + this.querySuffix);
         FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
@@ -147,8 +149,9 @@ public class ControllerPlugin extends BasePlugin {
             controllerClass.addImportedType(slf4jLogger);
             controllerClass.addImportedType(slf4jLoggerFactory);
         }
-        controllerClass.addImportedType(aoType);
+        controllerClass.addImportedType(queryType);
         controllerClass.addImportedType(voType);
+        controllerClass.addImportedType(pojoType);
         controllerClass.addImportedType(listType);
         controllerClass.addImportedType("org.springframework.web.bind.annotation.*");
         if (StringUtility.stringHasValue(responseMethod)) {

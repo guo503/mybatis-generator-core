@@ -125,9 +125,8 @@ public class BusinessGen {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
-        String aoName = this.getAoName(poName);
         method.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        CommonGen.setMethodParameter(method, poName);
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
@@ -138,7 +137,6 @@ public class BusinessGen {
         }
 
         String lowPo = MethodUtils.toLowerCase(poName);
-        String lowAo = MethodUtils.toLowerCase(aoName);
         String remarks = introspectedTable.getRemarks();
         String oldName = "old" + poName;
         boolean hasVersions = false;
@@ -151,7 +149,7 @@ public class BusinessGen {
                 }
             }
         }
-        method.addBodyLine("if (" + lowAo + " == null) {");
+        method.addBodyLine("if (" + lowPo + " == null) {");
         String exceptionName;
         if (StringUtility.stringHasValue(exceptionPack)) {
             exceptionName = new FullyQualifiedJavaType(exceptionPack).getShortName();
@@ -161,13 +159,11 @@ public class BusinessGen {
         method.addBodyLine(ExceptionUtils.generateCode(exceptionName, remarks, "不能为空!"));
         method.addBodyLine("}");
         if (hasVersions) {
-            method.addBodyLine(poName + " " + oldName + " = this." + MethodEnum.GET.getValue() + "(" + lowAo + ".get" + MethodUtils.toUpperCase(introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty()) + "());");
+            method.addBodyLine(poName + " " + oldName + " = this." + MethodEnum.GET.getValue() + "(" + lowPo + ".get" + MethodUtils.toUpperCase(introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty()) + "());");
             method.addBodyLine("if (" + oldName + " == null) {");
             method.addBodyLine(ExceptionUtils.generateCode(new FullyQualifiedJavaType(exceptionPack).getShortName(), remarks, "不存在!") + "");
             method.addBodyLine("}");
         }
-        method.addBodyLine(poName + " " + lowPo + " = new " + poName + "();");
-        method.addBodyLine("BeanUtils.copyProperties(" + lowAo + ", " + lowPo + ");");
         if (hasVersions) {
             method.addBodyLine(lowPo + ".set" + MethodUtils.toUpperCase(versions) + "(" + oldName + ".get" + MethodUtils.toUpperCase(versions) + "());");
         }
@@ -186,13 +182,13 @@ public class BusinessGen {
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
         String voName = this.getVoName(poName);
-        String aoName = this.getAoName(poName);
+        String queryName = this.getAoName(poName);
         String condName = poName + "Cond";
 
         FullyQualifiedJavaType returnType = MethodUtils.getResponseType(responseMethod, "List<" + voName + ">");
         String resMethod = MethodUtils.getResponseMethod(responseMethod, 2);
         method.setReturnType(returnType);
-        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
         //pageNum
         method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), "pageNum"));
         //pageSize
@@ -201,7 +197,7 @@ public class BusinessGen {
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
         String param = MethodUtils.toLowerCase(condName);
-        String paramAo = MethodUtils.toLowerCase(aoName);
+        String paramAo = MethodUtils.toLowerCase(queryName);
 
         String methodPrefix = CommonGen.getShortName(serviceType);
 
@@ -254,17 +250,17 @@ public class BusinessGen {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
-        String aoName = this.getAoName(poName);
+        String queryName = this.getAoName(poName);
         String condName = poName + "Cond";
         method.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
         String param = MethodUtils.toLowerCase(condName);
         //生成日志信息
         if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, MethodUtils.toLowerCase(aoName));
+            MethodUtils.addLoggerInfo(method, MethodUtils.toLowerCase(queryName));
         }
         String ltCondName = MethodUtils.toLowerCase(condName);
         method.addBodyLine("Condition<" + poName + "> " + ltCondName + " = new Condition<>();");
@@ -291,14 +287,14 @@ public class BusinessGen {
         Method method = new Method();
         method.setName(alias);
         String poName = introspectedTable.getDomainObjectName();
-        String aoName = this.getAoName(poName);
+        String queryName = this.getAoName(poName);
         String condName = poName + "Cond";
         method.setReturnType(new FullyQualifiedJavaType("void"));
-        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        CommonGen.setMethodParameter(method, poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
-        String paramAo = MethodUtils.toLowerCase(aoName);
+        String paramAo = MethodUtils.toLowerCase(queryName);
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, paramAo);
@@ -331,6 +327,6 @@ public class BusinessGen {
     }
 
     private String getAoName(String poName) {
-        return CommonGen.getObjectWithSuffix(poName, context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix"));
+        return CommonGen.getObjectWithSuffix(poName, context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
     }
 }

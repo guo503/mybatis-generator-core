@@ -175,16 +175,6 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
         return superClass;
     }
 
-    private boolean includePrimaryKeyColumns() {
-        return !introspectedTable.getRules().generatePrimaryKeyClass()
-                && introspectedTable.hasPrimaryKeyColumns();
-    }
-
-    private boolean includeBLOBColumns() {
-        return !introspectedTable.getRules().generateRecordWithBLOBsClass()
-                && introspectedTable.hasBLOBColumns();
-    }
-
     private void addParameterizedConstructor(TopLevelClass topLevelClass, List<IntrospectedColumn> constructorColumns) {
         Method method = new Method();
         method.setVisibility(JavaVisibility.PUBLIC);
@@ -229,25 +219,5 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
         }
 
         topLevelClass.addMethod(method);
-    }
-
-    private List<IntrospectedColumn> getColumnsInThisClass() {
-        List<IntrospectedColumn> introspectedColumns;
-        if (includePrimaryKeyColumns()) {
-            if (includeBLOBColumns()) {
-                introspectedColumns = introspectedTable.getAllColumns();
-            } else {
-                introspectedColumns = introspectedTable.getNonBLOBColumns();
-            }
-        } else {
-            if (includeBLOBColumns()) {
-                introspectedColumns = introspectedTable
-                        .getNonPrimaryKeyColumns();
-            } else {
-                introspectedColumns = introspectedTable.getBaseColumns();
-            }
-        }
-
-        return introspectedColumns;
     }
 }

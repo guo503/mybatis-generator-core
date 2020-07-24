@@ -16,11 +16,11 @@
 package org.mybatis.generator.codegen.mybatis3.model;
 
 import org.mybatis.generator.api.FullyQualifiedTable;
-import org.mybatis.generator.api.dom.java.CompilationUnit;
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.api.dom.java.JavaVisibility;
-import org.mybatis.generator.api.dom.java.TopLevelClass;
+import org.mybatis.generator.api.IntrospectedColumn;
+import org.mybatis.generator.api.Plugin;
+import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.codegen.AbstractJavaGenerator;
+import org.mybatis.generator.codegen.RootClassInfo;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.constant.CommonConstant;
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import static org.mybatis.generator.internal.util.JavaBeansUtil.getJavaBeansField;
 import static org.mybatis.generator.internal.util.messages.Messages.getString;
 
 
@@ -40,17 +41,17 @@ import static org.mybatis.generator.internal.util.messages.Messages.getString;
  * Author: guos
  * Date: 2019/1/30 16:31
  **/
-public class BaseRecordAOGenerator extends AbstractJavaGenerator {
+public class BaseRecordQueryGenerator extends AbstractJavaGenerator {
 
     private Properties properties;
 
     private Context context;
 
-    public BaseRecordAOGenerator() {
+    public BaseRecordQueryGenerator() {
         super();
     }
 
-    public BaseRecordAOGenerator(Context context) {
+    public BaseRecordQueryGenerator(Context context) {
         PluginConfiguration extentModelPlugin = ContextUtils.checkExtendModelPlugin(context);
         this.properties = extentModelPlugin.getProperties();
         this.context = context;
@@ -63,25 +64,33 @@ public class BaseRecordAOGenerator extends AbstractJavaGenerator {
     @Override
     public List<CompilationUnit> getCompilationUnits() {
 
-        String aoPack = context.getPPVal(ExtendModelPlugin.class.getName(), "aoPack");
-        String aoSuffix1 = context.getProp(ExtendModelPlugin.class.getName(), "aoSuffix");
-        String aoSuffix = Objects.isNull(aoSuffix1) ? CommonConstant.AO_SUFFIX : aoSuffix1;
-
+        String queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
+        String t_aoSuffix1 = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
+        String querySuffix = Objects.isNull(t_aoSuffix1) ? CommonConstant.QUERY_SUFFIX : t_aoSuffix1;
+        String statusType = context.getProp(ExtendModelPlugin.class.getName(), "statusType");
 
         FullyQualifiedTable table = introspectedTable.getFullyQualifiedTable();
         progressCallback.startTask(getString(
                 "Progress.8", table.toString())); //$NON-NLS-1$
-
-        String aoType = aoPack + "." + introspectedTable.getDomainObjectName() + aoSuffix;
+        Plugin plugins = context.getPlugins();
+        String queryType = queryPack + "." + introspectedTable.getDomainObjectName() + querySuffix;
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(
-                aoType);
+                queryType);
         TopLevelClass topLevelClass = new TopLevelClass(type);
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
 
-        FullyQualifiedJavaType poType = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
-        // 继承po类
-        topLevelClass.setSuperClass(poType);
-        topLevelClass.addImportedType(poType);
+        String rootClass = getRootClass();
+        //表字段
+        List<IntrospectedColumn> introspectedColumns = this.getColumnsInThisClass();
+        for (IntrospectedColumn introspectedColumn : introspectedColumns) {
+            if (RootClassInfo.getInstance(rootClass, warnings)
+                    .containsProperty(introspectedColumn)) {
+                continue;
+            }
+            Field field = getJavaBeansField(introspectedColumn, context, introspectedTable);
+            topLevelClass.addField(field);
+            topLevelClass.addImportedType(field.getType());
+        }
 
         List<CompilationUnit> answer = new ArrayList<CompilationUnit>();
 
@@ -95,6 +104,6 @@ public class BaseRecordAOGenerator extends AbstractJavaGenerator {
 
     @Override
     public String getModelTargetProject() {
-        return context.getPPVal(ExtendModelPlugin.class.getName(), "aoProject");
+        return context.getPPVal(ExtendModelPlugin.class.getName(), "queryProject");
     }
 }
