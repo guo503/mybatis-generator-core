@@ -76,6 +76,28 @@ public class BasePlugin extends PluginAdapter {
      **/
     protected String exceptionPack;
 
+    /**
+     * query类包路径
+     */
+    protected String queryPack;
+
+    /**
+     * query类后缀名
+     */
+    protected String querySuffix;
+
+    /**
+     * vo包路径
+     */
+    protected String voPack;
+
+    /**
+     * vo类后缀名
+     */
+    protected String voSuffix;
+
+    protected FullyQualifiedJavaType objectsType;
+
 
     public BasePlugin() {
         super();
@@ -94,6 +116,10 @@ public class BasePlugin extends PluginAdapter {
     public void setProperties(Properties properties) {
         super.setProperties(properties);
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
+        this.queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
+        this.querySuffix = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
+        this.voPack = context.getPPVal(ExtendModelPlugin.class.getName(), "voPack");
+        this.voSuffix = context.getProp(ExtendModelPlugin.class.getName(), "voSuffix");
         this.listType = new FullyQualifiedJavaType("java.util.*");
         String daoType = BaseMethodPlugin.class.getName();
         this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());

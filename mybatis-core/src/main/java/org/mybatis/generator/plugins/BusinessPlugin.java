@@ -173,9 +173,9 @@ public class BusinessPlugin extends BasePlugin {
         businessImplClass.addImportedType(responseType);
         interface1.addImportedType(responseType);
 
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullQueryName(domainObjectName, voPack, voSuffix));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-        FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "querySuffix"));
+        FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(MethodUtils.getFullQueryName(domainObjectName, queryPack, querySuffix));
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
 
@@ -265,11 +265,17 @@ public class BusinessPlugin extends BasePlugin {
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
             method = businessGen.listByCondition(this.serviceType, introspectedTable, this.listByCondition);
             this.addMethod(method, interface1, topLevelClass, isInterface);
+            if (Objects.nonNull(topLevelClass)) {
+                topLevelClass.addImportedType(MethodUtils.getFullQueryName(introspectedTable.getDomainObjectName(), queryPack, querySuffix));
+            }
         }
 
         if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.countByCondition))) {
             method = businessGen.count(this.serviceType, introspectedTable, this.countByCondition);
             this.addMethod(method, interface1, topLevelClass, isInterface);
+            if (Objects.nonNull(topLevelClass)) {
+                topLevelClass.addImportedType(MethodUtils.getFullQueryName(introspectedTable.getDomainObjectName(), queryPack, querySuffix));
+            }
         }
 
         if (context.isCustomEnable(BusinessPlugin.class.getName(), MethodEnum.getNameByValue(this.doBatchMethod))) {
@@ -284,6 +290,7 @@ public class BusinessPlugin extends BasePlugin {
             interface1.addMethod(method);
         } else {
             method.addAnnotation("@Override");
+            topLevelClass.addImportedType(objectsType);
             topLevelClass.addMethod(method);
             if (Objects.equals(method.getName(), this.doBatchMethod)) {
                 topLevelClass.addImportedType("org.springframework.util.CollectionUtils");

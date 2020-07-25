@@ -1,6 +1,5 @@
 package org.mybatis.generator.method;
 
-import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.api.dom.java.Method;
@@ -33,10 +32,8 @@ public class CommonGen {
             FullyQualifiedJavaType type = new FullyQualifiedJavaType(introspectedTable.getPrimaryKeyType());
             method.addParameter(new Parameter(type, "key"));
         } else {
-            for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-                FullyQualifiedJavaType type = introspectedColumn.getFullyQualifiedJavaType();
-                method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
-            }
+            String idPro = MethodUtils.getPrimaryKeyName(introspectedTable);
+            method.addParameter(new Parameter(MethodUtils.getPrimaryKeyFullyQualifiedJavaType(introspectedTable), idPro));
         }
     }
 

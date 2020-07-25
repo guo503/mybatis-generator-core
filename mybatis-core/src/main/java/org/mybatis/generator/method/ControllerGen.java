@@ -43,25 +43,23 @@ public class ControllerGen {
      * 添加方法
      */
     public Method selectByPrimaryKey(FullyQualifiedJavaType businessType, IntrospectedTable introspectedTable, String alias) {
-        String id = introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty();
+        String id = MethodUtils.getPrimaryKeyName(introspectedTable);
         Method method = new Method();
         method.setName(alias);
         String voName = CommonGen.getObjectWithSuffix(introspectedTable.getDomainObjectName(), CommonConstant.VO_SUFFIX);
         method.setReturnType(MethodUtils.getResponseType(responseMethod, voName));
         method.addAnnotation(AnnotationUtils.generateAnnotation("@GetMapping", "{" + id + "}"));
-        method.addParameter(new Parameter(new FullyQualifiedJavaType("@PathVariable(\"" + id + "\")"), "Integer " + id));
+        method.addParameter(new Parameter(new FullyQualifiedJavaType("@PathVariable(\"" + id + "\")"), MethodUtils.getPrimaryKeyType(introspectedTable) + " " + id));
         //CommonGen.setMethodPrimaryKey(introspectedTable, method);
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        StringBuilder sb = new StringBuilder();
-        sb.append(CommonGen.getShortName(businessType));
-        sb.append(alias + "(" + id + ")");
         String resMethod = MethodUtils.getResponseMethod(responseMethod, 0);
         //生成日志信息
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, id);
         }
-        method.addBodyLine("return " + resMethod.replace("$", sb.toString()) + ";");
+        String sb = CommonGen.getShortName(businessType) + alias + "(" + id + ")";
+        method.addBodyLine("return " + resMethod.replace("$", sb) + ";");
         return method;
     }
 

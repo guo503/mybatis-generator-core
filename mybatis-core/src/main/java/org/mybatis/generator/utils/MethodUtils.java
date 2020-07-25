@@ -26,9 +26,6 @@ public class MethodUtils {
 
 
     public static void main(String[] args) {
-        // String lineToHump = lineToHump("f_parent_no_leader");
-        // System.out.println(lineToHump);//fParentNoLeader
-        //System.out.println(humpToLine2(lineToHump));//f_parent_no_leader
         System.out.println(getResultFullMethod("com.tsyj.sdk.response.Result:success($)|fail($)|success($,$)", ":", 2));
     }
 
@@ -384,6 +381,26 @@ public class MethodUtils {
         }
         method.removeAnnotation();
         method.removeAllBodyLines();
+    }
+
+    public static String getPrimaryKeyName(IntrospectedTable introspectedTable) {
+        return introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty();
+    }
+
+    public static String getPrimaryKeyType(IntrospectedTable introspectedTable) {
+        return introspectedTable.getPrimaryKeyColumns().get(0).getFullyQualifiedJavaType().getShortName();
+    }
+
+    public static FullyQualifiedJavaType getPrimaryKeyFullyQualifiedJavaType(IntrospectedTable introspectedTable) {
+        return introspectedTable.getPrimaryKeyColumns().get(0).getFullyQualifiedJavaType();
+    }
+
+    public static String getFullQueryName(String poName, String queryPack, String querySuffix) {
+        return queryPack + "." + poName + querySuffix;
+    }
+
+    public static String getFullVoName(String poName, String voPack, String voSuffix) {
+        return voPack + "." + poName + voSuffix;
     }
 
 }

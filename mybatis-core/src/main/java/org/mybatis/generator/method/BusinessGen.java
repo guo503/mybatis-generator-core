@@ -64,7 +64,7 @@ public class BusinessGen {
         sb.append(CommonGen.getShortName(serviceType));
         sb.append(alias);
         sb.append("(");
-        String idPro = introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty();
+        String idPro = MethodUtils.getPrimaryKeyName(introspectedTable);
         sb.append(idPro);
         sb.append(")");
         //生成日志信息
@@ -73,10 +73,13 @@ public class BusinessGen {
         }
         String lowPo = MethodUtils.toLowerCase(poName);
         String lowVo = MethodUtils.toLowerCase(voName);
+        method.addBodyLine("if (Objects.isNull(" + idPro + ")) {");
+        method.addBodyLine("throw new " + CommonConstant.DEFAULT_EXCEPTION + "(\"" + idPro + "不能为空!\");");
+        method.addBodyLine("}");
         method.addBodyLine(poName + " " + lowPo + " = " + sb.toString() + ";");
 
         method.addBodyLine(voName + " " + lowVo + " = new " + voName + "();");
-        method.addBodyLine("if (" + lowPo + " == null) {");
+        method.addBodyLine("if (Objects.isNull(" + lowPo + ")) {");
         method.addBodyLine("return " + lowVo + ";");
         method.addBodyLine("}");
         method.addBodyLine("BeanUtils.copyProperties(" + lowPo + ", " + lowVo + ");");
@@ -96,11 +99,12 @@ public class BusinessGen {
         method.setVisibility(JavaVisibility.PUBLIC);
         CommentUtils.addGeneralMethodComment(method, introspectedTable);
 
+
         StringBuilder sb = new StringBuilder();
         sb.append(CommonGen.getShortName(serviceType));
         sb.append(alias);
         sb.append("(");
-        String idPro = introspectedTable.getPrimaryKeyColumns().get(0).getJavaProperty();
+        String idPro = MethodUtils.getPrimaryKeyName(introspectedTable);
         sb.append(idPro);
         sb.append(")");
         //生成日志信息
@@ -149,7 +153,7 @@ public class BusinessGen {
                 }
             }
         }
-        method.addBodyLine("if (" + lowPo + " == null) {");
+        method.addBodyLine("if (Objects.isNull(" + lowPo + ")) {");
         String exceptionName;
         if (StringUtility.stringHasValue(exceptionPack)) {
             exceptionName = new FullyQualifiedJavaType(exceptionPack).getShortName();
@@ -214,11 +218,16 @@ public class BusinessGen {
         if (enableLogger) {
             MethodUtils.addLoggerInfo(method, paramAo);
         }
+        String primaryKeyName = MethodUtils.getPrimaryKeyName(introspectedTable);
         String voListName = MethodUtils.toLowerCase(voName) + "List";
         method.addBodyLine(res);
         String ltCondName = MethodUtils.toLowerCase(condName);
         method.addBodyLine("Condition<" + poName + "> " + ltCondName + " = new Condition<>();");
         method.addBodyLine(ltCondName + ".limit(pageNum, pageSize);");
+        method.addBodyLine("Condition<" + poName + ">.Criteria criteria = " + ltCondName + ".createCriteria();");
+        method.addBodyLine("if (Objects.nonNull(" + MethodUtils.generateGet(queryName, primaryKeyName) + ")) {");
+        method.addBodyLine("criteria.andEqual(" + poName + "." + primaryKeyName.toUpperCase() + ", " + MethodUtils.generateGet(queryName, primaryKeyName) + ");");
+        method.addBodyLine("}");
         method.addBodyLine("int count = " + methodPrefix + MethodEnum.COUNT_BY_CONDITION.getValue() + "(" + ltCondName + ");");
         method.addBodyLine("if (count == 0){");
         method.addBodyLine("return result;");
