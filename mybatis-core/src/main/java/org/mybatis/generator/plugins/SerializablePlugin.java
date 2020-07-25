@@ -39,7 +39,6 @@ import java.util.Properties;
  * attempt to do any versioning of classes.
  *
  * @author Jeff Butler
- *
  */
 public class SerializablePlugin extends PluginAdapter {
 
@@ -90,15 +89,15 @@ public class SerializablePlugin extends PluginAdapter {
 
     protected void makeSerializable(TopLevelClass topLevelClass,
                                     IntrospectedTable introspectedTable) {
+        if (topLevelClass.getType().getShortName().contains(CommonConstant.QUERY_SUFFIX)) {
+            return;
+        }
         if (addGWTInterface) {
             topLevelClass.addImportedType(gwtSerializable);
             topLevelClass.addSuperInterface(gwtSerializable);
         }
 
         if (!suppressJavaInterface) {
-            if (topLevelClass.getType().getShortName().contains("Query")) {
-                return;
-            }
             topLevelClass.addImportedType(serializable);
             topLevelClass.addSuperInterface(serializable);
 

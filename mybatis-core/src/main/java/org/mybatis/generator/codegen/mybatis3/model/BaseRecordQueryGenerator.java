@@ -17,7 +17,6 @@ package org.mybatis.generator.codegen.mybatis3.model;
 
 import org.mybatis.generator.api.FullyQualifiedTable;
 import org.mybatis.generator.api.IntrospectedColumn;
-import org.mybatis.generator.api.Plugin;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.codegen.AbstractJavaGenerator;
 import org.mybatis.generator.codegen.RootClassInfo;
@@ -67,12 +66,10 @@ public class BaseRecordQueryGenerator extends AbstractJavaGenerator {
         String queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
         String t_aoSuffix1 = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
         String querySuffix = Objects.isNull(t_aoSuffix1) ? CommonConstant.QUERY_SUFFIX : t_aoSuffix1;
-        String statusType = context.getProp(ExtendModelPlugin.class.getName(), "statusType");
 
         FullyQualifiedTable table = introspectedTable.getFullyQualifiedTable();
         progressCallback.startTask(getString(
                 "Progress.8", table.toString())); //$NON-NLS-1$
-        Plugin plugins = context.getPlugins();
         String queryType = queryPack + "." + introspectedTable.getDomainObjectName() + querySuffix;
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(
                 queryType);

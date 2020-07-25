@@ -2,6 +2,7 @@ package org.mybatis.generator.utils;
 
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.MethodEnum;
 
 import java.util.Arrays;
@@ -198,8 +199,10 @@ public class CommentUtils {
 
         if (1 == flag) {
             String baseShortName = topLevelClass.getType().getShortName();
-            if (baseShortName.endsWith("Cond")) {
+            if (baseShortName.endsWith(CommonConstant.QUERY_SUFFIX)) {
                 desc = desc + "查询条件类";
+            } else if (baseShortName.endsWith(CommonConstant.VO_SUFFIX)) {
+                desc = desc + "显示类";
             } else {
                 desc = desc + "实体类";
             }
