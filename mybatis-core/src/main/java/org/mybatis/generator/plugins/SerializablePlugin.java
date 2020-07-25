@@ -96,6 +96,9 @@ public class SerializablePlugin extends PluginAdapter {
         }
 
         if (!suppressJavaInterface) {
+            if (topLevelClass.getType().getShortName().contains("Query")) {
+                return;
+            }
             topLevelClass.addImportedType(serializable);
             topLevelClass.addSuperInterface(serializable);
 
