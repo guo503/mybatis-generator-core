@@ -129,7 +129,7 @@ public class ControllerPlugin extends BasePlugin {
 
         //vo全路径
         FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(this.queryPack + "." + domainObjectName + this.querySuffix);
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(ExtendModelPlugin.class.getName(), "voPack") + "." + domainObjectName + context.getProp(ExtendModelPlugin.class.getName(), "voSuffix"));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullVoName(domainObjectName, voPack, voSuffix));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
         FullyQualifiedJavaType controllerType = new FullyQualifiedJavaType(controllerPath);
