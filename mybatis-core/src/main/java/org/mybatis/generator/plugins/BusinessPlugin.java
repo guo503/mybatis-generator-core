@@ -173,7 +173,7 @@ public class BusinessPlugin extends BasePlugin {
         businessImplClass.addImportedType(responseType);
         interface1.addImportedType(responseType);
 
-        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullQueryName(domainObjectName, voPack, voSuffix));
+        FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullVoName(domainObjectName, voPack, voSuffix));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
         FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(MethodUtils.getFullQueryName(domainObjectName, queryPack, querySuffix));
 
