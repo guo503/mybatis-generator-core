@@ -223,12 +223,12 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
         if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
-        Condition<T> condition = new Condition<>();
-        T t = TableParser.getInstance(condition);
+        T t = TableParser.getInstance(this.getClass(),1);
         if (Objects.isNull(t)) {
             throw new RuntimeException("获取condition实例失败");
         }
         String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
+        Condition<T> condition = new Condition<>();
         condition.createCriteria().andIn(primaryKeyName, ids);
         condition.limit(maxSize);
         return this.listByCondition(condition);
@@ -286,9 +286,9 @@ public class ManageImpl<M extends Mapper<T>, T> implements IManage<T> {
     @Override
     public List<T> batchList(int gtId, Condition<T> condition) {
         Assert.notNull(condition,  "condition不能为空");
-        T t = TableParser.getInstance(condition);
+        T t = TableParser.getInstance(this.getClass(),1);
         if (Objects.isNull(t)) {
-            throw new RuntimeException("获取condition实例失败");
+            throw new RuntimeException("获取泛型实例失败");
         }
         String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
         //每次最多查询2000条数据

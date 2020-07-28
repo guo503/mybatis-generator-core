@@ -4,9 +4,7 @@ import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.constant.KeyConst;
-import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
-import org.mybatis.generator.method.ControllerGen;
 import org.mybatis.generator.utils.*;
 
 import java.io.IOException;
@@ -56,11 +54,6 @@ public class ControllerPlugin extends BasePlugin {
     private String responseMethod;
 
     /**
-     * 要继承的基础controller
-     */
-    private String baseController;
-
-    /**
      * business包路径
      */
     private String businessPack;
@@ -100,7 +93,6 @@ public class ControllerPlugin extends BasePlugin {
 
         this.responseMethod = context.getProp(className, "responseMethod");
 
-        this.baseController = context.getProp(className, "baseController");
         return true;
     }
 
@@ -116,16 +108,14 @@ public class ControllerPlugin extends BasePlugin {
             return new ArrayList<>();
         }
 
-        if (!StringUtility.stringHasValue(responseMethod)) {
-            throw new RuntimeException(responseMethod + "不能为空");
-        }
-
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
 
         List<GeneratedJavaFile> files = new ArrayList<>();
 
+        String businessName = domainObjectName + businessSuffix;
         //business全路径
-        businessType = new FullyQualifiedJavaType(businessPack + "." + domainObjectName + businessSuffix);
+        businessType = new FullyQualifiedJavaType(businessPack + "." + businessName);
+
 
         //vo全路径
         FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(this.queryPack + "." + domainObjectName + this.querySuffix);
@@ -138,12 +128,10 @@ public class ControllerPlugin extends BasePlugin {
         Files.deleteIfExists(Paths.get(controllerFilePath));
         //controller
         TopLevelClass controllerClass = new TopLevelClass(controllerType);
-        if (StringUtility.stringHasValue(baseController)) {
-            controllerClass.setSuperClass(MethodUtils.getClassName(baseController));
-            controllerClass.addImportedType(new FullyQualifiedJavaType(baseController));
-        } else {
-            controllerClass.addAnnotation("@CrossOrigin");
-        }
+        String baseClass = baseController.getShortName() + "<" + businessName + "," + domainObjectName + "," + MethodUtils.getShortQueryName(domainObjectName, querySuffix) + "," + MethodUtils.getShortVoName(domainObjectName, voSuffix) + ">";
+        controllerClass.setSuperClass(MethodUtils.getClassName(baseClass));
+        controllerClass.addImportedType(baseController);
+        controllerClass.addImportedType(businessType);
         //生成日志信息
         if (enableLogger) {
             controllerClass.addImportedType(slf4jLogger);
@@ -152,12 +140,7 @@ public class ControllerPlugin extends BasePlugin {
         controllerClass.addImportedType(queryType);
         controllerClass.addImportedType(voType);
         controllerClass.addImportedType(pojoType);
-        controllerClass.addImportedType(listType);
         controllerClass.addImportedType("org.springframework.web.bind.annotation.*");
-        if (StringUtility.stringHasValue(responseMethod)) {
-            FullyQualifiedJavaType response = new FullyQualifiedJavaType(MethodUtils.getFullClass(responseMethod, ":"));
-            controllerClass.addImportedType(response);
-        }
         CommentUtils.addControllerClassComment(controllerClass, introspectedTable);
         addController(controllerClass, introspectedTable, files);
 
@@ -176,23 +159,23 @@ public class ControllerPlugin extends BasePlugin {
             ClassUtils.addLogger(topLevelClass);
         }
 
-        ClassUtils.addField(topLevelClass, this.businessType, null);
-        ControllerGen controllerGen = new ControllerGen(context, this.responseMethod, this.enableLogger);
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
-            topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectByPrimaryKey));
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
-            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertSelective));
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
-            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateByPrimaryKeySelective));
-        }
-
-        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
-            topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listByCondition));
-        }
+        //ClassUtils.addField(topLevelClass, this.businessType, null);
+        //ControllerGen controllerGen = new ControllerGen(context, this.responseMethod, this.enableLogger);
+//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
+//            topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectByPrimaryKey));
+//        }
+//
+//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
+//            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertSelective));
+//        }
+//
+//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
+//            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateByPrimaryKeySelective));
+//        }
+//
+//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
+//            topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listByCondition));
+//        }
 
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.controllerProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);

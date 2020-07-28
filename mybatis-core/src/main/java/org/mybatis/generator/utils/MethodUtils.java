@@ -375,8 +375,8 @@ public class MethodUtils {
         return ClassName.substring(ClassName.lastIndexOf('.') + 1);
     }
 
-    public static void clear(Method method){
-        if(Objects.isNull(method)){
+    public static void clear(Method method) {
+        if (Objects.isNull(method)) {
             return;
         }
         method.removeAnnotation();
@@ -401,6 +401,15 @@ public class MethodUtils {
 
     public static String getFullVoName(String poName, String voPack, String voSuffix) {
         return voPack + "." + poName + voSuffix;
+    }
+
+
+    public static String getShortQueryName(String poName, String querySuffix) {
+        return poName + querySuffix;
+    }
+
+    public static String getShortVoName(String poName, String voSuffix) {
+        return poName + voSuffix;
     }
 
 }

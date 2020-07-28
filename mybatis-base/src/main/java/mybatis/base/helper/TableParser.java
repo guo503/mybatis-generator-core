@@ -188,10 +188,10 @@ public class TableParser {
     }
 
 
-    public static <T> T getInstance(Object o) {
+    public static <T> T getInstance(Class<?> paramClz, int index) {
         try {
-            Type type = o.getClass().getGenericSuperclass();
-            if (type == null) {
+            Type type = paramClz.getGenericSuperclass();
+            if (Objects.isNull(type)) {
                 return null;
             }
             ParameterizedType parameterizedType = null;
@@ -205,7 +205,11 @@ public class TableParser {
             if (types.length == 0) {
                 return null;
             }
-            Type realType = parameterizedType.getActualTypeArguments()[0];
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (index >= actualTypeArguments.length) {
+                return null;
+            }
+            Type realType = parameterizedType.getActualTypeArguments()[index];
             Class<T> clz = (Class<T>) realType;
             return clz.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {

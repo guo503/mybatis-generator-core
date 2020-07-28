@@ -146,10 +146,6 @@ public class BusinessPlugin extends BasePlugin {
             throw new RuntimeException("service插件存在");
         }
 
-        if (!StringUtility.stringHasValue(responseMethod)) {
-            throw new RuntimeException(responseMethod + "不能为空");
-        }
-
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
 
         //service全路径
@@ -163,15 +159,8 @@ public class BusinessPlugin extends BasePlugin {
         interfaceType = new FullyQualifiedJavaType(businessPath);
         FullyQualifiedJavaType businessImplType = new FullyQualifiedJavaType(businessImplPath);
 
-        //查询条件类
-        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
-
         Interface interface1 = new Interface(interfaceType);
         TopLevelClass businessImplClass = new TopLevelClass(businessImplType);
-        businessImplClass.addImportedType(new FullyQualifiedJavaType(conditionType));
-        FullyQualifiedJavaType responseType = new FullyQualifiedJavaType(MethodUtils.getFullClass(responseMethod, ":"));
-        businessImplClass.addImportedType(responseType);
-        interface1.addImportedType(responseType);
 
         FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullVoName(domainObjectName, voPack, voSuffix));
         FullyQualifiedJavaType pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
@@ -183,10 +172,12 @@ public class BusinessPlugin extends BasePlugin {
         String businessImplFilePath = businessImplProject + LocalFileUtils.getPath(businessImplPath) + suffix;
 
         Files.deleteIfExists(Paths.get(businessFilePath));
-        interface1.addImportedType(listType);
         interface1.addImportedType(pojoType);
         interface1.addImportedType(voType);
         interface1.addImportedType(queryType);
+        String baseInterface = IBusiness.getShortName() + "<" + domainObjectName + "," + MethodUtils.getShortQueryName(domainObjectName, querySuffix) + "," + MethodUtils.getShortVoName(domainObjectName, voSuffix) + ">";
+        interface1.addSuperInterface(new FullyQualifiedJavaType(baseInterface));
+        interface1.addImportedType(IBusiness);
         this.addBusiness(interface1, introspectedTable, businessFiles);
         CommentUtils.addGeneralInterfaceComment(interface1, introspectedTable);
         List<GeneratedJavaFile> files = new ArrayList<>(businessFiles);
@@ -198,14 +189,11 @@ public class BusinessPlugin extends BasePlugin {
         businessImplClass.addImportedType(voType);
         businessImplClass.addImportedType(queryType);
         businessImplClass.addImportedType(pojoType);
-        businessImplClass.addImportedType(listType);
         businessImplClass.addImportedType(this.interfaceType);
-        businessImplClass.addImportedType(new FullyQualifiedJavaType("org.springframework.beans.BeanUtils"));
-        businessImplClass.addImportedType(new FullyQualifiedJavaType("com.google.common.collect.*"));
-        businessImplClass.addImportedType(new FullyQualifiedJavaType("java.util.stream.Collectors"));
-        if (StringUtility.stringHasValue(this.exceptionPack)) {
-            FullyQualifiedJavaTypeUtils.importType((Interface) null, businessImplClass, this.exceptionPack);
-        }
+        String baseClass = businessImpl.getShortName() + "<" + serviceName + "," + domainObjectName + "," + MethodUtils.getShortQueryName(domainObjectName, querySuffix) + "," + MethodUtils.getShortVoName(domainObjectName, voSuffix) + ">";
+        businessImplClass.setSuperClass(baseClass);
+        businessImplClass.addImportedType(businessImpl);
+        businessImplClass.addImportedType(serviceType);
 
         this.addBusinessImpl(businessImplClass, introspectedTable, businessImplFiles);
         CommentUtils.addBusinessClassComment(businessImplClass, introspectedTable);
@@ -216,7 +204,7 @@ public class BusinessPlugin extends BasePlugin {
 
     protected void addBusiness(Interface interface1, IntrospectedTable introspectedTable, List<GeneratedJavaFile> files) {
         interface1.setVisibility(JavaVisibility.PUBLIC);
-        this.addMethods(interface1, null, introspectedTable, true);
+        //this.addMethods(interface1, null, introspectedTable, true);
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, this.businessProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);
     }
@@ -232,8 +220,8 @@ public class BusinessPlugin extends BasePlugin {
             ClassUtils.addLogger(topLevelClass);
         }
 
-        ClassUtils.addField(topLevelClass, this.serviceType, this.remoteResource);
-        this.addMethods(null, topLevelClass, introspectedTable, false);
+        //ClassUtils.addField(topLevelClass, this.serviceType, this.remoteResource);
+        //this.addMethods(null, topLevelClass, introspectedTable, false);
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.businessImplProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);
     }
