@@ -20,7 +20,7 @@ public class BaseController<B extends IBusiness<T, Q, R>, T, Q, R> {
     protected HttpServletRequest request;
 
     @Autowired
-    private B baseBusiness;
+    protected B baseBusiness;
 
 
     /**

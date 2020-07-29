@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T, Q, R> {
 
     @Autowired
-    private S baseService;
+    protected S baseService;
 
 
     /**
@@ -157,6 +157,15 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         if (Objects.isNull(condition)) {
             return Lists.newArrayList();
         }
+        //没有排序的话，默认按id升序
+        if (CollectionUtils.isEmpty(condition.getOrderByList())) {
+            T t = TableParser.getInstance(this.getClass(), 1);
+            if (Objects.isNull(t)) {
+                throw new RuntimeException("获取实体类失败!");
+            }
+            String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
+            condition.setOrderBy(primaryKeyName);
+        }
         return this.listR(baseService.listByCondition(condition));
     }
 
@@ -212,6 +221,12 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
             if (isNeq || isLte || isGte) {
                 fieldName = StrUtils.toLowerCaseFirst(fieldName.substring(3));
             }
+            //like
+            boolean isLk = fieldName.startsWith("lk");
+            if (isLk) {
+                fieldName = StrUtils.toLowerCaseFirst(fieldName.substring(2));
+            }
+
             if (Objects.isNull(entityMap.get(fieldName))) {
                 continue;
             }
@@ -232,6 +247,8 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
                 criteria.andLessThanEqual(fieldName, fieldValue);
             } else if (isGte) {
                 criteria.andGreaterThanEqual(fieldName, fieldValue);
+            } else if (isLk) {
+                criteria.andLike(fieldName, "%" + fieldValue + "%");
             } else {
                 criteria.andEqual(fieldName, fieldValue);
             }
