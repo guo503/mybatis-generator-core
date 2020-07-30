@@ -205,50 +205,8 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         Map<String, Field> entityMap = fields.stream().filter(f -> Objects.equals(f.getModifiers(), Modifier.PRIVATE)).collect(Collectors.toMap(Field::getName, Function.identity(), (k1, k2) -> k2));
         for (Field field : queryFields) {
             field.setAccessible(true); // 私有属性必须设置访问权限
-            String fieldName = field.getName();
-            Class<?> type = field.getType();
-            //集合
-            boolean isList = Objects.equals(type, List.class);
-            if (isList) {
-                fieldName = fieldName.substring(0, fieldName.lastIndexOf("s"));
-            }
-            boolean isNeq = fieldName.startsWith("neq");
-            boolean isLte = fieldName.startsWith("lte");
-            boolean isGte = fieldName.startsWith("gte");
-            if (isNeq || isLte || isGte) {
-                fieldName = StrUtils.toLowerCaseFirst(fieldName.substring(3));
-            }
-            //like
-            boolean isLk = fieldName.startsWith("lk");
-            if (isLk) {
-                fieldName = StrUtils.toLowerCaseFirst(fieldName.substring(2));
-            }
-
-            if (Objects.isNull(entityMap.get(fieldName))) {
-                continue;
-            }
-            Object fieldValue;
-            try {
-                fieldValue = field.get(q);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("获取属性" + field.getName() + "失败!");
-            }
-            if (Objects.isNull(fieldValue)) {
-                continue;
-            }
-            if (isList) {
-                criteria.andIn(fieldName, (List) fieldValue);
-            } else if (isNeq) {
-                criteria.andNotEqual(fieldName, fieldValue);
-            } else if (isLte) {
-                criteria.andLessThanEqual(fieldName, fieldValue);
-            } else if (isGte) {
-                criteria.andGreaterThanEqual(fieldName, fieldValue);
-            } else if (isLk) {
-                criteria.andLike(fieldName, "%" + fieldValue + "%");
-            } else {
-                criteria.andEqual(fieldName, fieldValue);
-            }
+            //设置查询条件
+            this.setCriteria(criteria, q, entityMap, field);
         }
         return condition;
     }
@@ -277,6 +235,75 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
             }
             size = list.size();
             gtId = TableParser.getPrimaryKeyVal(list.get(size - 1));
+        }
+    }
+
+
+    private void setCriteria(Condition<T>.Criteria criteria, Q q, Map<String, Field> entityMap, Field field) {
+        String fieldName = field.getName();
+        Class<?> type = field.getType();
+        //集合
+        boolean isList = Objects.equals(type, List.class);
+        //不等于,小于等于,大于等于,模糊,非空,空,In,notIn
+        //默认等于
+        boolean isNeq, isLte, isGte, isLk, isNN, isN, isNin = false;
+        isNeq = fieldName.startsWith("neq");
+        isLte = fieldName.startsWith("lte");
+        isGte = fieldName.startsWith("gte");
+        isN = fieldName.startsWith("n");
+        isNN = fieldName.startsWith("nn");
+        isLk = fieldName.startsWith("lk");
+
+        String actualName = fieldName;
+
+        if (isList) {
+            actualName = fieldName.substring(0, fieldName.lastIndexOf("s"));
+            isNin = fieldName.startsWith("nin");
+            if (isNin) {
+                actualName = StrUtils.toLowerCaseFirst(actualName.substring(3));
+            }
+        } else if (isNeq || isLte || isGte) {
+            actualName = StrUtils.toLowerCaseFirst(fieldName.substring(3));
+        } else if (isLk || isNN) {
+            actualName = StrUtils.toLowerCaseFirst(fieldName.substring(2));
+        } else if (isN) {
+            actualName = StrUtils.toLowerCaseFirst(fieldName.substring(1));
+        }
+
+        if (Objects.isNull(entityMap.get(actualName))) {
+            if (Objects.isNull(entityMap.get(fieldName))) {
+                return;
+            }
+        }
+        Object fieldValue;
+        try {
+            fieldValue = field.get(q);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("获取属性" + field.getName() + "失败!");
+        }
+        if (Objects.isNull(fieldValue)) {
+            return;
+        }
+        if (isList) {
+            if (isNin) {
+                criteria.andNotIn(actualName, (List) fieldValue);
+            } else {
+                criteria.andIn(actualName, (List) fieldValue);
+            }
+        } else if (isNeq) {
+            criteria.andNotEqual(actualName, fieldValue);
+        } else if (isLte) {
+            criteria.andLessThanEqual(actualName, fieldValue);
+        } else if (isGte) {
+            criteria.andGreaterThanEqual(actualName, fieldValue);
+        } else if (isLk) {
+            criteria.andLike(actualName, "%" + fieldValue + "%");
+        } else if (isNN) {
+            criteria.andIsNotNull(actualName);
+        } else if (isN) {
+            criteria.andIsNull(actualName);
+        } else {
+            criteria.andEqual(actualName, fieldValue);
         }
     }
 
