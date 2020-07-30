@@ -74,7 +74,7 @@ public class BaseController<B extends IBusiness<T, Q, R>, T, Q, R> {
      * @date 2020/7/28 15:17
      **/
     @GetMapping
-    public Result<List<R>> listByCondition(Q q) {
+    public Result<List<R>> list(Q q) {
         List<R> rList = baseBusiness.listByCondition(q, this.getPageNum(), this.getPageSize());
         int count = baseBusiness.countByCondition(q);
         return Result.success(rList, count);
