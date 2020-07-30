@@ -198,10 +198,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         if (Objects.isNull(t)) {
             throw new RuntimeException("获取实体类失败!");
         }
-        String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
         Condition<T> condition = new Condition<>();
-        //默认主键升序
-        condition.setOrderBy(primaryKeyName);
         Condition<T>.Criteria criteria = condition.createCriteria();
         Field[] queryFields = q.getClass().getDeclaredFields();
         List<Field> fields = Lists.newArrayList(t.getClass().getDeclaredFields());
