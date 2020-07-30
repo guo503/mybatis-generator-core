@@ -246,9 +246,11 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         boolean isList = Objects.equals(type, List.class);
         //不等于,小于等于,大于等于,模糊,非空,空,In,notIn
         //默认等于
-        boolean isNeq, isLte, isGte, isLk, isNN, isN, isNin = false;
+        boolean isNeq, isLte, isGte, isLt, isGt,isLk, isNN, isN, isNin = false;
         isNeq = fieldName.startsWith("neq");
         isLte = fieldName.startsWith("lte");
+        isGt = fieldName.startsWith("gt");
+        isLt = fieldName.startsWith("lt");
         isGte = fieldName.startsWith("gte");
         isN = fieldName.startsWith("n");
         isNN = fieldName.startsWith("nn");
@@ -264,7 +266,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
             }
         } else if (isNeq || isLte || isGte) {
             actualName = StrUtils.toLowerCaseFirst(fieldName.substring(3));
-        } else if (isLk || isNN) {
+        } else if (isLk || isNN || isGt || isLt) {
             actualName = StrUtils.toLowerCaseFirst(fieldName.substring(2));
         } else if (isN) {
             actualName = StrUtils.toLowerCaseFirst(fieldName.substring(1));
@@ -296,6 +298,10 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
             criteria.andLessThanEqual(actualName, fieldValue);
         } else if (isGte) {
             criteria.andGreaterThanEqual(actualName, fieldValue);
+        } else if (isLt) {
+            criteria.andLessThan(actualName, fieldValue);
+        } else if (isGt) {
+            criteria.andGreaterThan(actualName, fieldValue);
         } else if (isLk) {
             criteria.andLike(actualName, "%" + fieldValue + "%");
         } else if (isNN) {
