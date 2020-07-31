@@ -1,5 +1,6 @@
 package mybatis.base.template.controller;
 
+import com.google.common.collect.Lists;
 import mybatis.base.template.business.IBusiness;
 import mybatis.base.template.controller.response.Result;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -75,16 +76,15 @@ public class BaseController<B extends IBusiness<T, Q, R>, T, Q, R> {
      **/
     @GetMapping
     public Result<List<R>> list(Q q) {
-        List<R> rList = baseBusiness.listByCondition(q, this.getPageNum(), this.getPageSize());
         int count = baseBusiness.countByCondition(q);
+        List<R> rList;
+        if (count == 0) {
+            rList = Lists.newArrayList();
+        } else {
+            rList = baseBusiness.listByCondition(q, this.getPageNum(), this.getPageSize());
+        }
         return Result.success(rList, count);
     }
-
-
-
-
-
-
 
 
     protected int getPageNum() {
