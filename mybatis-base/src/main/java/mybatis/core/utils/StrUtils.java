@@ -12,6 +12,8 @@ public class StrUtils {
     public static void main(String[] args) {
         System.out.println("users".substring(0,"users".lastIndexOf("s")));
         System.out.println(toLowerCaseFirst("neqId".substring(3)));
+        System.out.println("idAsc".substring(0,"idAsc".lastIndexOf("Asc")));
+        System.out.println("idDesc".substring(0,"idDesc".lastIndexOf("Desc")));
     }
 
     public static boolean isEmpty(Object str) {

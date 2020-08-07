@@ -2,6 +2,7 @@ package mybatis.base.template.business;
 
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import mybatis.base.helper.TableParser;
 import mybatis.base.template.service.IService;
 import mybatis.core.entity.Condition;
@@ -100,7 +101,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
     @Override
     public List<R> listByCondition(Q q, int pageNum, int pageSize) {
         List<R> result = Lists.newArrayList();
-        Condition<T> condition = this.getCondition(q);
+        Condition<T> condition = this.getCondition(q, false);
         if (Objects.isNull(condition)) {
             return result;
         }
@@ -136,7 +137,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
      **/
     @Override
     public int countByCondition(Q q) {
-        Condition<T> condition = this.getCondition(q);
+        Condition<T> condition = this.getCondition(q, true);
         if (Objects.isNull(condition)) {
             return 0;
         }
@@ -156,15 +157,6 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
     public List<R> listByCondition(Condition<T> condition) {
         if (Objects.isNull(condition)) {
             return Lists.newArrayList();
-        }
-        //没有排序的话，默认按id升序
-        if (CollectionUtils.isEmpty(condition.getOrderByList())) {
-            T t = TableParser.getInstance(this.getClass(), 1);
-            if (Objects.isNull(t)) {
-                throw new RuntimeException("获取实体类失败!");
-            }
-            String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
-            condition.setOrderBy(primaryKeyName);
         }
         return this.listR(baseService.listByCondition(condition));
     }
@@ -190,7 +182,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
      *
      * @return
      */
-    protected Condition<T> getCondition(Q q) {
+    protected Condition<T> getCondition(Q q, boolean isCount) {
         if (Objects.isNull(q)) {
             return null;
         }
@@ -198,17 +190,38 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         if (Objects.isNull(t)) {
             throw new RuntimeException("获取实体类失败!");
         }
-        Condition<T> condition = new Condition<>();
-        Condition<T>.Criteria criteria = condition.createCriteria();
+        Condition<T> tCondition = new Condition<>();
+        Condition<T>.Criteria criteria = tCondition.andCriteria();
         Field[] queryFields = q.getClass().getDeclaredFields();
         List<Field> fields = Lists.newArrayList(t.getClass().getDeclaredFields());
         Map<String, Field> entityMap = fields.stream().filter(f -> Objects.equals(f.getModifiers(), Modifier.PRIVATE)).collect(Collectors.toMap(Field::getName, Function.identity(), (k1, k2) -> k2));
+        //排序map
+        Map<String, Object> sortMap = Maps.newHashMap();
         for (Field field : queryFields) {
             field.setAccessible(true); // 私有属性必须设置访问权限
             //设置查询条件
-            this.setCriteria(criteria, q, entityMap, field);
+            this.setCriteria(sortMap, criteria, q, entityMap, field);
         }
-        return condition;
+
+        //查询总数
+        if (isCount) {
+            return tCondition;
+        }
+        //如果列表排序字段为空,默认id升序
+        if (CollectionUtils.isEmpty(sortMap)) {
+            String primaryKeyName = TableParser.getPrimaryKeyName(t.getClass());
+            tCondition.setOrderBy(primaryKeyName);
+            return tCondition;
+        }
+        //设置排序字段
+        sortMap.forEach((k, v) -> {
+            if ("asc".equals(v)) {
+                tCondition.setOrderBy(k);
+            } else {
+                tCondition.setOrderBy(k).desc();
+            }
+        });
+        return tCondition;
     }
 
     /**
@@ -239,14 +252,14 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
     }
 
 
-    private void setCriteria(Condition<T>.Criteria criteria, Q q, Map<String, Field> entityMap, Field field) {
+    private void setCriteria(Map<String, Object> sortMap, Condition<T>.Criteria criteria, Q q, Map<String, Field> entityMap, Field field) {
         String fieldName = field.getName();
         Class<?> type = field.getType();
         //集合
         boolean isList = Objects.equals(type, List.class);
         //不等于,小于等于,大于等于,模糊,非空,空,In,notIn
         //默认等于
-        boolean isNeq, isLte, isGte, isLt, isGt,isLk, isNN, isN, isNin = false;
+        boolean isNeq, isLte, isGte, isLt, isGt, isLk, isNN, isN, isSort, isNin = false;
         isNeq = fieldName.startsWith("neq");
         isLte = fieldName.startsWith("lte");
         isGt = fieldName.startsWith("gt");
@@ -255,6 +268,7 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
         isN = fieldName.startsWith("n");
         isNN = fieldName.startsWith("nn");
         isLk = fieldName.startsWith("lk");
+        isSort = fieldName.endsWith("Sort");
 
         String actualName = fieldName;
 
@@ -270,6 +284,8 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
             actualName = StrUtils.toLowerCaseFirst(fieldName.substring(2));
         } else if (isN) {
             actualName = StrUtils.toLowerCaseFirst(fieldName.substring(1));
+        } else if (isSort) {
+            actualName = fieldName.substring(0, fieldName.lastIndexOf("Sort"));
         }
 
         if (Objects.isNull(entityMap.get(actualName))) {
@@ -277,20 +293,29 @@ public class BusinessImpl<S extends IService<T>, T, Q, R> implements IBusiness<T
                 return;
             }
         }
+
+        //条件字段
         Object fieldValue;
         try {
             fieldValue = field.get(q);
         } catch (IllegalAccessException e) {
             throw new RuntimeException("获取属性" + field.getName() + "失败!");
         }
-        if (Objects.isNull(fieldValue)) {
+        if (StrUtils.isEmpty(fieldValue)) {
             return;
         }
+
+        //排序字段
+        if (isSort) {
+            sortMap.put(actualName, fieldValue);
+            return;
+        }
+
         if (isList) {
             if (isNin) {
-                criteria.andNotIn(actualName, (List) fieldValue);
+                criteria.andNotIn(actualName, (List<?>) fieldValue);
             } else {
-                criteria.andIn(actualName, (List) fieldValue);
+                criteria.andIn(actualName, (List<?>) fieldValue);
             }
         } else if (isNeq) {
             criteria.andNotEqual(actualName, fieldValue);
