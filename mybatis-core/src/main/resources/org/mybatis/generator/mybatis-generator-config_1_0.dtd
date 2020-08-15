@@ -118,8 +118,8 @@
   <!ELEMENT method EMPTY>
   <!ATTLIST method
    name CDATA #REQUIRED
-   mapping CDATA #IMPLIED
-   isDefault CDATA #IMPLIED>
+   value CDATA #REQUIRED
+   mapping CDATA #IMPLIED>
 
 <!--
   The plugin element is used to define a plugin.

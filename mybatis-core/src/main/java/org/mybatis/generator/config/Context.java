@@ -644,7 +644,7 @@ public class Context extends PropertyHolder {
         if (Objects.isNull(methodConfiguration)) {
             return null;
         }
-        return StringUtility.isTrue(methodConfiguration.getIsDefault()) ? methodConfiguration.getName() : methodConfiguration.getMapping();
+        return methodConfiguration.getMapping();
     }
 
 

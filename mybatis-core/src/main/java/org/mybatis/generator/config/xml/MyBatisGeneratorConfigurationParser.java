@@ -735,14 +735,14 @@ public class MyBatisGeneratorConfigurationParser {
 
         String name = attributes.getProperty("name");
         String mapping = attributes.getProperty("mapping");
-        String isDefault = attributes.getProperty("isDefault");
+        String value = attributes.getProperty("value");
         String key = CustomKeyUtil.getPropKey(type, name);
         if (Objects.nonNull(context.getCustomConfiguration(type, name))) {
             throw new RuntimeException("属性name已存在!");
         }
         methodConfiguration.setName(name);
         methodConfiguration.setMapping(mapping);
-        methodConfiguration.setIsDefault(isDefault);
+        methodConfiguration.setValue(value);
         context.setMethodConfigurationMap(key, methodConfiguration);
     }
 
