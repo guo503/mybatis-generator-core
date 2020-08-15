@@ -115,10 +115,16 @@
    value CDATA #REQUIRED
    type CDATA #REQUIRED>
 
+  <!ELEMENT method EMPTY>
+  <!ATTLIST method
+   name CDATA #REQUIRED
+   mapping CDATA #IMPLIED
+   isDefault CDATA #IMPLIED>
+
 <!--
   The plugin element is used to define a plugin.
 -->
-<!ELEMENT plugin ((property | prop | path | pack)*)>
+<!ELEMENT plugin ((property | prop | path | pack | method)*)>
 <!ATTLIST plugin
   type CDATA #REQUIRED>
 

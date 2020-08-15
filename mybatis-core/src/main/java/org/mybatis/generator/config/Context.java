@@ -76,6 +76,8 @@ public class Context extends PropertyHolder {
 
     private Map<String, PathOrPackConfiguration> pathOrPackConfigurationMap;
 
+    private Map<String, MethodConfiguration> methodConfigurationMap;
+
     private Map<String, TableProp> tablePropMap;
 
     private String targetRuntime;
@@ -101,6 +103,7 @@ public class Context extends PropertyHolder {
         pluginConfigurations = new ArrayList<PluginConfiguration>();
         this.customConfigurationMap = new HashMap<>();
         this.pathOrPackConfigurationMap = new HashMap<>();
+        this.methodConfigurationMap = new HashMap<>();
         this.tablePropMap = new HashMap<>();
     }
 
@@ -575,6 +578,10 @@ public class Context extends PropertyHolder {
         this.pathOrPackConfigurationMap.put(name, pathOrPackConfiguration);
     }
 
+    public void setMethodConfigurationMap(String name, MethodConfiguration methodConfiguration) {
+        this.methodConfigurationMap.put(name, methodConfiguration);
+    }
+
     public void setTablePropMap(String name, TableProp tableProp) {
         this.tablePropMap.put(name, tableProp);
     }
@@ -622,6 +629,22 @@ public class Context extends PropertyHolder {
             return null;
         }
         return pathOrPackConfiguration.getValue();
+    }
+
+    public String getMName(String type, String name) {
+        MethodConfiguration methodConfiguration = this.methodConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(methodConfiguration)) {
+            return null;
+        }
+        return methodConfiguration.getName();
+    }
+
+    public String getMMapping(String type, String name) {
+        MethodConfiguration methodConfiguration = this.methodConfigurationMap.get(CustomKeyUtil.getPropKey(type, name));
+        if (Objects.isNull(methodConfiguration)) {
+            return null;
+        }
+        return StringUtility.isTrue(methodConfiguration.getIsDefault()) ? methodConfiguration.getName() : methodConfiguration.getMapping();
     }
 
 

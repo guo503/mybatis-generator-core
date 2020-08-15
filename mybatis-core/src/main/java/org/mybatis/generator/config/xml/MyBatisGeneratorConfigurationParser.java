@@ -35,6 +35,7 @@ import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.CustomKeyUtil;
 import org.mybatis.generator.utils.MethodUtils;
+import org.mybatis.generator.utils.OsUtil;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -205,7 +206,7 @@ public class MyBatisGeneratorConfigurationParser {
         String targetProject = attributes.getProperty("targetProject"); //$NON-NLS-1$
 
         sqlMapGeneratorConfiguration.setTargetPackage(targetPackage);
-        sqlMapGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
+        sqlMapGeneratorConfiguration.setTargetProject(context.getCorePath() + OsUtil.castPath(targetProject));
 
         NodeList nodeList = node.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -597,6 +598,8 @@ public class MyBatisGeneratorConfigurationParser {
                 this.parsePathOrPack(context, childNode, type, true);
             } else if ("pack".equals(childNode.getNodeName())) {
                 this.parsePathOrPack(context, childNode, type, false);
+            } else if ("method".equals(childNode.getNodeName())) {
+                this.methodConfiguration(context, childNode, type);
             }
         }
     }
@@ -612,7 +615,7 @@ public class MyBatisGeneratorConfigurationParser {
         String targetProject = attributes.getProperty("targetProject"); //$NON-NLS-1$
 
         javaModelGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
-        javaModelGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
+        javaModelGeneratorConfiguration.setTargetProject(context.getCorePath() + OsUtil.castPath(targetProject));
 
         NodeList nodeList = node.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -642,7 +645,7 @@ public class MyBatisGeneratorConfigurationParser {
 
         javaClientGeneratorConfiguration.setConfigurationType(type);
         javaClientGeneratorConfiguration.setTargetPackage(context.getCorePack() + targetPackage);
-        javaClientGeneratorConfiguration.setTargetProject(context.getCorePath() + targetProject);
+        javaClientGeneratorConfiguration.setTargetProject(context.getCorePath() + OsUtil.castPath(targetProject));
         javaClientGeneratorConfiguration
                 .setImplementationPackage(implementationPackage);
 
@@ -725,10 +728,29 @@ public class MyBatisGeneratorConfigurationParser {
         context.setPathOrPackConfigurationMap(key, pathOrPackConfiguration);
     }
 
+
+    protected void methodConfiguration(Context context, Node node, String type) {
+        MethodConfiguration methodConfiguration = new MethodConfiguration();
+        Properties attributes = this.parseCustomAttributes(node);
+
+        String name = attributes.getProperty("name");
+        String mapping = attributes.getProperty("mapping");
+        String isDefault = attributes.getProperty("isDefault");
+        String key = CustomKeyUtil.getPropKey(type, name);
+        if (Objects.nonNull(context.getCustomConfiguration(type, name))) {
+            throw new RuntimeException("属性name已存在!");
+        }
+        methodConfiguration.setName(name);
+        methodConfiguration.setMapping(mapping);
+        methodConfiguration.setIsDefault(isDefault);
+        context.setMethodConfigurationMap(key, methodConfiguration);
+    }
+
     private String getPathOrPack(Context context, String type, String value, boolean isPath) {
-        String prefix;
+        String prefix, val = value;
         //项目路径
         if (isPath) {
+            val = OsUtil.castPath(val);
             //core
             if (Objects.equals(KeyConst.CORE, type)) {
                 prefix = context.getProperty(KeyConst.CORE_PROJECT_PREFIX);
@@ -753,7 +775,7 @@ public class MyBatisGeneratorConfigurationParser {
             }
             prefix = prefix + ".";
         }
-        return prefix + value;
+        return prefix + val;
 
     }
 

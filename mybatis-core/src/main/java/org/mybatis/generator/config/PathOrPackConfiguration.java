@@ -1,6 +1,7 @@
 package org.mybatis.generator.config;
 
 /**
+ * path or pack元素标签
  * @author guos
  * @description
  * @date 2020/4/27 18:18
