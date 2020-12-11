@@ -4,6 +4,7 @@ import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.config.PropertyRegistry;
 import org.mybatis.generator.constant.MethodEnum;
+import org.mybatis.generator.enums.ProjectEnum;
 
 import java.util.List;
 import java.util.Properties;
@@ -104,6 +105,16 @@ public class BasePlugin extends PluginAdapter {
 
     protected FullyQualifiedJavaType objectsType;
 
+    /**
+     * 是否生成查询
+     */
+    protected boolean enableQuery;
+
+    /**
+     * 项目结构
+     */
+    protected boolean isBS;
+
 
     public BasePlugin() {
         super();
@@ -124,6 +135,7 @@ public class BasePlugin extends PluginAdapter {
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
         this.queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
         this.querySuffix = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
+        this.enableQuery = context.isCustomEnable(ExtendModelPlugin.class.getName(), "querySuffix");
         this.voPack = context.getPPVal(ExtendModelPlugin.class.getName(), "voPack");
         this.voSuffix = context.getProp(ExtendModelPlugin.class.getName(), "voSuffix");
         this.listType = new FullyQualifiedJavaType("java.util.*");
@@ -145,17 +157,21 @@ public class BasePlugin extends PluginAdapter {
 
         this.page = "mybatis.core.page.Page";
 
-        this.iManage = new FullyQualifiedJavaType("mybatis.base.template.manage.IManage");
-        this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.manage.ManageImpl");
+        this.isBS = ProjectEnum.isBS(context.getProperty("project_structure"));
 
-        this.iService = new FullyQualifiedJavaType("mybatis.base.template.service.IService");
-        this.serviceImpl = new FullyQualifiedJavaType("mybatis.base.template.service.ServiceImpl");
+        this.iManage = new FullyQualifiedJavaType("mybatis.base.template.bsm.manage.IManage");
+        this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.bsm.manage.ManageImpl");
 
-        this.IBusiness = new FullyQualifiedJavaType("mybatis.base.template.business.IBusiness");
-        this.businessImpl = new FullyQualifiedJavaType("mybatis.base.template.business.BusinessImpl");
+        String pack = "mybatis.base.template" + (this.isBS ? ".bs." : ".bsm.");
+
+        this.iService = new FullyQualifiedJavaType(pack + "service.IService");
+        this.serviceImpl = new FullyQualifiedJavaType(pack + "service.ServiceImpl");
+
+        this.IBusiness = new FullyQualifiedJavaType(pack + "business.IBusiness");
+        this.businessImpl = new FullyQualifiedJavaType(pack + "business.BusinessImpl");
 
 
-        this.baseController = new FullyQualifiedJavaType("mybatis.base.template.controller.BaseController");
+        this.baseController = new FullyQualifiedJavaType(pack + "controller.BaseController");
 
 
         this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");

@@ -1,8 +1,8 @@
-package mybatis.base.template.controller.enums;
+package mybatis.base.template.enums;
 
 public interface IErrorCode {
-	
+
 	int getCode();
-	
+
 	String getMessage();
 }

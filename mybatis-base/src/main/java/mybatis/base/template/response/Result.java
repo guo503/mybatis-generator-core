@@ -1,8 +1,8 @@
-package mybatis.base.template.controller.response;
+package mybatis.base.template.response;
 
 
-import mybatis.base.template.controller.enums.ErrorCodeEnum;
-import mybatis.base.template.controller.enums.IErrorCode;
+import mybatis.base.template.enums.ErrorCodeEnum;
+import mybatis.base.template.enums.IErrorCode;
 
 import java.io.Serializable;
 

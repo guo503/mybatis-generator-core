@@ -5,14 +5,13 @@
     <parent>
         <artifactId>mybatis-generator-core</artifactId>
         <groupId>com.tsyj</groupId>
-        <version>1.0.0</version>
+        <version>${mybatis.parent}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.tsyj</groupId>
     <artifactId>mybatis-base</artifactId>
     <packaging>jar</packaging>
-    <version>${mybatis.base.version}</version>
+    <version>${mybatis.base}</version>
 
     <properties>
         <ibatx.project.version>1.0.1</ibatx.project.version>
@@ -29,11 +28,13 @@
 
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <scope>provided</scope>
+            <version>${mybatis.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>mysql</groupId>

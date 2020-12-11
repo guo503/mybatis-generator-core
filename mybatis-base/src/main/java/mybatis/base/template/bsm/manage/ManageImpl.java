@@ -1,4 +1,4 @@
-package mybatis.base.template.manage;
+package mybatis.base.template.bsm.manage;
 
 
 import com.google.common.collect.Lists;

@@ -1,4 +1,4 @@
-package mybatis.base.template.business;
+package mybatis.base.template.bsm.business;
 
 
 import mybatis.core.entity.Condition;

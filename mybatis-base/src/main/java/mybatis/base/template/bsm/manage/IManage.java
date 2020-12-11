@@ -1,4 +1,4 @@
-package mybatis.base.template.service;
+package mybatis.base.template.bsm.manage;
 
 
 import mybatis.core.entity.Condition;
@@ -10,7 +10,7 @@ import java.util.Map;
  * @author guos
  * @date 2020/6/29 15:35
  **/
-public interface IService<T> {
+public interface IManage<T> {
 
     /**
      * 查询

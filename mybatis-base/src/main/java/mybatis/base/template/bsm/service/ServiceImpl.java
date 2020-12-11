@@ -1,7 +1,7 @@
-package mybatis.base.template.service;
+package mybatis.base.template.bsm.service;
 
 
-import mybatis.base.template.manage.IManage;
+import mybatis.base.template.bsm.manage.IManage;
 import mybatis.core.entity.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 

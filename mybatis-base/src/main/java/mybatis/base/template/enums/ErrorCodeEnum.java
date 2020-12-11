@@ -1,4 +1,4 @@
-package mybatis.base.template.controller.enums;
+package mybatis.base.template.enums;
 
 /**
  * api请求错误码

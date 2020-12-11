@@ -80,7 +80,11 @@ public class ServicePlugin extends BasePlugin {
 
         interfaceType = new FullyQualifiedJavaType(servicePath);
 
-        daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getProp(ManagePlugin.class.getName(), "manageSuffix"));
+        if (isBS) {
+            daoType = new FullyQualifiedJavaType(introspectedTable.getMyBatis3JavaMapperType());
+        } else {
+            daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getProp(ManagePlugin.class.getName(), "manageSuffix"));
+        }
 
         serviceType = new FullyQualifiedJavaType(serviceImplPath);
 

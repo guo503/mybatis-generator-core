@@ -33,12 +33,6 @@ public class ManagePlugin extends BasePlugin {
     private String manageProject;
     private String manageImplProject;
 
-
-    /**
-     * 表的列list
-     **/
-    private List<IntrospectedColumn> columns;
-
     private String manageSuffix;
 
 
@@ -80,11 +74,12 @@ public class ManagePlugin extends BasePlugin {
         String domainObjectName = introspectedTable.getDomainObjectName();
         //是否生成business
         boolean generatorManage = StringUtility.isTrue(context.getTableProp(domainObjectName, KeyConst.ENABLE_MANAGE));
+        if(isBS){
+            return new ArrayList<>();
+        }
         if (!generatorManage) {//是否生成service
             return new ArrayList<>();
         }
-        columns = introspectedTable.getNonPrimaryKeyColumns();
-
         // 取Service名称【com.coolead.service.PetService】
         String table = introspectedTable.getBaseRecordType();
         String tableName = table.replaceAll(this.pojoUrl + ".", "");

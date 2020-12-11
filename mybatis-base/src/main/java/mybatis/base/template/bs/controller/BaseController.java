@@ -1,8 +1,8 @@
-package mybatis.base.template.controller;
+package mybatis.base.template.bs.controller;
 
 import com.google.common.collect.Lists;
-import mybatis.base.template.business.IBusiness;
-import mybatis.base.template.controller.response.Result;
+import mybatis.base.template.bs.business.IBusiness;
+import mybatis.base.template.response.Result;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

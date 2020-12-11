@@ -1,10 +1,10 @@
-package mybatis.base.template.business;
+package mybatis.base.template.bsm.business;
 
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import mybatis.base.helper.TableParser;
-import mybatis.base.template.service.IService;
+import mybatis.base.template.bsm.service.IService;
 import mybatis.core.entity.Condition;
 import mybatis.core.page.Page;
 import mybatis.core.utils.StrUtils;
