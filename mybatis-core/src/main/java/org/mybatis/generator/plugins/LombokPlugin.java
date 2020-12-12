@@ -29,12 +29,18 @@ public class LombokPlugin extends PluginAdapter {
         boolean hasLombok = this.hasLombok();
         if (hasLombok) {
             String classType = ExtendModelPlugin.class.getName();
-            boolean isPo = Objects.equals(topLevelClass.getType().getShortName(), introspectedTable.getDomainObjectName());
+            String shortName = topLevelClass.getType().getShortName();
+            boolean isPo = Objects.equals(shortName, introspectedTable.getDomainObjectName());
+            boolean isVO = shortName.endsWith(CommonConstant.VO_SUFFIX);
             //添加domain的import
             if (isPo) {
                 String tableAnno = context.getProp(classType, "table");
                 topLevelClass.addImportedType(tableAnno);
                 topLevelClass.addAnnotation("@" + MethodUtils.getClassName(tableAnno, ".") + "(name = \"" + introspectedTable.getTableName() + "\")");
+            }
+            if(isVO){
+                topLevelClass.addImportedType("lombok.EqualsAndHashCode");
+                topLevelClass.addAnnotation("@EqualsAndHashCode(callSuper = false)");
             }
             topLevelClass.addImportedType("lombok.Data");
             topLevelClass.addAnnotation("@Data");

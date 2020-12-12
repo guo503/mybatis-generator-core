@@ -68,17 +68,17 @@ public class CommentUtils {
         String description = getDesc(methodName, introspectedTable.getRemarks(), introspectedTable.getDomainObjectName());
         String TabStr = "\t\t\t";
         StringBuilder sb = new StringBuilder();
-        sb.append(TabStr + "" + "\n");
-        sb.append(TabStr + "/**" + "\n");
-        sb.append(TabStr + "*" + description + "\n");
-        sb.append("* @param " + parameterName + " " + parameterName + "\n");
-        sb.append("* @author " + introspectedTable.getContext().getProperty("author") + "\n");
-        sb.append("* @date " + date2Str(new Date()) + "\n");
+        sb.append(TabStr).append("\n");
+        sb.append(TabStr).append("/**").append("\n");
+        sb.append(TabStr).append("*").append(description).append("\n");
+        sb.append("* @param ").append(parameterName).append(" ").append(parameterName).append("\n");
+        sb.append("* @author ").append(introspectedTable.getContext().getProperty("author")).append("\n");
+        sb.append("* @date ").append(date2Str(new Date())).append("\n");
         if (!"void".equals(returnType)) {
-            sb.append("* @return " + returnType + "\n");
+            sb.append("* @return ").append(returnType).append("\n");
         }
         sb.append("*/" + "\n");
-        sb.append(methodStr + "\n");
+        sb.append(methodStr).append("\n");
         return sb.toString();
     }
 
