@@ -1,12 +1,10 @@
 package org.mybatis.generator.plugins;
 
 import org.mybatis.generator.api.GeneratedJavaFile;
-import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
-import org.mybatis.generator.constant.MethodEnum;
 import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.utils.*;
 
@@ -15,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -26,7 +23,6 @@ import java.util.Objects;
  **/
 public class ServicePlugin extends BasePlugin {
 
-    private FullyQualifiedJavaType serviceType;
     private FullyQualifiedJavaType daoType;
     private FullyQualifiedJavaType interfaceType;
     private String servicePack;
@@ -79,19 +75,10 @@ public class ServicePlugin extends BasePlugin {
         String serviceImplPath = serviceImplPack + "." + tableName + serviceSuffix + "Impl";
 
         interfaceType = new FullyQualifiedJavaType(servicePath);
+        daoType = new FullyQualifiedJavaType(introspectedTable.getMyBatis3JavaMapperType());
 
-        if (isBS) {
-            daoType = new FullyQualifiedJavaType(introspectedTable.getMyBatis3JavaMapperType());
-        } else {
-            daoType = new FullyQualifiedJavaType(context.getPPVal(ManagePlugin.class.getName(), "managePack") + "." + tableName + context.getProp(ManagePlugin.class.getName(), "manageSuffix"));
-        }
-
-        serviceType = new FullyQualifiedJavaType(serviceImplPath);
-
+        FullyQualifiedJavaType serviceType = new FullyQualifiedJavaType(serviceImplPath);
         pojoType = MethodGeneratorUtils.getPoType(context, introspectedTable);
-
-        //查询条件类
-        String conditionType = context.getProp(ExtendModelPlugin.class.getName(), CommonConstant.CONDITION);
 
         String suffix = CommonConstant.JAVA_FILE_SUFFIX;
         String serviceFilePath = serviceProject + LocalFileUtils.getPath(servicePath) + suffix;
@@ -104,13 +91,10 @@ public class ServicePlugin extends BasePlugin {
         interface1.addSuperInterface(new FullyQualifiedJavaType(iService.getShortName() + "<" + domainObjectName + ">"));
         interface1.addImportedType(iService);
 
-        //interface1.addImportedType(new FullyQualifiedJavaType(conditionType));
-
         TopLevelClass topLevelClass = new TopLevelClass(serviceType);
         topLevelClass.setSuperClass(new FullyQualifiedJavaType(serviceImpl.getShortName() + "<" + daoType.getShortName() + ", " + domainObjectName + ">"));
         topLevelClass.addImportedType(serviceImpl);
 
-        //topLevelClass.addImportedType(new FullyQualifiedJavaType(conditionType));
         Files.deleteIfExists(Paths.get(serviceFilePath));
         // 导入必须的类
         addImport(interface1, null);
@@ -172,134 +156,6 @@ public class ServicePlugin extends BasePlugin {
         files.add(file);
     }
 
-    private void addMethods(Interface interface1, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, String tableName) {
-        // add method
-        Method method;
-        //是否是接口
-        boolean isInterface = Objects.nonNull(interface1);
-        method = selectByPrimaryKey(introspectedTable, selectByPrimaryKey, tableName);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = selectByModel(introspectedTable, MethodEnum.GET_ONE.getValue());
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), insertSelective, introspectedTable, tableName, 1);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = getOtherInteger(this.getClass().getName(), saveAndGet, introspectedTable, tableName, 1);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = getOtherInteger(BaseMethodPlugin.class.getName(), updateByPrimaryKeySelective, introspectedTable, tableName, 1);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = listByIds(BaseMethodPlugin.class.getName(), introspectedTable, listByIds, 1);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, list, 1);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = countByCondition(introspectedTable, count);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-
-        method = listByCondition(BaseMethodPlugin.class.getName(), introspectedTable, listByCondition, 4);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-
-        method = countByCondition(introspectedTable, countByCondition);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-
-        method = listByCondition(this.getClass().getName(), introspectedTable, listId, 2);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = listByIds(this.getClass().getName(), introspectedTable, mapByIds, 2);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = listByCondition(this.getClass().getName(), introspectedTable, map, 3);
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        method = batchList(introspectedTable, MethodEnum.BATCH_LIST.getValue());
-        if (isInterface) {
-            interface1.addMethod(method);
-            MethodUtils.clear(method);
-        } else {
-            topLevelClass.addMethod(method);
-        }
-
-        //实现类
-        if (!isInterface) {
-            topLevelClass.addImportedType(serviceType);
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.util.Assert"));
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("org.springframework.transaction.annotation.Transactional"));
-        }
-    }
-
     /**
      * 添加字段
      *
@@ -319,428 +175,6 @@ public class ServicePlugin extends BasePlugin {
         topLevelClass.addField(field);
     }
 
-    /**
-     * 添加方法
-     * flag 1:根据id查询
-     */
-    protected Method selectByPrimaryKey(IntrospectedTable introspectedTable, String alias, String tableName) {
-        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
-            return null;
-        }
-        Method method = new Method();
-        method.setName(alias);
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        method.setReturnType(new FullyQualifiedJavaType(domainObjectName));
-        method.addAnnotation("@Override");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
-        if (columns == null || columns.size() == 0) {
-            throw new RuntimeException("请设置表的唯一主键列！");
-        }
-        String primaryKey = columns.get(0).getJavaProperty();
-        if (introspectedTable.getRules().generatePrimaryKeyClass()) {
-            FullyQualifiedJavaType type = new FullyQualifiedJavaType(introspectedTable.getPrimaryKeyType());
-            method.addParameter(new Parameter(type, "key"));
-        } else {
-            for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-                FullyQualifiedJavaType type = introspectedColumn.getFullyQualifiedJavaType();
-                method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
-            }
-        }
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, primaryKey);
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("return ");
-        sb.append(getDaoShort());
-        sb.append(alias);
-        sb.append("(");
-        for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-            sb.append(introspectedColumn.getJavaProperty());
-            sb.append(",");
-        }
-        sb.setLength(sb.length() - 1);
-        sb.append(");");
-        method.addBodyLine("Assert.notNull(" + primaryKey + ",\"" + primaryKey + "不能为空\");");
-        method.addBodyLine(sb.toString());
-        return method;
-    }
-
-
-    /**
-     * 添加方法
-     * flag 1:根据id查询
-     */
-    protected Method selectByModel(IntrospectedTable introspectedTable, String alias) {
-        Method method = new Method();
-        method.setName(alias);
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String lowPo = MethodUtils.toLowerCase(domainObjectName);
-        FullyQualifiedJavaType type = new FullyQualifiedJavaType(domainObjectName);
-        method.addParameter(new Parameter(type, lowPo));
-        method.setReturnType(new FullyQualifiedJavaType(domainObjectName));
-        method.addAnnotation("@Override");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, lowPo);
-        }
-        method.addBodyLine("Assert.notNull(" + lowPo + ",\"" + lowPo + "不能为空\");");
-        String sb = "return " + getDaoShort() + alias + "(" + lowPo + ");";
-        method.addBodyLine(sb);
-        return method;
-    }
-
-
-    /**
-     * 添加方法
-     * 删除
-     */
-    protected Method delete(IntrospectedTable introspectedTable, String alias, String tableName, int flag) {
-        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(alias))) {
-            return null;
-        }
-        Method method = new Method();
-        method.setName(alias);
-        method.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        method.addAnnotation("@Override");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
-        if (columns == null || columns.size() == 0) {
-            throw new RuntimeException("请设置表的唯一主键列！");
-        }
-        String primaryKey = columns.get(0).getJavaProperty();
-        if (introspectedTable.getRules().generatePrimaryKeyClass()) {
-            FullyQualifiedJavaType type = new FullyQualifiedJavaType(introspectedTable.getPrimaryKeyType());
-            method.addParameter(new Parameter(type, "key"));
-        } else {
-            for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-                FullyQualifiedJavaType type = introspectedColumn.getFullyQualifiedJavaType();
-                method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
-            }
-        }
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, primaryKey);
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("return ");
-        sb.append(getDaoShort());
-        sb.append("(");
-        for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-            sb.append(introspectedColumn.getJavaProperty());
-            sb.append(",");
-        }
-        sb.setLength(sb.length() - 1);
-        sb.append(");");
-        method.addBodyLine("Assert.notNull(" + primaryKey + ",\"" + primaryKey + "不能为空\");");
-        method.addBodyLine(sb.toString());
-        return method;
-    }
-
-
-    /**
-     * add method
-     */
-    protected Method countByCondition(IntrospectedTable introspectedTable, String methodName) {
-        if (!context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String condName = MethodUtils.toLowerCase(MethodGeneratorUtils.getCondName(domainObjectName));
-        Method method = new Method();
-        method.setName(methodName);
-        method.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        method.addAnnotation("@Override");
-        //method.addParameter(new Parameter(this.getShortPojoType(introspectedTable), condName));
-        String poName = MethodUtils.toLowerCase(domainObjectName);
-        Parameter parameter;
-        String tip;
-        if (MethodEnum.COUNT.getValue().equals(methodName)) {
-            parameter = new Parameter(new FullyQualifiedJavaType(domainObjectName), poName);
-            tip = poName;
-        } else {
-            parameter = new Parameter(new FullyQualifiedJavaType("Condition<" + domainObjectName + ">"), condName);
-            tip = condName;
-        }
-        method.addParameter(parameter);
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, condName);
-        }
-        method.addBodyLine("Assert.notNull(" + tip + ",\"" + tip + "不能为空\");");
-        String sb = getDaoShort() + methodName + "(" + tip + ");";
-        method.addBodyLine("return " + sb);
-        return method;
-    }
-
-
-    /**
-     * param introspectedTable
-     * param type              :返回类型：1,po集合 2 id列表集合
-     * return
-     */
-    protected Method listByCondition(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
-        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String condName = MethodUtils.toLowerCase(MethodGeneratorUtils.getCondName(domainObjectName));
-        String poName = MethodUtils.toLowerCase(domainObjectName);
-        Method method = new Method();
-        method.setName(methodName);
-        String returnType = null;
-        Parameter parameter;
-        //1:list 2:listId 3:map 4: listByCondition
-        if (type == 1 || type == 4) {
-            returnType = "List<" + domainObjectName + ">";
-        } else if (type == 2) {
-            returnType = "List<Integer>";
-        } else if (type == 3) {
-            returnType = "Map<Integer," + domainObjectName + ">";
-        }
-        if (type == 1) {
-            parameter = new Parameter(new FullyQualifiedJavaType(domainObjectName), poName);
-        } else {
-            parameter = new Parameter(new FullyQualifiedJavaType("Condition<" + domainObjectName + ">"), condName);
-        }
-        method.setReturnType(new FullyQualifiedJavaType(returnType));
-        method.addParameter(parameter);
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        return method;
-    }
-
-
-    /**
-     * 批量查询列表
-     * param introspectedTable
-     * param type
-     * return
-     */
-    protected Method batchList(IntrospectedTable introspectedTable, String methodName) {
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String condName = MethodUtils.toLowerCase(MethodGeneratorUtils.getCondName(domainObjectName));
-        Method method = new Method();
-        method.setName(methodName);
-        String returnType = "List<" + domainObjectName + ">";
-        method.setReturnType(new FullyQualifiedJavaType(returnType));
-        method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), CommonConstant.GT_ID));
-        method.addParameter(new Parameter(new FullyQualifiedJavaType("Condition<" + domainObjectName + ">"), condName));
-        method.setVisibility(JavaVisibility.PUBLIC);
-        method.addAnnotation("@Override");
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, new String[]{CommonConstant.GT_ID, condName});
-        }
-        method.addBodyLine("Assert.notNull(" + condName + ",\"" + condName + "不能为空\");");
-        String sb = getDaoShort() + methodName + "(" + CommonConstant.GT_ID + ", " + condName + ");";
-        method.addBodyLine("return " + sb);
-        return method;
-    }
-
-
-    /**
-     * add method
-     */
-    protected Method listByIds(String pluginType, IntrospectedTable introspectedTable, String methodName, int type) {
-        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        Method method = new Method();
-        method.setName(methodName);
-        FullyQualifiedJavaType paramType = new FullyQualifiedJavaType("List");
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        if (type == 1) {
-            method.setReturnType(new FullyQualifiedJavaType("List<" + domainObjectName + ">"));
-        } else {
-            method.setReturnType(new FullyQualifiedJavaType("Map<Integer," + domainObjectName + ">"));
-        }
-        paramType.addTypeArgument(new FullyQualifiedJavaType("java.lang.Integer"));
-        method.addParameter(new Parameter(paramType, "ids"));
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        return method;
-    }
-
-
-    /**
-     * add method
-     */
-    protected Method getOtherInteger(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        Method method = new Method();
-        method.setName(methodName);
-        String params = addParams(introspectedTable, method, type);
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        method.setVisibility(JavaVisibility.PUBLIC);
-        if (MethodEnum.SAVE_AND_GET.getValue().equals(methodName)) {
-            method.addAnnotation("@Transactional");
-            method.addAnnotation("@Override");
-            method.setReturnType(new FullyQualifiedJavaType(domainObjectName));
-        } else {
-            method.addAnnotation("@Override");
-            method.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        }
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-
-        StringBuilder sb = new StringBuilder();
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, params);
-        }
-        sb.append("return ");
-        sb.append(getDaoShort());
-        sb.append(methodName);
-
-
-        sb.append("(");
-        sb.append(params);
-        sb.append(");");
-        method.addBodyLine(sb.toString());
-        return method;
-    }
-
-
-    /**
-     * add method
-     */
-    protected Method getOtherList(String pluginType, String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!context.isCustomEnable(pluginType, MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        Method method = new Method();
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String returnType = "List<" + domainObjectName + ">";
-        method.setName(methodName);
-        method.addAnnotation("@Override");
-        String idsStr = "ids";
-        if (type == 7) {
-            method.setReturnType(new FullyQualifiedJavaType("List<Integer>"));
-        } else {
-            method.setReturnType(new FullyQualifiedJavaType(returnType));
-        }
-        String params = addParams(introspectedTable, method, type);
-        String condName = MethodGeneratorUtils.getCondName(domainObjectName);
-        String lowCond = MethodUtils.toLowerCase(condName);
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        if (type == 7) {
-            //生成日志信息
-            if (enableLogger) {
-                MethodUtils.addLoggerInfo(method, params);
-            }
-        } else if (type == 6) {
-            params = idsStr;
-            //生成日志信息
-            if (enableLogger) {
-                MethodUtils.addLoggerInfo(method, params);
-            }
-        } else if (type == 5) {
-            params = MethodUtils.toLowerCase(domainObjectName);
-            //生成日志信息
-            if (enableLogger) {
-                MethodUtils.addLoggerInfo(method, params);
-            }
-        } else if (type == 8) {
-            params = lowCond;
-            //生成日志信息
-            if (enableLogger) {
-                MethodUtils.addLoggerInfo(method, params);
-            }
-        }
-        String checkStr = "Assert.notNull(" + params + ",\"" + params + "不能为空\");";
-        method.addBodyLine(checkStr);
-        method.addBodyLine("return " + getDaoShort() + methodName + "(" + params + ");");
-        return method;
-    }
-
-
-    /**
-     * add method
-     */
-    protected Method getOtherMap(String methodName, IntrospectedTable introspectedTable, String tableName, int type) {
-        if (!context.isCustomEnable(this.className, MethodEnum.getNameByValue(methodName))) {
-            return null;
-        }
-        Method method = new Method();
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        method.setName(methodName);
-        method.addAnnotation("@Override");
-        String returnType = "Map<Integer," + domainObjectName + ">";
-        method.setReturnType(new FullyQualifiedJavaType(returnType));
-        String params = addParams(introspectedTable, method, type);
-        method.setVisibility(JavaVisibility.PUBLIC);
-        CommentUtils.addGeneralMethodComment(method, introspectedTable);
-        //生成日志信息
-        if (enableLogger) {
-            MethodUtils.addLoggerInfo(method, params);
-        }
-        method.addBodyLine("return " + getDaoShort() + methodName + "(" + params + ");");
-        return method;
-    }
-
-
-    /**
-     * type: pojo 1 key 2 example 3 pojo+example 4
-     */
-    protected String addParams(IntrospectedTable introspectedTable, Method method, int type1) {
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        String lowCond = MethodUtils.toLowerCase(MethodGeneratorUtils.getCondName(domainObjectName));
-        Parameter parameter = new Parameter(new FullyQualifiedJavaType("Condition<" + domainObjectName + ">"), lowCond);
-        String lowPo = MethodUtils.toLowerCase(domainObjectName);
-        Parameter parameter2 = new Parameter(new FullyQualifiedJavaType(domainObjectName), lowPo);
-        switch (type1) {
-            case 1:
-                method.addParameter(new Parameter(pojoType, lowPo)); //$NON-NLS-1$
-                return lowPo;
-            case 2:
-                if (introspectedTable.getRules().generatePrimaryKeyClass()) {
-                    FullyQualifiedJavaType type = new FullyQualifiedJavaType(introspectedTable.getPrimaryKeyType());
-                    method.addParameter(new Parameter(type, "key"));
-                } else {
-                    for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-                        FullyQualifiedJavaType type = introspectedColumn.getFullyQualifiedJavaType();
-                        method.addParameter(new Parameter(type, introspectedColumn.getJavaProperty()));
-                    }
-                }
-                StringBuilder sb = new StringBuilder();
-                for (IntrospectedColumn introspectedColumn : introspectedTable.getPrimaryKeyColumns()) {
-                    sb.append(introspectedColumn.getJavaProperty());
-                    sb.append(",");
-                }
-                sb.setLength(sb.length() - 1);
-                return sb.toString();
-            case 5:
-                method.addParameter(parameter2);
-                return lowPo;
-            case 6:
-                //设置参数类型是List
-                FullyQualifiedJavaType paramType = new FullyQualifiedJavaType("List<Integer>");
-                method.addParameter(new Parameter(paramType, "ids")); //$NON-NLS-1$
-                return "ids";
-            case 7:
-                method.addParameter(parameter);
-                return lowCond;
-            case 8:
-                method.addParameter(parameter);
-                return lowCond;
-            default:
-                break;
-        }
-        return null;
-    }
-
 
     /**
      * import must class
@@ -748,37 +182,18 @@ public class ServicePlugin extends BasePlugin {
     private void addImport(Interface interfaces, TopLevelClass topLevelClass) {
         if (interfaces != null) {
             interfaces.addImportedType(pojoType);
-            //interfaces.addImportedType(listType);
-            //FullyQualifiedJavaType mapType = new FullyQualifiedJavaType("java.util.Map");
-            //interfaces.addImportedType(mapType);
         }
         if (topLevelClass != null) {
             topLevelClass.addImportedType(daoType);
             topLevelClass.addImportedType(interfaceType);
             topLevelClass.addImportedType(pojoType);
-            //topLevelClass.addImportedType(listType);
             if (enableLogger) {
                 topLevelClass.addImportedType(slf4jLogger);
                 topLevelClass.addImportedType(slf4jLoggerFactory);
             }
             if (enableAnnotation) {
                 topLevelClass.addImportedType(service);
-                //topLevelClass.addImportedType(autowired);
             }
-//            if (topLevelClass.getType().getShortName().endsWith("Impl")) {
-//                FullyQualifiedJavaType override = new FullyQualifiedJavaType("java.lang.Override");
-//                topLevelClass.addImportedType(override);
-//            }
         }
-    }
-
-
-    private String getDaoShort() {
-        return MethodUtils.toLowerCase(daoType.getShortName()) + ".";
-    }
-
-    public boolean clientInsertMethodGenerated(Method method, Interface interfaze, IntrospectedTable introspectedTable) {
-        FullyQualifiedJavaType returnType = method.getReturnType();
-        return true;
     }
 }

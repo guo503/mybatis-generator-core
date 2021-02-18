@@ -21,7 +21,7 @@ import java.util.List;
  **/
 public class ControllerPlugin extends BasePlugin {
 
-    private FullyQualifiedJavaType businessType;
+    private FullyQualifiedJavaType serviceType;
 
     /**
      * controller包路径
@@ -39,29 +39,16 @@ public class ControllerPlugin extends BasePlugin {
     private String controllerSuffix;
 
     /**
-     * vo包路径
-     */
-    private String queryPack;
-
-    /**
-     * vo类后缀
-     */
-    private String querySuffix;
-
-    /**
-     * 返回类方法
-     */
-    private String responseMethod;
-
-    /**
      * business包路径
      */
-    private String businessPack;
+    private String servicePack;
 
     /**
      * business类后缀
      */
-    private String businessSuffix;
+    private String serviceSuffix;
+
+    protected FullyQualifiedJavaType baseController;
 
 
     public ControllerPlugin() {
@@ -83,15 +70,10 @@ public class ControllerPlugin extends BasePlugin {
         this.controllerProject = context.getPPVal(className, "controllerProject");
         this.controllerPack = context.getPPVal(className, "controllerPack");
         this.controllerSuffix = context.getProp(className, "controllerSuffix");
+        this.baseController = new FullyQualifiedJavaType(context.getProp(className, "baseController"));
 
-        this.businessPack = context.getPPVal(BusinessPlugin.class.getName(), "businessPack");
-        this.businessSuffix = context.getProp(BusinessPlugin.class.getName(), "businessSuffix");
-
-        this.queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
-        this.querySuffix = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
-
-
-        this.responseMethod = context.getProp(className, "responseMethod");
+        this.servicePack = context.getPPVal(ServicePlugin.class.getName(), "servicePack");
+        this.serviceSuffix = context.getProp(ServicePlugin.class.getName(), "serviceSuffix");
 
         return true;
     }
@@ -112,13 +94,12 @@ public class ControllerPlugin extends BasePlugin {
 
         List<GeneratedJavaFile> files = new ArrayList<>();
 
-        String businessName = domainObjectName + businessSuffix;
+        String serviceName = domainObjectName + serviceSuffix;
         //business全路径
-        businessType = new FullyQualifiedJavaType(businessPack + "." + businessName);
+        serviceType = new FullyQualifiedJavaType(servicePack + "." + serviceName);
 
 
         //vo全路径
-        FullyQualifiedJavaType queryType = new FullyQualifiedJavaType(this.queryPack + "." + domainObjectName + this.querySuffix);
         FullyQualifiedJavaType voType = new FullyQualifiedJavaType(MethodUtils.getFullVoName(domainObjectName, voPack, voSuffix));
 
         String controllerPath = controllerPack + "." + domainObjectName + controllerSuffix;
@@ -128,16 +109,15 @@ public class ControllerPlugin extends BasePlugin {
         Files.deleteIfExists(Paths.get(controllerFilePath));
         //controller
         TopLevelClass controllerClass = new TopLevelClass(controllerType);
-        String baseClass = baseController.getShortName() + "<" + businessName + "," + domainObjectName + "," + MethodUtils.getShortQueryName(domainObjectName, querySuffix) + "," + MethodUtils.getShortVoName(domainObjectName, voSuffix) + ">";
+        String baseClass = baseController.getShortName() + "<" + serviceName + "," + domainObjectName + "," + MethodUtils.getShortVoName(domainObjectName, voSuffix) + ">";
         controllerClass.setSuperClass(MethodUtils.getClassName(baseClass));
         controllerClass.addImportedType(baseController);
-        controllerClass.addImportedType(businessType);
+        controllerClass.addImportedType(serviceType);
         //生成日志信息
         if (enableLogger) {
             controllerClass.addImportedType(slf4jLogger);
             controllerClass.addImportedType(slf4jLoggerFactory);
         }
-        controllerClass.addImportedType(queryType);
         controllerClass.addImportedType(voType);
         controllerClass.addImportedType(pojoType);
         controllerClass.addImportedType("org.springframework.web.bind.annotation.*");
@@ -158,24 +138,6 @@ public class ControllerPlugin extends BasePlugin {
         if (this.enableLogger) {
             ClassUtils.addLogger(topLevelClass);
         }
-
-        //ClassUtils.addField(topLevelClass, this.businessType, null);
-        //ControllerGen controllerGen = new ControllerGen(context, this.responseMethod, this.enableLogger);
-//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.selectByPrimaryKey))) {
-//            topLevelClass.addMethod(controllerGen.selectByPrimaryKey(this.businessType, introspectedTable, this.selectByPrimaryKey));
-//        }
-//
-//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.insertSelective))) {
-//            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.insertSelective));
-//        }
-//
-//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.updateByPrimaryKeySelective))) {
-//            topLevelClass.addMethod(controllerGen.insertOrUpdate(this.businessType, introspectedTable, this.updateByPrimaryKeySelective));
-//        }
-//
-//        if (context.isCustomEnable(BaseMethodPlugin.class.getName(), MethodEnum.getNameByValue(this.listByCondition))) {
-//            topLevelClass.addMethod(controllerGen.listByCondition(this.businessType, introspectedTable, this.listByCondition));
-//        }
 
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.controllerProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);

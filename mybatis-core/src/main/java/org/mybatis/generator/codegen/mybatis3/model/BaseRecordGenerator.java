@@ -22,10 +22,8 @@ import org.mybatis.generator.api.Plugin;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.codegen.AbstractJavaGenerator;
 import org.mybatis.generator.codegen.RootClassInfo;
-import org.mybatis.generator.internal.util.StringUtility;
+import org.mybatis.generator.constant.MpEnum;
 import org.mybatis.generator.plugins.ExtendModelPlugin;
-import org.mybatis.generator.utils.ClassUtils;
-import org.mybatis.generator.utils.MethodUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,16 +48,6 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
                 "Progress.8", table.toString())); //$NON-NLS-1$
         Plugin plugins = context.getPlugins();
         CommentGenerator commentGenerator = context.getCommentGenerator();
-        String domainObjectName = introspectedTable.getDomainObjectName();
-        //乐观锁列
-        String versionCol = context.getTableProp(domainObjectName,"versionCol");
-        //逻辑删除列
-        String delCol = context.getTableProp(domainObjectName,"delCol");
-
-
-        String idPath = context.getProp(ExtendModelPlugin.class.getName(), "id");
-        String versionPath = context.getProp(ExtendModelPlugin.class.getName(), "version");
-        String logicDeletePath = context.getProp(ExtendModelPlugin.class.getName(), "logicDelete");
 
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(
                 introspectedTable.getBaseRecordType());
@@ -105,23 +93,11 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
                     Plugin.ModelClassType.BASE_RECORD)) {
                 topLevelClass.addField(field);
                 topLevelClass.addImportedType(field.getType());
-
                 //主键
-                if (StringUtility.stringHasValue(idPath) && introspectedTable.getPrimaryKeyColumns().get(0).getActualColumnName().equals(actualColumnName)) {
-                    field.addAnnotation("@" + MethodUtils.getClassName(idPath, ".") + "()");
-                    topLevelClass.addImportedType(idPath);
-                }
-
-                //乐观锁列
-                if (StringUtility.stringHasValue(versionPath) && StringUtility.stringHasValue(versionCol) && versionCol.equals(actualColumnName)) {
-                    field.addAnnotation("@" + MethodUtils.getClassName(versionPath, ".") + "()");
-                    topLevelClass.addImportedType(versionPath);
-                }
-
-                //逻辑删除列
-                if (StringUtility.stringHasValue(logicDeletePath) && StringUtility.stringHasValue(delCol) && delCol.equals(actualColumnName)) {
-                    field.addAnnotation("@" + MethodUtils.getClassName(logicDeletePath, ".") + "()");
-                    topLevelClass.addImportedType(logicDeletePath);
+                if (introspectedTable.getPrimaryKeyColumns().get(0).getActualColumnName().equals(actualColumnName)) {
+                    field.addAnnotation("@" + MpEnum.TableId.getValue() + "(type = " + MpEnum.IdType.getValue() + ".AUTO)");
+                    topLevelClass.addImportedType(context.getProp(ExtendModelPlugin.class.getName(), MpEnum.TableId.getValue()));
+                    topLevelClass.addImportedType(context.getProp(ExtendModelPlugin.class.getName(), MpEnum.IdType.getValue()));
                 }
             }
 
@@ -144,14 +120,14 @@ public class BaseRecordGenerator extends AbstractJavaGenerator {
         }
 
 
-        boolean hasBlank;
-        //生成列常量属性
-        for (int i = 0; i < introspectedColumns.size(); i++) {
-            hasBlank = i == 0;
-            IntrospectedColumn introspectedColumn = introspectedColumns.get(i);
-            String actualColumnName = introspectedColumn.getActualColumnName();
-            ClassUtils.addStaticField(topLevelClass, actualColumnName, hasBlank);
-        }
+//        boolean hasBlank;
+//        //生成列常量属性
+//        for (int i = 0; i < introspectedColumns.size(); i++) {
+//            hasBlank = i == 0;
+//            IntrospectedColumn introspectedColumn = introspectedColumns.get(i);
+//            String actualColumnName = introspectedColumn.getActualColumnName();
+//            ClassUtils.addStaticField(topLevelClass, actualColumnName, hasBlank);
+//        }
         return answer;
     }
 

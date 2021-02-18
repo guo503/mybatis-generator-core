@@ -21,6 +21,7 @@
         <mybatis.parent>1.0.0</mybatis.parent>
         <mybatis.base>1.0.0</mybatis.base>
         <mybatis.core>1.0.0</mybatis.core>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
 

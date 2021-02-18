@@ -2,9 +2,7 @@ package org.mybatis.generator.plugins;
 
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.config.PropertyRegistry;
-import org.mybatis.generator.constant.MethodEnum;
-import org.mybatis.generator.enums.ProjectEnum;
+import org.mybatis.generator.constant.MpEnum;
 
 import java.util.List;
 import java.util.Properties;
@@ -25,8 +23,6 @@ public class BasePlugin extends PluginAdapter {
     protected FullyQualifiedJavaType autowired;
 
     protected FullyQualifiedJavaType service;
-
-    protected FullyQualifiedJavaType listType;
 
     protected FullyQualifiedJavaType pojoType;
 
@@ -60,8 +56,6 @@ public class BasePlugin extends PluginAdapter {
 
     protected FullyQualifiedJavaType IBusiness;
     protected FullyQualifiedJavaType businessImpl;
-
-    protected FullyQualifiedJavaType baseController;
 
     /**
      * 是否生成logger日志
@@ -103,13 +97,6 @@ public class BasePlugin extends PluginAdapter {
      */
     protected String voSuffix;
 
-    protected FullyQualifiedJavaType objectsType;
-
-    /**
-     * 是否生成查询
-     */
-    protected boolean enableQuery;
-
     /**
      * 项目结构
      */
@@ -133,46 +120,16 @@ public class BasePlugin extends PluginAdapter {
     public void setProperties(Properties properties) {
         super.setProperties(properties);
         this.pojoUrl = context.getJavaModelGeneratorConfiguration().getTargetPackage();
-        this.queryPack = context.getPPVal(ExtendModelPlugin.class.getName(), "queryPack");
-        this.querySuffix = context.getProp(ExtendModelPlugin.class.getName(), "querySuffix");
-        this.enableQuery = context.isCustomEnable(ExtendModelPlugin.class.getName(), "querySuffix");
         this.voPack = context.getPPVal(ExtendModelPlugin.class.getName(), "voPack");
         this.voSuffix = context.getProp(ExtendModelPlugin.class.getName(), "voSuffix");
-        this.listType = new FullyQualifiedJavaType("java.util.*");
-        String daoType = BaseMethodPlugin.class.getName();
-        this.selectByPrimaryKey = context.getProp(daoType, MethodEnum.GET.getName());
-        this.insertSelective = context.getProp(daoType, MethodEnum.SAVE.getName());
-        this.updateByPrimaryKeySelective = context.getProp(daoType, MethodEnum.UPDATE.getName());
-        this.listByIds = context.getProp(daoType, MethodEnum.LIST_BY_IDS.getName());
-        this.listByCondition = context.getProp(daoType, MethodEnum.LIST_BY_CONDITION.getName());
-        this.countByCondition = context.getProp(daoType, MethodEnum.COUNT_BY_CONDITION.getName());
-        this.count = context.getProp(daoType, MethodEnum.COUNT.getName());
-        this.list = context.getProp(daoType, MethodEnum.LIST.getName());
-        this.deleteByCondition = context.getProp(daoType, MethodEnum.DELETE_BY_CONDITION.getName());
-        this.fileEncoding = context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING);
-        this.map = context.getProp(daoType, MethodEnum.MAP.getName());
-        this.mapByIds = context.getProp(daoType, MethodEnum.MAP_BY_IDS.getName());
-        this.listId = context.getProp(daoType, MethodEnum.LIST_ID.getName());
-        this.saveAndGet = context.getProp(daoType, MethodEnum.SAVE_AND_GET.getName());
 
-        this.page = "mybatis.core.page.Page";
+        this.iService = new FullyQualifiedJavaType(context.getProp(ExtendModelPlugin.class.getName(), MpEnum.IService.getValue()));
+        this.serviceImpl = new FullyQualifiedJavaType(context.getProp(ExtendModelPlugin.class.getName(), MpEnum.ServiceImpl.getValue()));
+        this.fileEncoding = context.getProperty("javaFileEncoding");
 
-        this.isBS = ProjectEnum.isBS(context.getProperty("project_structure"));
-
-        this.iManage = new FullyQualifiedJavaType("mybatis.base.template.bsm.manage.IManage");
-        this.manageImpl = new FullyQualifiedJavaType("mybatis.base.template.bsm.manage.ManageImpl");
-
-        String pack = "mybatis.base.template" + (this.isBS ? ".bs." : ".bsm.");
-
-        this.iService = new FullyQualifiedJavaType(pack + "service.IService");
-        this.serviceImpl = new FullyQualifiedJavaType(pack + "service.ServiceImpl");
-
+        String pack = "mybatis.base.template.";
         this.IBusiness = new FullyQualifiedJavaType(pack + "business.IBusiness");
         this.businessImpl = new FullyQualifiedJavaType(pack + "business.BusinessImpl");
-
-
-        this.baseController = new FullyQualifiedJavaType(pack + "controller.BaseController");
-
 
         this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
         this.service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");

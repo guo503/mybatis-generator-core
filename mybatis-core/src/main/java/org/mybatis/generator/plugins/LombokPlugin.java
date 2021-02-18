@@ -7,9 +7,9 @@ import org.mybatis.generator.api.dom.java.Interface;
 import org.mybatis.generator.api.dom.java.Method;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.constant.CommonConstant;
+import org.mybatis.generator.constant.MpEnum;
 import org.mybatis.generator.utils.CommentUtils;
 import org.mybatis.generator.utils.ContextUtils;
-import org.mybatis.generator.utils.MethodUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +27,17 @@ public class LombokPlugin extends PluginAdapter {
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         boolean hasLombok = this.hasLombok();
+
         if (hasLombok) {
-            String classType = ExtendModelPlugin.class.getName();
             String shortName = topLevelClass.getType().getShortName();
             boolean isPo = Objects.equals(shortName, introspectedTable.getDomainObjectName());
             boolean isVO = shortName.endsWith(CommonConstant.VO_SUFFIX);
             //添加domain的import
             if (isPo) {
-                String tableAnno = context.getProp(classType, "table");
-                topLevelClass.addImportedType(tableAnno);
-                topLevelClass.addAnnotation("@" + MethodUtils.getClassName(tableAnno, ".") + "(name = \"" + introspectedTable.getTableName() + "\")");
+                topLevelClass.addImportedType(context.getProp(ExtendModelPlugin.class.getName(), MpEnum.TableName.getValue()));
+                topLevelClass.addAnnotation("@" + MpEnum.TableName.getValue() + "(\"" + introspectedTable.getTableName() + "\")");
             }
-            if(isVO){
+            if (isVO) {
                 topLevelClass.addImportedType("lombok.EqualsAndHashCode");
                 topLevelClass.addAnnotation("@EqualsAndHashCode(callSuper = false)");
             }
