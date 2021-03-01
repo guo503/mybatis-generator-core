@@ -6,13 +6,19 @@ import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.internal.util.StringUtility;
+import org.mybatis.generator.method.CommonGen;
 import org.mybatis.generator.utils.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 /**
@@ -97,8 +103,14 @@ public class ServicePlugin extends BasePlugin {
 
         Files.deleteIfExists(Paths.get(serviceFilePath));
         // 导入必须的类
-        addImport(interface1, null);
+        addImport(interface1, null, true);
         interface1.addImportedType(MethodGeneratorUtils.getPoType(context, introspectedTable));
+        String extName = ExtendModelPlugin.class.getName();
+        //FullyQualifiedJavaType voType = new FullyQualifiedJavaType(context.getPPVal(extName, "voPack") + "." + tableName + context.getProp(extName, "voSuffix"));
+        //interface1.addImportedType(voType);
+        //interface1.addImportedType(IPage);
+        //添加方法
+        //this.addMethods(interface1, null, introspectedTable, true);
         // 接口
         addService(interface1, manageFiles);
         //添加接口注释
@@ -107,9 +119,13 @@ public class ServicePlugin extends BasePlugin {
         Files.deleteIfExists(Paths.get(serviceImplFilePath));
 
         // 导入必须的类
-        addImport(null, topLevelClass);
+        addImport(null, topLevelClass, false);
+        //topLevelClass.addImportedType(voType);
+        //topLevelClass.addImportedType(IPage);
         //添加类注释
         CommentUtils.addGeneralClassComment(topLevelClass, introspectedTable);
+        //添加方法
+        //this.addMethods(null, topLevelClass, introspectedTable, false);
         // 实现类
         addServiceImpl(topLevelClass, manageImplFiles);
         files.addAll(manageImplFiles);
@@ -179,14 +195,22 @@ public class ServicePlugin extends BasePlugin {
     /**
      * import must class
      */
-    private void addImport(Interface interfaces, TopLevelClass topLevelClass) {
-        if (interfaces != null) {
+    private void addImport(Interface interfaces, TopLevelClass topLevelClass, boolean isInter) {
+        //FullyQualifiedJavaType listType = new FullyQualifiedJavaType("java.util.List");
+        if (isInter) {
             interfaces.addImportedType(pojoType);
-        }
-        if (topLevelClass != null) {
+            //interfaces.addImportedType(listType);
+        } else {
             topLevelClass.addImportedType(daoType);
             topLevelClass.addImportedType(interfaceType);
             topLevelClass.addImportedType(pojoType);
+            //topLevelClass.addImportedType(listType);
+            //topLevelClass.addImportedType("java.util.Objects");
+            //topLevelClass.addImportedType("org.springframework.beans.BeanUtils");
+            //topLevelClass.addImportedType("com.baomidou.mybatisplus.core.conditions.query.QueryWrapper");
+            //topLevelClass.addImportedType("com.baomidou.mybatisplus.core.toolkit.Wrappers");
+            //topLevelClass.addImportedType("com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper");
+            //topLevelClass.addImportedType("com.baomidou.mybatisplus.extension.plugins.pagination.Page");
             if (enableLogger) {
                 topLevelClass.addImportedType(slf4jLogger);
                 topLevelClass.addImportedType(slf4jLoggerFactory);
@@ -195,5 +219,73 @@ public class ServicePlugin extends BasePlugin {
                 topLevelClass.addImportedType(service);
             }
         }
+    }
+
+
+    private void addMethods(Interface interfaces, TopLevelClass topLevelClass, IntrospectedTable introspectedTable, boolean isInter) {
+        Method method;
+        method = this.listByCondition(introspectedTable, "list");
+        if (isInter) {
+            method.removeAllBodyLines();
+            interfaces.addMethod(method);
+        } else {
+            topLevelClass.addMethod(method);
+        }
+    }
+
+    public Method listByCondition(IntrospectedTable introspectedTable, String alias) {
+        Method method = new Method();
+        method.setName(alias);
+        String poName = introspectedTable.getDomainObjectName();
+        String queryName = MethodUtils.getShortVoName(poName, CommonConstant.VO_SUFFIX);
+        FullyQualifiedJavaType returnType = new FullyQualifiedJavaType(IPage.getShortName() + "<" + poName + ">");
+        method.setReturnType(returnType);
+        CommonGen.setMethodParameter(method, queryName);
+        String pageNum = "pageNum", pageSize = "pageSize";
+        method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), pageNum));
+        method.addParameter(new Parameter(FullyQualifiedJavaType.getIntInstance(), pageSize));
+        method.setVisibility(JavaVisibility.PUBLIC);
+        CommentUtils.addGeneralMethodComment(method, introspectedTable);
+        String paramVo = MethodUtils.toLowerCase(queryName);
+        //生成日志信息
+        if (enableLogger) {
+            MethodUtils.addLoggerInfo(method, paramVo);
+        }
+        String lowerPo = MethodUtils.toLowerCase(poName);
+        method.addBodyLine(poName + " " + lowerPo + "= new " + poName + "();");
+        method.addBodyLine("BeanUtils.copyProperties(" + paramVo + "," + lowerPo + ");");
+        method.addBodyLine("QueryWrapper<" + poName + "> query = Wrappers.query();");
+        method.addBodyLine("LambdaQueryWrapper<" + poName + "> lambda = query.lambda();");
+        List<java.lang.reflect.Field> fields = this.listField(lowerPo);
+        fields.forEach(f -> {
+            f.setAccessible(true);
+            try {
+                method.addBodyLine("lambda.eq(" + poName + "::get" + MethodUtils.toUpperCase(f.getName()) + "," + f.get(lowerPo) + ");");
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
+        method.addBodyLine("Page<" + poName + "> page = new Page<>(" + pageNum + ", " + pageSize + ");");
+        method.addBodyLine("return baseMapper.selectPage(page, query);");
+        return method;
+    }
+
+
+    private List<java.lang.reflect.Field> listField(String tableName) {
+        String poPath = context.getJavaModelGeneratorConfiguration().getTargetProject()
+                + File.separator +
+                context.getJavaModelGeneratorConfiguration().getTargetPackage().replace(".", "\\") + File.separator
+                + MethodUtils.toUpperCase(tableName) + ".java";
+        Class<?> aClass;
+        try {
+            aClass = ServicePlugin.class.getClassLoader().loadClass(poPath);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(tableName + "不存在!");
+        }
+        java.lang.reflect.Field[] declaredFields = aClass.getDeclaredFields();
+        List<java.lang.reflect.Field> fields = Arrays.asList(declaredFields);
+        fields = fields.stream().
+                filter(f -> Objects.equals(f.getModifiers(), Modifier.PRIVATE) && !Modifier.isStatic(f.getModifiers())).collect(Collectors.toList());
+        return fields;
     }
 }

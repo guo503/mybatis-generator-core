@@ -58,6 +58,12 @@ public class BasePlugin extends PluginAdapter {
     protected FullyQualifiedJavaType businessImpl;
 
     /**
+     * 分页类路径
+     */
+    protected FullyQualifiedJavaType IPage;
+
+
+    /**
      * 是否生成logger日志
      */
     protected boolean enableLogger;
@@ -66,11 +72,6 @@ public class BasePlugin extends PluginAdapter {
      * 类名
      */
     protected String className;
-
-    /**
-     * 分页类路径
-     */
-    protected String page;
 
     /**
      * 自定义异常类全路径
@@ -133,5 +134,7 @@ public class BasePlugin extends PluginAdapter {
 
         this.autowired = new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired");
         this.service = new FullyQualifiedJavaType("org.springframework.stereotype.Service");
+
+        this.IPage=new FullyQualifiedJavaType("com.baomidou.mybatisplus.core.metadata.IPage");
     }
 }

@@ -35,6 +35,8 @@ public class ManagePlugin extends BasePlugin {
 
     private String manageSuffix;
 
+    private String page;
+
 
     public ManagePlugin() {
         super();

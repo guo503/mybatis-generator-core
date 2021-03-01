@@ -3,8 +3,10 @@ package org.mybatis.generator.plugins;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.constant.CommonConstant;
 import org.mybatis.generator.constant.KeyConst;
 import org.mybatis.generator.internal.util.StringUtility;
+import org.mybatis.generator.method.CommonGen;
 import org.mybatis.generator.utils.*;
 
 import java.io.IOException;
@@ -113,6 +115,8 @@ public class ControllerPlugin extends BasePlugin {
         controllerClass.setSuperClass(MethodUtils.getClassName(baseClass));
         controllerClass.addImportedType(baseController);
         controllerClass.addImportedType(serviceType);
+        //controllerClass.addImportedType("org.springframework.web.bind.annotation.GetMapping");
+        //controllerClass.addImportedType(IPage);
         //生成日志信息
         if (enableLogger) {
             controllerClass.addImportedType(slf4jLogger);
@@ -122,6 +126,10 @@ public class ControllerPlugin extends BasePlugin {
         controllerClass.addImportedType(pojoType);
         controllerClass.addImportedType("org.springframework.web.bind.annotation.*");
         CommentUtils.addControllerClassComment(controllerClass, introspectedTable);
+
+        //添加方法
+        //controllerClass.addMethod(this.listByCondition(introspectedTable, "list"));
+
         addController(controllerClass, introspectedTable, files);
 
         return files;
@@ -141,6 +149,27 @@ public class ControllerPlugin extends BasePlugin {
 
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, this.controllerProject, this.fileEncoding, this.context.getJavaFormatter());
         files.add(file);
+    }
+
+
+    public Method listByCondition(IntrospectedTable introspectedTable, String alias) {
+        Method method = new Method();
+        method.setName(alias);
+        method.addAnnotation("@GetMapping(\"/list\")");
+        String poName = introspectedTable.getDomainObjectName();
+        String queryName = MethodUtils.getShortVoName(poName, CommonConstant.VO_SUFFIX);
+        FullyQualifiedJavaType returnType = new FullyQualifiedJavaType(IPage.getShortName() + "<" + poName + ">");
+        method.setReturnType(returnType);
+        CommonGen.setMethodParameter(method, queryName);
+        method.setVisibility(JavaVisibility.PUBLIC);
+        CommentUtils.addGeneralMethodComment(method, introspectedTable);
+        String paramVo = MethodUtils.toLowerCase(queryName);
+        //生成日志信息
+        if (enableLogger) {
+            MethodUtils.addLoggerInfo(method, paramVo);
+        }
+        method.addBodyLine("return baseService.list(" + paramVo + ", this.getPageNum(), this.getPageSize());");
+        return method;
     }
 
 
