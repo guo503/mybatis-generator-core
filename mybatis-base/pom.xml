@@ -16,7 +16,7 @@
     <properties>
         <ibatx.project.version>1.0.1</ibatx.project.version>
         <jdk.version>1.8</jdk.version>
-        <mybatis.version>3.4.6</mybatis.version>
+        <mybatis.version>3.5.6</mybatis.version>
         <mysql.connect.version>8.0.13</mysql.connect.version>
         <spring.boot.version>1.5.9.RELEASE</spring.boot.version>
         <springframework.version>4.3.20.RELEASE</springframework.version>
